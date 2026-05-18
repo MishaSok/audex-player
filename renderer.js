@@ -22,8 +22,6 @@ let settings = Object.assign({
   autoRescan: false,
   downloads: false,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
-// Downloads section is in development — force off regardless of stored value.
-settings.downloads = false;
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
 const coverCache = {};
@@ -163,8 +161,29 @@ const I18N = {
     'fs.nowPlaying': 'Сейчас играет',
     'fs.queue': 'Очередь',
     'fs.queueAhead': '{n} впереди',
+    'downloads.tab.internet': 'Из интернета',
+    'downloads.tab.parsing': 'Парсинг',
     'downloads.title': 'Скачивание из интернета',
     'downloads.subtitle': 'Здесь появится возможность сохранять треки по прямой ссылке. Раздел в разработке.',
+    'downloads.parsing.title': 'Парсинг',
+    'downloads.parsing.subtitle': 'Здесь появится возможность собирать треки парсингом со страниц. Раздел в разработке.',
+    'downloads.yt.placeholder': 'Название трека или «исполнитель — трек»',
+    'downloads.yt.search': 'Найти',
+    'downloads.yt.hint': 'Поиск по YouTube · показывает несколько вариантов, чтобы выбрать нужный.',
+    'downloads.yt.col.title': 'Название',
+    'downloads.yt.col.channel': 'Канал',
+    'downloads.yt.col.duration': 'Длит.',
+    'downloads.yt.idle.title': 'Найдите трек на YouTube',
+    'downloads.yt.idle.text': 'Введите название — внизу появится список mp3, доступных для скачивания. Файлы сохраняются в папку «Audex Downloads» и автоматически добавляются в библиотеку.',
+    'downloads.yt.searching': 'Ищу: «{q}»…',
+    'downloads.yt.empty': 'Ничего не найдено по запросу «{q}».',
+    'downloads.yt.error': 'Ошибка поиска: {e}',
+    'downloads.yt.action.download': 'Скачать',
+    'downloads.yt.action.downloading': 'Загрузка…',
+    'downloads.yt.action.done': 'Готово',
+    'downloads.yt.action.retry': 'Повторить',
+    'downloads.yt.downloadError': 'Не удалось: {e}',
+    'downloads.yt.downloadOk': 'Скачано и добавлено в библиотеку: {t}',
     'settings.title': 'Настройки',
     'settings.subtitle': 'Внешний вид, источники музыки и поведение приложения.',
     'section.appearance': 'Внешний вид',
@@ -310,8 +329,29 @@ const I18N = {
     'fs.nowPlaying': 'Now playing',
     'fs.queue': 'Queue',
     'fs.queueAhead': '{n} ahead',
+    'downloads.tab.internet': 'From the internet',
+    'downloads.tab.parsing': 'Parsing',
     'downloads.title': 'Download from the internet',
     'downloads.subtitle': 'The ability to save tracks by direct link will appear here. Section in development.',
+    'downloads.parsing.title': 'Parsing',
+    'downloads.parsing.subtitle': 'The ability to collect tracks by parsing pages will appear here. Section in development.',
+    'downloads.yt.placeholder': 'Track name or "artist — track"',
+    'downloads.yt.search': 'Search',
+    'downloads.yt.hint': 'YouTube search · shows multiple options so you can pick the right one.',
+    'downloads.yt.col.title': 'Title',
+    'downloads.yt.col.channel': 'Channel',
+    'downloads.yt.col.duration': 'Dur.',
+    'downloads.yt.idle.title': 'Find a track on YouTube',
+    'downloads.yt.idle.text': 'Enter a name — a list of downloadable mp3 files will appear below. Files are saved to the "Audex Downloads" folder and added to your library.',
+    'downloads.yt.searching': 'Searching: "{q}"…',
+    'downloads.yt.empty': 'Nothing found for "{q}".',
+    'downloads.yt.error': 'Search error: {e}',
+    'downloads.yt.action.download': 'Download',
+    'downloads.yt.action.downloading': 'Downloading…',
+    'downloads.yt.action.done': 'Done',
+    'downloads.yt.action.retry': 'Retry',
+    'downloads.yt.downloadError': 'Failed: {e}',
+    'downloads.yt.downloadOk': 'Downloaded and added to library: {t}',
     'settings.title': 'Settings',
     'settings.subtitle': 'Appearance, music sources, and app behavior.',
     'section.appearance': 'Appearance',
@@ -457,8 +497,29 @@ const I18N = {
     'fs.nowPlaying': 'Wird abgespielt',
     'fs.queue': 'Warteschlange',
     'fs.queueAhead': '{n} folgen',
+    'downloads.tab.internet': 'Aus dem Internet',
+    'downloads.tab.parsing': 'Parsing',
     'downloads.title': 'Aus dem Internet herunterladen',
     'downloads.subtitle': 'Hier wird es möglich sein, Titel per Direktlink zu speichern. Bereich in Entwicklung.',
+    'downloads.parsing.title': 'Parsing',
+    'downloads.parsing.subtitle': 'Hier wird es möglich sein, Titel durch Parsen von Seiten zu sammeln. Bereich in Entwicklung.',
+    'downloads.yt.placeholder': 'Titel oder „Interpret — Titel"',
+    'downloads.yt.search': 'Suchen',
+    'downloads.yt.hint': 'YouTube-Suche · zeigt mehrere Treffer zur Auswahl.',
+    'downloads.yt.col.title': 'Titel',
+    'downloads.yt.col.channel': 'Kanal',
+    'downloads.yt.col.duration': 'Dauer',
+    'downloads.yt.idle.title': 'Titel auf YouTube finden',
+    'downloads.yt.idle.text': 'Gib einen Namen ein — unten erscheint eine Liste herunterladbarer mp3-Dateien. Dateien werden im Ordner „Audex Downloads" gespeichert und zur Bibliothek hinzugefügt.',
+    'downloads.yt.searching': 'Suche: „{q}"…',
+    'downloads.yt.empty': 'Nichts gefunden zu „{q}".',
+    'downloads.yt.error': 'Suchfehler: {e}',
+    'downloads.yt.action.download': 'Herunterladen',
+    'downloads.yt.action.downloading': 'Lädt…',
+    'downloads.yt.action.done': 'Fertig',
+    'downloads.yt.action.retry': 'Erneut',
+    'downloads.yt.downloadError': 'Fehlgeschlagen: {e}',
+    'downloads.yt.downloadOk': 'Heruntergeladen und zur Bibliothek hinzugefügt: {t}',
     'settings.title': 'Einstellungen',
     'settings.subtitle': 'Aussehen, Musikquellen und App-Verhalten.',
     'section.appearance': 'Aussehen',
@@ -604,8 +665,29 @@ const I18N = {
     'fs.nowPlaying': 'En cours de lecture',
     'fs.queue': 'File',
     'fs.queueAhead': '{n} à venir',
+    'downloads.tab.internet': "Depuis Internet",
+    'downloads.tab.parsing': 'Analyse',
     'downloads.title': "Téléchargement depuis Internet",
     'downloads.subtitle': "La possibilité d'enregistrer des pistes via un lien direct apparaîtra ici. Section en développement.",
+    'downloads.parsing.title': 'Analyse',
+    'downloads.parsing.subtitle': "La possibilité de collecter des pistes en analysant des pages apparaîtra ici. Section en développement.",
+    'downloads.yt.placeholder': "Nom de la piste ou « artiste — piste »",
+    'downloads.yt.search': 'Rechercher',
+    'downloads.yt.hint': 'Recherche YouTube · affiche plusieurs résultats au choix.',
+    'downloads.yt.col.title': 'Titre',
+    'downloads.yt.col.channel': 'Chaîne',
+    'downloads.yt.col.duration': 'Durée',
+    'downloads.yt.idle.title': 'Trouvez une piste sur YouTube',
+    'downloads.yt.idle.text': "Entrez un nom — la liste des mp3 téléchargeables apparaîtra ci-dessous. Les fichiers sont enregistrés dans le dossier « Audex Downloads » et ajoutés à votre bibliothèque.",
+    'downloads.yt.searching': 'Recherche : « {q} »…',
+    'downloads.yt.empty': 'Aucun résultat pour « {q} ».',
+    'downloads.yt.error': 'Erreur de recherche : {e}',
+    'downloads.yt.action.download': 'Télécharger',
+    'downloads.yt.action.downloading': 'Téléchargement…',
+    'downloads.yt.action.done': 'Terminé',
+    'downloads.yt.action.retry': 'Réessayer',
+    'downloads.yt.downloadError': 'Échec : {e}',
+    'downloads.yt.downloadOk': 'Téléchargé et ajouté à la bibliothèque : {t}',
     'settings.title': 'Paramètres',
     'settings.subtitle': "Apparence, sources musicales et comportement de l'application.",
     'section.appearance': 'Apparence',
@@ -751,8 +833,29 @@ const I18N = {
     'fs.nowPlaying': 'Зараз грає',
     'fs.queue': 'Черга',
     'fs.queueAhead': '{n} попереду',
+    'downloads.tab.internet': 'З інтернету',
+    'downloads.tab.parsing': 'Парсинг',
     'downloads.title': 'Завантаження з інтернету',
     'downloads.subtitle': 'Тут з\'явиться можливість зберігати треки за прямим посиланням. Розділ у розробці.',
+    'downloads.parsing.title': 'Парсинг',
+    'downloads.parsing.subtitle': 'Тут з\'явиться можливість збирати треки парсингом зі сторінок. Розділ у розробці.',
+    'downloads.yt.placeholder': 'Назва треку або «виконавець — трек»',
+    'downloads.yt.search': 'Знайти',
+    'downloads.yt.hint': 'Пошук на YouTube · показує кілька варіантів на вибір.',
+    'downloads.yt.col.title': 'Назва',
+    'downloads.yt.col.channel': 'Канал',
+    'downloads.yt.col.duration': 'Трив.',
+    'downloads.yt.idle.title': 'Знайдіть трек на YouTube',
+    'downloads.yt.idle.text': 'Введіть назву — нижче з\'явиться список mp3, доступних для завантаження. Файли зберігаються у папку «Audex Downloads» і додаються до бібліотеки.',
+    'downloads.yt.searching': 'Шукаю: «{q}»…',
+    'downloads.yt.empty': 'Нічого не знайдено за запитом «{q}».',
+    'downloads.yt.error': 'Помилка пошуку: {e}',
+    'downloads.yt.action.download': 'Завантажити',
+    'downloads.yt.action.downloading': 'Завантаження…',
+    'downloads.yt.action.done': 'Готово',
+    'downloads.yt.action.retry': 'Повторити',
+    'downloads.yt.downloadError': 'Не вдалося: {e}',
+    'downloads.yt.downloadOk': 'Завантажено і додано до бібліотеки: {t}',
     'settings.title': 'Налаштування',
     'settings.subtitle': 'Зовнішній вигляд, джерела музики та поведінка застосунку.',
     'section.appearance': 'Зовнішній вигляд',
@@ -1121,6 +1224,193 @@ document.querySelectorAll('.nav-item').forEach(item => {
 document.querySelectorAll('.crumb-item.link').forEach(el => {
   el.addEventListener('click', () => setView(el.dataset.view));
 });
+
+// ── Downloads tabs ──
+document.querySelectorAll('.dl-tabs .dl-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.dlTab;
+    document.querySelectorAll('.dl-tabs .dl-tab').forEach(t => {
+      const on = t.dataset.dlTab === target;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.dl-pane').forEach(p => {
+      p.hidden = p.dataset.dlPane !== target;
+    });
+  });
+});
+
+// ── Downloads: YouTube search & download ──
+let ytSearchToken = 0;
+let ytLastResults = [];
+const ytActiveDownloads = new Map(); // videoId -> { rowEl, btnEl }
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  window.electronAPI.onYtDownloadProgress(({ videoId, phase, percent }) => {
+    const entry = videoId ? ytActiveDownloads.get(videoId) : null;
+    if (!entry) return;
+    const { rowEl } = entry;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      fill.style.width = percent.toFixed(1) + '%';
+      pct.textContent = Math.round(percent) + '%';
+    }
+  });
+}
+
+function setYtStatus(text, kind) {
+  const el = $('dl-yt-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function renderYtResults(results) {
+  ytLastResults = results || [];
+  const wrap = $('dl-yt-results');
+  const rows = $('dl-yt-rows');
+  const empty = $('dl-yt-empty');
+  if (!wrap || !rows) return;
+  if (!ytLastResults.length) {
+    wrap.hidden = true;
+    if (empty) empty.classList.add('show');
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  rows.innerHTML = ytLastResults.map((r, i) => `
+    <div class="dl-row" data-yt-row="${i}">
+      <div class="thumb" style="background-image: url('${escapeHtml(r.thumbnail || '')}')"></div>
+      <div class="title" title="${escapeHtml(r.title)}">${escapeHtml(r.title || '')}</div>
+      <div class="channel" title="${escapeHtml(r.channel || '')}">${escapeHtml(r.channel || '')}</div>
+      <div class="duration">${escapeHtml(r.durationStr || '')}</div>
+      <div class="action">
+        <button type="button" class="dl-download-btn" data-yt-dl="${i}">
+          <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+          <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-yt-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-yt-dl'), 10);
+      if (!isNaN(idx)) downloadYtResult(idx, btn);
+    });
+  });
+}
+
+async function runYtSearch() {
+  const input = $('dl-yt-query');
+  const btn = $('dl-yt-search-btn');
+  if (!input) return;
+  const q = input.value.trim();
+  if (!q) { input.focus(); return; }
+  const token = ++ytSearchToken;
+  if (btn) btn.disabled = true;
+  setYtStatus(tr('downloads.yt.searching', { q }));
+  const wrap = $('dl-yt-results');
+  if (wrap) wrap.hidden = true;
+  try {
+    const res = await window.electronAPI.ytSearch(q, 8);
+    if (token !== ytSearchToken) return;
+    if (!res || !res.success) {
+      setYtStatus(tr('downloads.yt.error', { e: (res && res.error) || 'unknown' }), 'error');
+      renderYtResults([]);
+      return;
+    }
+    if (!res.results.length) {
+      setYtStatus(tr('downloads.yt.empty', { q }), 'error');
+      renderYtResults([]);
+      return;
+    }
+    setYtStatus(null);
+    renderYtResults(res.results);
+  } catch (err) {
+    if (token !== ytSearchToken) return;
+    setYtStatus(tr('downloads.yt.error', { e: String(err) }), 'error');
+  } finally {
+    if (token === ytSearchToken && btn) btn.disabled = false;
+  }
+}
+
+function restoreDownloadButton(actionEl, idx, labelKey, cls) {
+  actionEl.innerHTML = `
+    <button type="button" class="dl-download-btn ${cls || ''}" data-yt-dl="${idx}">
+      <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+      <span>${escapeHtml(tr(labelKey))}</span>
+    </button>
+  `;
+  const newBtn = actionEl.querySelector('[data-yt-dl]');
+  if (newBtn) {
+    newBtn.addEventListener('click', () => downloadYtResult(idx, newBtn));
+  }
+  return newBtn;
+}
+
+async function downloadYtResult(idx, btn) {
+  const r = ytLastResults[idx];
+  if (!r || !btn) return;
+  if (btn.classList.contains('is-done')) return;
+  const rowEl = btn.closest('.dl-row');
+  if (!rowEl) return;
+  const actionEl = rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>
+  `;
+  ytActiveDownloads.set(r.id, { rowEl, btnEl: null });
+
+  try {
+    const res = await window.electronAPI.ytDownload({
+      videoId: r.id,
+      url: r.url,
+      suggestedName: r.title,
+    });
+    ytActiveDownloads.delete(r.id);
+    if (!res || !res.success) {
+      restoreDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+      setYtStatus(tr('downloads.yt.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    const doneBtn = restoreDownloadButton(actionEl, idx, 'downloads.yt.action.done', 'is-done');
+    if (doneBtn) doneBtn.disabled = true;
+    setYtStatus(tr('downloads.yt.downloadOk', { t: r.title }), 'ok');
+  } catch (err) {
+    ytActiveDownloads.delete(r.id);
+    restoreDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+    setYtStatus(tr('downloads.yt.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+(function wireYtSearchControls() {
+  const btn = $('dl-yt-search-btn');
+  const input = $('dl-yt-query');
+  if (btn) btn.addEventListener('click', runYtSearch);
+  if (input) {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); runYtSearch(); }
+    });
+  }
+})();
 
 // ── Render: sidebar counts + recents ──
 function renderCounts() {

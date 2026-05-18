@@ -354,10 +354,52 @@
           </div>
         </header>
 
-        <div class="empty-block">
-          <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
-          <div class="empty-title-lg" data-i18n="downloads.title">Скачивание из интернета</div>
-          <div class="empty-text" data-i18n="downloads.subtitle">Здесь появится возможность сохранять треки по прямой ссылке. Раздел в разработке.</div>
+        <div class="dl-tabs" role="tablist">
+          <button type="button" class="dl-tab is-active" data-dl-tab="internet" role="tab" aria-selected="true" data-i18n="downloads.tab.internet">Из интернета</button>
+          <button type="button" class="dl-tab" data-dl-tab="parsing" role="tab" aria-selected="false" data-i18n="downloads.tab.parsing">Парсинг</button>
+        </div>
+
+        <div class="dl-pane" data-dl-pane="internet">
+          <div class="dl-search">
+            <div class="dl-search-row">
+              <label class="dl-search-field" for="dl-yt-query">
+                <svg class="i" width="13" height="13"><use href="#i-search"/></svg>
+                <input type="text" id="dl-yt-query" class="dl-search-input" data-i18n-placeholder="downloads.yt.placeholder" placeholder="Название трека или «исполнитель — трек»">
+              </label>
+              <button type="button" id="dl-yt-search-btn" class="dl-search-btn">
+                <svg class="i" width="12" height="12"><use href="#i-search"/></svg>
+                <span data-i18n="downloads.yt.search">Найти</span>
+              </button>
+            </div>
+            <div class="dl-search-hint" data-i18n="downloads.yt.hint">Поиск по YouTube · показывает несколько вариантов, чтобы выбрать нужный.</div>
+          </div>
+
+          <div id="dl-yt-status" class="dl-status" hidden></div>
+
+          <div id="dl-yt-results" class="dl-results" hidden>
+            <div class="dl-results-head">
+              <div class="dl-col-thumb"></div>
+              <div class="dl-col-title" data-i18n="downloads.yt.col.title">Название</div>
+              <div class="dl-col-channel" data-i18n="downloads.yt.col.channel">Канал</div>
+              <div class="dl-col-duration" data-i18n="downloads.yt.col.duration">Длит.</div>
+              <div class="dl-col-action"></div>
+            </div>
+            <div id="dl-yt-rows" class="dl-results-body"></div>
+          </div>
+
+          <div id="dl-yt-empty" class="empty-block show">
+            <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
+            <div class="empty-title-lg" data-i18n="downloads.yt.idle.title">Найдите трек на YouTube</div>
+            <div class="empty-text" data-i18n="downloads.yt.idle.text">Введите название — внизу появится список mp3, доступных для скачивания. Файлы сохраняются в папку «Audex Downloads» и автоматически добавляются в библиотеку.</div>
+          </div>
+        </div>
+
+        <div class="dl-pane" data-dl-pane="parsing" hidden>
+          <div class="empty-block">
+            <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
+            <div class="empty-title-lg" data-i18n="downloads.parsing.title">Парсинг</div>
+            <div class="empty-text" data-i18n="downloads.parsing.subtitle">Здесь появится возможность собирать треки парсингом со страниц. Раздел в разработке.</div>
+          </div>
         </div>
       </section>
 
@@ -466,7 +508,7 @@
                   </div>
                   <div class="setting-desc" data-i18n="setting.showDownloadsDesc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
                 </div>
-                <button class="toggle is-disabled" data-setting="downloads" disabled aria-disabled="true" title="Раздел находится в разработке" data-i18n-title="tooltip.wip"><div class="toggle-knob"></div></button>
+                <button class="toggle" data-setting="downloads"><div class="toggle-knob"></div></button>
               </div>
             </div>
           </section>

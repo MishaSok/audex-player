@@ -8,4 +8,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeMetadata: (filePath, tags) => ipcRenderer.invoke('music:writeMetadata', { filePath, tags }),
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),
+  ytSearch: (query, count) => ipcRenderer.invoke('downloads:ytSearch', query, count),
+  ytDownload: (payload) => ipcRenderer.invoke('downloads:ytDownload', payload),
+  onYtDownloadProgress: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('downloads:ytProgress', listener);
+    return () => ipcRenderer.removeListener('downloads:ytProgress', listener);
+  },
+  getDownloadsDir: () => ipcRenderer.invoke('downloads:getDir'),
 });
