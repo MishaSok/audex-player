@@ -1,34 +1,53 @@
-# 🎵 Ambevor MP3 Player
+# Audex
 
-Красивый десктопный MP3-плеер для Linux, вдохновленный дизайном Ambevor и функционалом Rhythmbox.
+A minimal desktop music player for local audio libraries. Built with Electron, vanilla JS, and a charcoal-and-amber Mono theme.
 
-## 🛠 Стек технологий
-- **Electron.js** — фреймворк для создания кроссплатформенного десктопного приложения.
-- **Node.js** — среда выполнения.
-- **HTML5 + CSS3 (Vanilla)** — верстка и дизайн (кастомные ползунки, анимации, без UI-фреймворков).
-- **Vanilla JavaScript** — логика интерфейса (взаимодействие с DOM, Audio API).
-- **music-metadata** — библиотека для чтения ID3-тегов (метаданные треков и извлечение встроенных обложек).
+## Features
 
-## ✨ Особенности
-- Тёмный "угольный" интерфейс с янтарными акцентами и эффектом зернистости (grain overlay).
-- Чтение метаданных локальных MP3/WAV/FLAC файлов (название, исполнитель, альбом, обложка).
-- Полноэкранный режим с красивой вращающейся виниловой пластинкой.
-- Полное управление воспроизведением (Shuffle, Repeat, регулировка громкости, перемотка).
+- Local library scanning for `.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac` (recursive directory import)
+- ID3 / cover-art reading via `music-metadata`; tag editing for MP3 via `node-id3`
+- Playlists, Favorites, Recents, filters and sort, command palette (search)
+- Fullscreen "now playing" view with rotating vinyl and dynamic playback-bar color
+- Shuffle, Repeat (off / all / one), volume, seek
+- Dark / light / system theme, optional auto-rescan of a default folder on startup
 
-## 🚀 Установка и запуск
+## Tech stack
 
-1. Убедитесь, что у вас установлен [Node.js](https://nodejs.org/) (рекомендуется версия LTS).
-2. Склонируйте этот репозиторий:
-   ```bash
-   git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ>
-   cd ambevor-player
-   ```
-3. Установите зависимости проекта:
-   ```bash
-   npm install
-   ```
-4. Запустите приложение:
-   ```bash
-   npm start
-   ```
-   *(На Linux, при необходимости, приложение уже настроено на запуск с флагом `--no-sandbox` для избежания проблем с правами).*
+- **Electron 42** — desktop shell (main + preload + renderer)
+- **Vanilla HTML / CSS / JS** — no UI frameworks
+- **music-metadata** — read tags and embedded artwork
+- **node-id3** — write ID3v2 tags back to MP3 files
+
+## Getting started
+
+```bash
+npm install
+npm start
+```
+
+`npm start` runs `electron . --no-sandbox` (the flag avoids sandbox permission issues on some Linux setups).
+
+## Project layout
+
+| File | Role |
+| --- | --- |
+| `main.js` | Electron main process: window, file dialogs, recursive directory scan, IPC handlers for metadata read/write and reveal-in-folder |
+| `preload.js` | `contextBridge` exposing the IPC API as `window.electronAPI` |
+| `renderer.js` | All UI logic: state, rendering, playback, playlists, favorites, settings, command palette |
+| `index.html` | Markup and inline SVG icon symbols |
+| `style.css` | Mono theme (charcoal + amber accent), grain overlay, animations |
+
+## Data & persistence
+
+Library metadata, favorites, playlists, settings and recents are persisted in `localStorage`. Cover art is *not* stored in `localStorage` (size limits) — it is re-extracted from files on startup via `restoreCovers()` in `renderer.js`. Library and favorites keys still use the legacy `ambevor-*` prefix for backwards compatibility with existing users; new keys use `audex-*`.
+
+## IPC surface
+
+Exposed on `window.electronAPI` (see `preload.js`):
+
+- `openFiles()` — open files-or-folder dialog, returns flat list of audio paths
+- `chooseFolder()` — pick a single directory
+- `scanFolder(path)` — recursive scan for audio files
+- `parseMetadata(path)` — returns `{ title, artist, album, …, cover, duration, path }`
+- `writeMetadata(path, tags)` — MP3 only; writes ID3v2 tags
+- `revealInFolder(path)` — open the OS file manager at the file
