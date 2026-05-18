@@ -10,6 +10,7 @@ function createWindow() {
     minHeight: 700,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     }
   });
 
@@ -17,12 +18,6 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // Custom protocol to bypass webSecurity limitations for local files
-  protocol.handle('local', (request) => {
-    const filePath = request.url.slice('local://'.length);
-    return net.fetch('file://' + decodeURIComponent(filePath));
-  });
-
   createWindow();
 
   app.on('activate', function () {
@@ -54,7 +49,7 @@ ipcMain.handle('music:parseMetadata', async (event, filePath) => {
     
     if (metadata.common.picture && metadata.common.picture.length > 0) {
       const picture = metadata.common.picture[0];
-      coverBase64 = picture.data.toString('base64');
+      coverBase64 = Buffer.from(picture.data).toString('base64');
       coverFormat = picture.format;
     }
 

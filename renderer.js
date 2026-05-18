@@ -1,5 +1,5 @@
 // State
-let library = [];
+let library = JSON.parse(localStorage.getItem('ambevor-library')) || [];
 let currentTrackIndex = -1;
 let isPlaying = false;
 let isShuffle = false;
@@ -67,6 +67,7 @@ btnAddFiles.addEventListener('click', async () => {
         library.push(metadata);
       }
     }
+    localStorage.setItem('ambevor-library', JSON.stringify(library));
     renderLibrary();
   }
 });
@@ -99,8 +100,8 @@ function playTrack(index) {
   currentTrackIndex = index;
   const track = library[index];
   
-  // Use custom local:// protocol for audio src
-  audio.src = 'local://' + encodeURIComponent(track.path);
+  // Use file:// protocol for audio src
+  audio.src = 'file://' + track.path;
   audio.play();
   isPlaying = true;
   updateUIForPlaying(track);
@@ -265,3 +266,8 @@ btnCloseFs.addEventListener('click', () => {
 
 // Sync progress bar color on start
 progressBar.style.background = `linear-gradient(to right, var(--accent-color) 0%, rgba(255,255,255,0.1) 0%)`;
+
+// Initial Render
+if (library.length > 0) {
+  renderLibrary();
+}
