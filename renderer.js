@@ -86,6 +86,837 @@ function saveRecents() {
   localStorage.setItem(LS.recents, JSON.stringify(recents.slice(0, 4)));
 }
 
+// ── i18n ──
+// Static UI strings are translated via [data-i18n], [data-i18n-placeholder],
+// [data-i18n-title] attributes on HTML elements. Dynamic strings (rendered
+// from JS) go through tr() / plural() below. Adding a new string: add the key
+// to every language in I18N, then either tag the HTML element with data-i18n
+// or call tr('your.key') in JS.
+const I18N = {
+  ru: {
+    'nav.library': 'Библиотека',
+    'nav.artists': 'Исполнители',
+    'nav.playlists': 'Плейлисты',
+    'nav.favorites': 'Избранное',
+    'nav.downloads': 'Загрузки',
+    'nav.search': 'Поиск',
+    'nav.recents': 'Недавнее',
+    'nav.openFiles': 'Открыть файлы',
+    'nav.settings': 'Настройки',
+    'crumb.collection': 'Коллекция',
+    'search.placeholder': 'Поиск…',
+    'search.artistPlaceholder': 'Поиск исполнителя…',
+    'search.trackPlaceholder': 'Поиск трека…',
+    'filter.all': 'Все',
+    'filter.recent': 'Недавно добавленные',
+    'filter.favorites': 'Только избранное',
+    'sort.label': 'Сортировка:',
+    'sort.dateDesc': 'Дата добавления ↓',
+    'sort.alpha': 'По алфавиту',
+    'sort.byTracks': 'По числу треков',
+    'sort.recent': 'Недавно добавленные',
+    'table.title': 'Название',
+    'table.artist': 'Исполнитель',
+    'table.album': 'Альбом',
+    'table.time': 'Время',
+    'empty.library.title': 'Библиотека пуста',
+    'empty.library.text': 'Открой файлы или папку, чтобы начать.',
+    'empty.playlists.title': 'Плейлистов пока нет',
+    'empty.playlists.text': 'Создай свой первый плейлист — собери треки по настроению, времени дня или альбому.',
+    'empty.artists.title': 'Исполнителей пока нет',
+    'empty.artists.text': 'Добавь треки в библиотеку, чтобы увидеть здесь список исполнителей.',
+    'empty.favorites.title': 'Нет избранных треков',
+    'empty.favorites.text': 'Нажми сердечко на любом треке, чтобы добавить его сюда.',
+    'btn.newPlaylist': 'Новый плейлист',
+    'btn.playAll': 'Играть всё',
+    'btn.shuffle': 'Перемешать',
+    'btn.deletePlaylist': 'Удалить плейлист',
+    'btn.choose': 'Выбрать…',
+    'btn.cancel': 'Отмена',
+    'btn.delete': 'Удалить',
+    'btn.create': 'Создать',
+    'btn.close': 'Закрыть',
+    'btn.save': 'Сохранить',
+    'btn.minimize': 'Свернуть',
+    'btn.album': 'Альбом',
+    'btn.favorite': 'В избранное',
+    'btn.unfavorite': 'Убрать из избранного',
+    'btn.favoriteOn': 'В избранном',
+    'btn.addToPlaylist': 'В плейлист',
+    'tooltip.favorite': 'В избранное',
+    'tooltip.shuffle': 'Случайный порядок',
+    'tooltip.prev': 'Предыдущий',
+    'tooltip.playPause': 'Воспроизведение/Пауза',
+    'tooltip.next': 'Следующий',
+    'tooltip.repeat': 'Повтор',
+    'tooltip.fullscreen': 'Полноэкранный',
+    'tooltip.volume': 'Звук',
+    'tooltip.wip': 'Раздел находится в разработке',
+    'hint.favorites': 'Сохранённые треки появляются здесь',
+    'eyebrow.playlist': 'Плейлист',
+    'eyebrow.artist': 'Исполнитель',
+    'autoChip.artists': 'Список собирается автоматически из библиотеки',
+    'np.empty.title': 'Не выбрано',
+    'np.empty.artist': '—',
+    'fs.nowPlayingFrom': 'Сейчас играет · из',
+    'fs.fromLibrary': 'Библиотеки',
+    'fs.nowPlaying': 'Сейчас играет',
+    'fs.queue': 'Очередь',
+    'fs.queueAhead': '{n} впереди',
+    'downloads.title': 'Скачивание из интернета',
+    'downloads.subtitle': 'Здесь появится возможность сохранять треки по прямой ссылке. Раздел в разработке.',
+    'settings.title': 'Настройки',
+    'settings.subtitle': 'Внешний вид, источники музыки и поведение приложения.',
+    'section.appearance': 'Внешний вид',
+    'section.music': 'Музыка',
+    'section.downloads': 'Скачивание из интернета',
+    'section.language': 'Язык',
+    'section.about': 'О приложении',
+    'theme.dark': 'Тёмная',
+    'theme.light': 'Светлая',
+    'theme.system': 'Системная',
+    'setting.defaultFolder': 'Папка по умолчанию',
+    'setting.defaultFolderDesc': 'Откуда загружать треки при запуске.',
+    'setting.scanSubdirs': 'Сканировать подпапки',
+    'setting.scanSubdirsDesc': 'Учитывать вложенные директории при индексации.',
+    'setting.autoRescan': 'Авто-обновление при старте',
+    'setting.autoRescanDesc': 'Перепроверять папку при каждом запуске.',
+    'setting.showDownloads': 'Показать вкладку «Загрузки»',
+    'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
+    'setting.uiLanguage': 'Язык интерфейса',
+    'setting.uiLanguageDesc': 'Применяется сразу.',
+    'setting.version': 'Версия',
+    'badge.wip': 'в разработке',
+    'placeholder.noFolder': '— не выбрана —',
+    'modal.deleteTrack.title': 'Удалить трек?',
+    'modal.deleteTrack.text': 'Трек будет удалён из библиотеки, а файл — перемещён в корзину.',
+    'modal.deleteTrackFull.text': '«{title}» от {artist} будет удалён из библиотеки, а сам файл — перемещён в корзину.',
+    'modal.deletePlaylist.title': 'Удалить плейлист?',
+    'modal.deletePlaylist.text': 'Плейлист «{name}» будет удалён. Треки в библиотеке останутся.',
+    'modal.newPlaylist.title': 'Новый плейлист',
+    'modal.newPlaylist.namePh': 'Название плейлиста',
+    'modal.newPlaylist.descPh': 'Описание (необязательно)',
+    'modal.addToPlaylist.title': 'Добавить в плейлист',
+    'modal.addToPlaylist.empty': 'Сначала создай плейлист на вкладке «Плейлисты».',
+    'modal.addToPlaylist.alreadyAdded': 'уже добавлен',
+    'editor.title': 'Редактировать теги',
+    'editor.cover': 'Обложка',
+    'editor.field.title': 'Название',
+    'editor.field.artist': 'Исполнитель',
+    'editor.field.album': 'Альбом',
+    'editor.field.albumArtist': 'Исп. альбома',
+    'editor.field.year': 'Год',
+    'editor.field.genre': 'Жанр',
+    'editor.field.trackNo': 'Трек №',
+    'editor.field.discNo': 'Диск №',
+    'editor.field.comment': 'Комментарий',
+    'editor.commentPh': 'Заметка о треке…',
+    'editor.coverEmbed': 'Встроенная обложка',
+    'editor.noCover': 'Нет обложки',
+    'editor.saving': 'Сохранение…',
+    'editor.saved': 'Сохранено ✓',
+    'editor.errorSave': 'Ошибка сохранения',
+    'cm.play': 'Играть',
+    'cm.addToPlaylist': 'Добавить в плейлист',
+    'cm.removeFromPlaylist': 'Убрать из плейлиста',
+    'cm.reveal': 'Показать в папке',
+    'cm.editTags': 'Редактировать теги…',
+    'cm.delete': 'Удалить из библиотеки',
+    'palette.placeholder': 'Поиск трека, альбома, действия…',
+    'palette.nav': '↑↓ навигация',
+    'palette.choose': '↵ выбрать',
+    'palette.close': 'ESC закрыть',
+    'palette.tracks': 'Треки',
+    'palette.actions': 'Действия',
+    'palette.itemHint': '↵ играть',
+    'palette.empty': 'Ничего не найдено',
+    'palette.action.openFiles': 'Открыть файлы…',
+    'palette.action.gotoSettings': 'Перейти в Настройки',
+    'palette.action.gotoPlaylists': 'Перейти в Плейлисты',
+    'palette.action.gotoFavorites': 'Перейти в Избранное',
+    'label.unknownArtist': 'Неизвестный исполнитель',
+    'label.noAlbum': 'Без альбома',
+    'label.tracksShort': 'тр.',
+    'error.deleteFile': 'Не удалось удалить файл с диска: ',
+    'error.unknown': 'неизвестная ошибка',
+  },
+  en: {
+    'nav.library': 'Library',
+    'nav.artists': 'Artists',
+    'nav.playlists': 'Playlists',
+    'nav.favorites': 'Favorites',
+    'nav.downloads': 'Downloads',
+    'nav.search': 'Search',
+    'nav.recents': 'Recent',
+    'nav.openFiles': 'Open files',
+    'nav.settings': 'Settings',
+    'crumb.collection': 'Collection',
+    'search.placeholder': 'Search…',
+    'search.artistPlaceholder': 'Search artist…',
+    'search.trackPlaceholder': 'Search track…',
+    'filter.all': 'All',
+    'filter.recent': 'Recently added',
+    'filter.favorites': 'Favorites only',
+    'sort.label': 'Sort:',
+    'sort.dateDesc': 'Date added ↓',
+    'sort.alpha': 'Alphabetical',
+    'sort.byTracks': 'By track count',
+    'sort.recent': 'Recently added',
+    'table.title': 'Title',
+    'table.artist': 'Artist',
+    'table.album': 'Album',
+    'table.time': 'Time',
+    'empty.library.title': 'Library is empty',
+    'empty.library.text': 'Open files or a folder to get started.',
+    'empty.playlists.title': 'No playlists yet',
+    'empty.playlists.text': 'Create your first playlist — gather tracks by mood, time of day, or album.',
+    'empty.artists.title': 'No artists yet',
+    'empty.artists.text': 'Add tracks to the library to see artists here.',
+    'empty.favorites.title': 'No favorite tracks',
+    'empty.favorites.text': 'Click the heart on any track to add it here.',
+    'btn.newPlaylist': 'New playlist',
+    'btn.playAll': 'Play all',
+    'btn.shuffle': 'Shuffle',
+    'btn.deletePlaylist': 'Delete playlist',
+    'btn.choose': 'Choose…',
+    'btn.cancel': 'Cancel',
+    'btn.delete': 'Delete',
+    'btn.create': 'Create',
+    'btn.close': 'Close',
+    'btn.save': 'Save',
+    'btn.minimize': 'Minimize',
+    'btn.album': 'Album',
+    'btn.favorite': 'Favorite',
+    'btn.unfavorite': 'Remove from favorites',
+    'btn.favoriteOn': 'Favorited',
+    'btn.addToPlaylist': 'Add to playlist',
+    'tooltip.favorite': 'Favorite',
+    'tooltip.shuffle': 'Shuffle',
+    'tooltip.prev': 'Previous',
+    'tooltip.playPause': 'Play / Pause',
+    'tooltip.next': 'Next',
+    'tooltip.repeat': 'Repeat',
+    'tooltip.fullscreen': 'Fullscreen',
+    'tooltip.volume': 'Volume',
+    'tooltip.wip': 'Feature in development',
+    'hint.favorites': 'Saved tracks appear here',
+    'eyebrow.playlist': 'Playlist',
+    'eyebrow.artist': 'Artist',
+    'autoChip.artists': 'List is built automatically from your library',
+    'np.empty.title': 'Nothing selected',
+    'np.empty.artist': '—',
+    'fs.nowPlayingFrom': 'Now playing · from',
+    'fs.fromLibrary': 'Library',
+    'fs.nowPlaying': 'Now playing',
+    'fs.queue': 'Queue',
+    'fs.queueAhead': '{n} ahead',
+    'downloads.title': 'Download from the internet',
+    'downloads.subtitle': 'The ability to save tracks by direct link will appear here. Section in development.',
+    'settings.title': 'Settings',
+    'settings.subtitle': 'Appearance, music sources, and app behavior.',
+    'section.appearance': 'Appearance',
+    'section.music': 'Music',
+    'section.downloads': 'Download from the internet',
+    'section.language': 'Language',
+    'section.about': 'About',
+    'theme.dark': 'Dark',
+    'theme.light': 'Light',
+    'theme.system': 'System',
+    'setting.defaultFolder': 'Default folder',
+    'setting.defaultFolderDesc': 'Where to load tracks from on startup.',
+    'setting.scanSubdirs': 'Scan subfolders',
+    'setting.scanSubdirsDesc': 'Include nested directories during indexing.',
+    'setting.autoRescan': 'Auto-refresh on startup',
+    'setting.autoRescanDesc': 'Re-check the folder each time the app starts.',
+    'setting.showDownloads': 'Show the “Downloads” tab',
+    'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
+    'setting.uiLanguage': 'Interface language',
+    'setting.uiLanguageDesc': 'Applied immediately.',
+    'setting.version': 'Version',
+    'badge.wip': 'in development',
+    'placeholder.noFolder': '— not selected —',
+    'modal.deleteTrack.title': 'Delete track?',
+    'modal.deleteTrack.text': 'The track will be removed from the library and the file moved to the trash.',
+    'modal.deleteTrackFull.text': '“{title}” by {artist} will be removed from the library and the file moved to the trash.',
+    'modal.deletePlaylist.title': 'Delete playlist?',
+    'modal.deletePlaylist.text': 'Playlist “{name}” will be deleted. Tracks remain in the library.',
+    'modal.newPlaylist.title': 'New playlist',
+    'modal.newPlaylist.namePh': 'Playlist name',
+    'modal.newPlaylist.descPh': 'Description (optional)',
+    'modal.addToPlaylist.title': 'Add to playlist',
+    'modal.addToPlaylist.empty': 'Create a playlist on the “Playlists” tab first.',
+    'modal.addToPlaylist.alreadyAdded': 'already added',
+    'editor.title': 'Edit tags',
+    'editor.cover': 'Cover',
+    'editor.field.title': 'Title',
+    'editor.field.artist': 'Artist',
+    'editor.field.album': 'Album',
+    'editor.field.albumArtist': 'Album artist',
+    'editor.field.year': 'Year',
+    'editor.field.genre': 'Genre',
+    'editor.field.trackNo': 'Track №',
+    'editor.field.discNo': 'Disc №',
+    'editor.field.comment': 'Comment',
+    'editor.commentPh': 'Note about the track…',
+    'editor.coverEmbed': 'Embedded cover',
+    'editor.noCover': 'No cover',
+    'editor.saving': 'Saving…',
+    'editor.saved': 'Saved ✓',
+    'editor.errorSave': 'Save error',
+    'cm.play': 'Play',
+    'cm.addToPlaylist': 'Add to playlist',
+    'cm.removeFromPlaylist': 'Remove from playlist',
+    'cm.reveal': 'Show in folder',
+    'cm.editTags': 'Edit tags…',
+    'cm.delete': 'Remove from library',
+    'palette.placeholder': 'Search tracks, albums, actions…',
+    'palette.nav': '↑↓ navigate',
+    'palette.choose': '↵ select',
+    'palette.close': 'ESC close',
+    'palette.tracks': 'Tracks',
+    'palette.actions': 'Actions',
+    'palette.itemHint': '↵ play',
+    'palette.empty': 'Nothing found',
+    'palette.action.openFiles': 'Open files…',
+    'palette.action.gotoSettings': 'Go to Settings',
+    'palette.action.gotoPlaylists': 'Go to Playlists',
+    'palette.action.gotoFavorites': 'Go to Favorites',
+    'label.unknownArtist': 'Unknown artist',
+    'label.noAlbum': 'No album',
+    'label.tracksShort': 'tr.',
+    'error.deleteFile': 'Could not delete file from disk: ',
+    'error.unknown': 'unknown error',
+  },
+  de: {
+    'nav.library': 'Bibliothek',
+    'nav.artists': 'Interpreten',
+    'nav.playlists': 'Playlists',
+    'nav.favorites': 'Favoriten',
+    'nav.downloads': 'Downloads',
+    'nav.search': 'Suche',
+    'nav.recents': 'Zuletzt',
+    'nav.openFiles': 'Dateien öffnen',
+    'nav.settings': 'Einstellungen',
+    'crumb.collection': 'Sammlung',
+    'search.placeholder': 'Suche…',
+    'search.artistPlaceholder': 'Interpreten suchen…',
+    'search.trackPlaceholder': 'Titel suchen…',
+    'filter.all': 'Alle',
+    'filter.recent': 'Kürzlich hinzugefügt',
+    'filter.favorites': 'Nur Favoriten',
+    'sort.label': 'Sortierung:',
+    'sort.dateDesc': 'Hinzugefügt ↓',
+    'sort.alpha': 'Alphabetisch',
+    'sort.byTracks': 'Nach Titelanzahl',
+    'sort.recent': 'Kürzlich hinzugefügt',
+    'table.title': 'Titel',
+    'table.artist': 'Interpret',
+    'table.album': 'Album',
+    'table.time': 'Zeit',
+    'empty.library.title': 'Bibliothek ist leer',
+    'empty.library.text': 'Öffne Dateien oder einen Ordner, um zu beginnen.',
+    'empty.playlists.title': 'Noch keine Playlists',
+    'empty.playlists.text': 'Erstelle deine erste Playlist — sammle Titel nach Stimmung, Tageszeit oder Album.',
+    'empty.artists.title': 'Noch keine Interpreten',
+    'empty.artists.text': 'Füge Titel zur Bibliothek hinzu, um hier Interpreten zu sehen.',
+    'empty.favorites.title': 'Keine Favoriten',
+    'empty.favorites.text': 'Tippe auf das Herz eines Titels, um ihn hier hinzuzufügen.',
+    'btn.newPlaylist': 'Neue Playlist',
+    'btn.playAll': 'Alle abspielen',
+    'btn.shuffle': 'Zufall',
+    'btn.deletePlaylist': 'Playlist löschen',
+    'btn.choose': 'Auswählen…',
+    'btn.cancel': 'Abbrechen',
+    'btn.delete': 'Löschen',
+    'btn.create': 'Erstellen',
+    'btn.close': 'Schließen',
+    'btn.save': 'Speichern',
+    'btn.minimize': 'Minimieren',
+    'btn.album': 'Album',
+    'btn.favorite': 'Zu Favoriten',
+    'btn.unfavorite': 'Aus Favoriten entfernen',
+    'btn.favoriteOn': 'In Favoriten',
+    'btn.addToPlaylist': 'Zur Playlist',
+    'tooltip.favorite': 'Zu Favoriten',
+    'tooltip.shuffle': 'Zufällige Reihenfolge',
+    'tooltip.prev': 'Vorheriger',
+    'tooltip.playPause': 'Wiedergabe / Pause',
+    'tooltip.next': 'Nächster',
+    'tooltip.repeat': 'Wiederholen',
+    'tooltip.fullscreen': 'Vollbild',
+    'tooltip.volume': 'Lautstärke',
+    'tooltip.wip': 'Funktion in Entwicklung',
+    'hint.favorites': 'Gespeicherte Titel erscheinen hier',
+    'eyebrow.playlist': 'Playlist',
+    'eyebrow.artist': 'Interpret',
+    'autoChip.artists': 'Die Liste wird automatisch aus deiner Bibliothek erstellt',
+    'np.empty.title': 'Nichts ausgewählt',
+    'np.empty.artist': '—',
+    'fs.nowPlayingFrom': 'Wird abgespielt · aus',
+    'fs.fromLibrary': 'Bibliothek',
+    'fs.nowPlaying': 'Wird abgespielt',
+    'fs.queue': 'Warteschlange',
+    'fs.queueAhead': '{n} folgen',
+    'downloads.title': 'Aus dem Internet herunterladen',
+    'downloads.subtitle': 'Hier wird es möglich sein, Titel per Direktlink zu speichern. Bereich in Entwicklung.',
+    'settings.title': 'Einstellungen',
+    'settings.subtitle': 'Aussehen, Musikquellen und App-Verhalten.',
+    'section.appearance': 'Aussehen',
+    'section.music': 'Musik',
+    'section.downloads': 'Aus dem Internet herunterladen',
+    'section.language': 'Sprache',
+    'section.about': 'Über die App',
+    'theme.dark': 'Dunkel',
+    'theme.light': 'Hell',
+    'theme.system': 'System',
+    'setting.defaultFolder': 'Standardordner',
+    'setting.defaultFolderDesc': 'Woher Titel beim Start geladen werden.',
+    'setting.scanSubdirs': 'Unterordner durchsuchen',
+    'setting.scanSubdirsDesc': 'Verschachtelte Verzeichnisse beim Indizieren einbeziehen.',
+    'setting.autoRescan': 'Beim Start automatisch aktualisieren',
+    'setting.autoRescanDesc': 'Den Ordner bei jedem Start neu prüfen.',
+    'setting.showDownloads': 'Tab „Downloads“ anzeigen',
+    'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
+    'setting.uiLanguage': 'Sprache der Oberfläche',
+    'setting.uiLanguageDesc': 'Wird sofort angewendet.',
+    'setting.version': 'Version',
+    'badge.wip': 'in Entwicklung',
+    'placeholder.noFolder': '— nicht ausgewählt —',
+    'modal.deleteTrack.title': 'Titel löschen?',
+    'modal.deleteTrack.text': 'Der Titel wird aus der Bibliothek entfernt und die Datei in den Papierkorb verschoben.',
+    'modal.deleteTrackFull.text': '„{title}“ von {artist} wird aus der Bibliothek entfernt und die Datei in den Papierkorb verschoben.',
+    'modal.deletePlaylist.title': 'Playlist löschen?',
+    'modal.deletePlaylist.text': 'Playlist „{name}“ wird gelöscht. Titel bleiben in der Bibliothek.',
+    'modal.newPlaylist.title': 'Neue Playlist',
+    'modal.newPlaylist.namePh': 'Playlist-Name',
+    'modal.newPlaylist.descPh': 'Beschreibung (optional)',
+    'modal.addToPlaylist.title': 'Zur Playlist hinzufügen',
+    'modal.addToPlaylist.empty': 'Erstelle zuerst eine Playlist im Tab „Playlists“.',
+    'modal.addToPlaylist.alreadyAdded': 'bereits hinzugefügt',
+    'editor.title': 'Tags bearbeiten',
+    'editor.cover': 'Cover',
+    'editor.field.title': 'Titel',
+    'editor.field.artist': 'Interpret',
+    'editor.field.album': 'Album',
+    'editor.field.albumArtist': 'Album-Interpret',
+    'editor.field.year': 'Jahr',
+    'editor.field.genre': 'Genre',
+    'editor.field.trackNo': 'Titel-Nr.',
+    'editor.field.discNo': 'CD-Nr.',
+    'editor.field.comment': 'Kommentar',
+    'editor.commentPh': 'Notiz zum Titel…',
+    'editor.coverEmbed': 'Eingebettetes Cover',
+    'editor.noCover': 'Kein Cover',
+    'editor.saving': 'Speichern…',
+    'editor.saved': 'Gespeichert ✓',
+    'editor.errorSave': 'Speicherfehler',
+    'cm.play': 'Abspielen',
+    'cm.addToPlaylist': 'Zur Playlist hinzufügen',
+    'cm.removeFromPlaylist': 'Aus Playlist entfernen',
+    'cm.reveal': 'Im Ordner anzeigen',
+    'cm.editTags': 'Tags bearbeiten…',
+    'cm.delete': 'Aus Bibliothek entfernen',
+    'palette.placeholder': 'Suche Titel, Alben, Aktionen…',
+    'palette.nav': '↑↓ Navigation',
+    'palette.choose': '↵ auswählen',
+    'palette.close': 'ESC schließen',
+    'palette.tracks': 'Titel',
+    'palette.actions': 'Aktionen',
+    'palette.itemHint': '↵ abspielen',
+    'palette.empty': 'Nichts gefunden',
+    'palette.action.openFiles': 'Dateien öffnen…',
+    'palette.action.gotoSettings': 'Zu den Einstellungen',
+    'palette.action.gotoPlaylists': 'Zu den Playlists',
+    'palette.action.gotoFavorites': 'Zu den Favoriten',
+    'label.unknownArtist': 'Unbekannter Interpret',
+    'label.noAlbum': 'Ohne Album',
+    'label.tracksShort': 'Tit.',
+    'error.deleteFile': 'Datei konnte nicht gelöscht werden: ',
+    'error.unknown': 'unbekannter Fehler',
+  },
+  fr: {
+    'nav.library': 'Bibliothèque',
+    'nav.artists': 'Artistes',
+    'nav.playlists': 'Playlists',
+    'nav.favorites': 'Favoris',
+    'nav.downloads': 'Téléchargements',
+    'nav.search': 'Recherche',
+    'nav.recents': 'Récents',
+    'nav.openFiles': 'Ouvrir des fichiers',
+    'nav.settings': 'Paramètres',
+    'crumb.collection': 'Collection',
+    'search.placeholder': 'Recherche…',
+    'search.artistPlaceholder': 'Rechercher un artiste…',
+    'search.trackPlaceholder': 'Rechercher une piste…',
+    'filter.all': 'Tout',
+    'filter.recent': 'Récemment ajoutés',
+    'filter.favorites': 'Favoris uniquement',
+    'sort.label': 'Tri :',
+    'sort.dateDesc': "Date d'ajout ↓",
+    'sort.alpha': 'Alphabétique',
+    'sort.byTracks': 'Par nombre de pistes',
+    'sort.recent': 'Récemment ajoutés',
+    'table.title': 'Titre',
+    'table.artist': 'Artiste',
+    'table.album': 'Album',
+    'table.time': 'Durée',
+    'empty.library.title': 'Bibliothèque vide',
+    'empty.library.text': 'Ouvre des fichiers ou un dossier pour commencer.',
+    'empty.playlists.title': 'Aucune playlist pour le moment',
+    'empty.playlists.text': "Crée ta première playlist — rassemble des pistes par humeur, moment de la journée ou album.",
+    'empty.artists.title': "Aucun artiste pour l'instant",
+    'empty.artists.text': 'Ajoute des pistes à la bibliothèque pour voir des artistes ici.',
+    'empty.favorites.title': 'Aucune piste favorite',
+    'empty.favorites.text': "Clique sur le cœur d'une piste pour l'ajouter ici.",
+    'btn.newPlaylist': 'Nouvelle playlist',
+    'btn.playAll': 'Tout lire',
+    'btn.shuffle': 'Aléatoire',
+    'btn.deletePlaylist': 'Supprimer la playlist',
+    'btn.choose': 'Choisir…',
+    'btn.cancel': 'Annuler',
+    'btn.delete': 'Supprimer',
+    'btn.create': 'Créer',
+    'btn.close': 'Fermer',
+    'btn.save': 'Enregistrer',
+    'btn.minimize': 'Réduire',
+    'btn.album': 'Album',
+    'btn.favorite': 'Ajouter aux favoris',
+    'btn.unfavorite': 'Retirer des favoris',
+    'btn.favoriteOn': 'Dans les favoris',
+    'btn.addToPlaylist': 'À la playlist',
+    'tooltip.favorite': 'Ajouter aux favoris',
+    'tooltip.shuffle': 'Ordre aléatoire',
+    'tooltip.prev': 'Précédent',
+    'tooltip.playPause': 'Lecture / Pause',
+    'tooltip.next': 'Suivant',
+    'tooltip.repeat': 'Répéter',
+    'tooltip.fullscreen': 'Plein écran',
+    'tooltip.volume': 'Volume',
+    'tooltip.wip': 'Fonctionnalité en développement',
+    'hint.favorites': 'Les pistes enregistrées apparaissent ici',
+    'eyebrow.playlist': 'Playlist',
+    'eyebrow.artist': 'Artiste',
+    'autoChip.artists': 'La liste est générée automatiquement depuis ta bibliothèque',
+    'np.empty.title': 'Rien de sélectionné',
+    'np.empty.artist': '—',
+    'fs.nowPlayingFrom': 'En cours de lecture · depuis',
+    'fs.fromLibrary': 'la Bibliothèque',
+    'fs.nowPlaying': 'En cours de lecture',
+    'fs.queue': 'File',
+    'fs.queueAhead': '{n} à venir',
+    'downloads.title': "Téléchargement depuis Internet",
+    'downloads.subtitle': "La possibilité d'enregistrer des pistes via un lien direct apparaîtra ici. Section en développement.",
+    'settings.title': 'Paramètres',
+    'settings.subtitle': "Apparence, sources musicales et comportement de l'application.",
+    'section.appearance': 'Apparence',
+    'section.music': 'Musique',
+    'section.downloads': "Téléchargement depuis Internet",
+    'section.language': 'Langue',
+    'section.about': "À propos",
+    'theme.dark': 'Sombre',
+    'theme.light': 'Clair',
+    'theme.system': 'Système',
+    'setting.defaultFolder': 'Dossier par défaut',
+    'setting.defaultFolderDesc': "D'où charger les pistes au démarrage.",
+    'setting.scanSubdirs': 'Analyser les sous-dossiers',
+    'setting.scanSubdirsDesc': "Inclure les répertoires imbriqués lors de l'indexation.",
+    'setting.autoRescan': 'Mise à jour automatique au démarrage',
+    'setting.autoRescanDesc': "Revérifier le dossier à chaque lancement.",
+    'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
+    'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
+    'setting.uiLanguage': "Langue de l'interface",
+    'setting.uiLanguageDesc': 'Appliquée immédiatement.',
+    'setting.version': 'Version',
+    'badge.wip': 'en développement',
+    'placeholder.noFolder': '— non sélectionné —',
+    'modal.deleteTrack.title': 'Supprimer la piste ?',
+    'modal.deleteTrack.text': 'La piste sera retirée de la bibliothèque et le fichier déplacé vers la corbeille.',
+    'modal.deleteTrackFull.text': '« {title} » de {artist} sera retirée de la bibliothèque et le fichier déplacé vers la corbeille.',
+    'modal.deletePlaylist.title': 'Supprimer la playlist ?',
+    'modal.deletePlaylist.text': 'La playlist « {name} » sera supprimée. Les pistes restent dans la bibliothèque.',
+    'modal.newPlaylist.title': 'Nouvelle playlist',
+    'modal.newPlaylist.namePh': 'Nom de la playlist',
+    'modal.newPlaylist.descPh': 'Description (facultatif)',
+    'modal.addToPlaylist.title': 'Ajouter à la playlist',
+    'modal.addToPlaylist.empty': "Crée d'abord une playlist dans l'onglet « Playlists ».",
+    'modal.addToPlaylist.alreadyAdded': 'déjà ajoutée',
+    'editor.title': 'Modifier les tags',
+    'editor.cover': 'Pochette',
+    'editor.field.title': 'Titre',
+    'editor.field.artist': 'Artiste',
+    'editor.field.album': 'Album',
+    'editor.field.albumArtist': "Artiste de l'album",
+    'editor.field.year': 'Année',
+    'editor.field.genre': 'Genre',
+    'editor.field.trackNo': 'Piste №',
+    'editor.field.discNo': 'Disque №',
+    'editor.field.comment': 'Commentaire',
+    'editor.commentPh': 'Note sur la piste…',
+    'editor.coverEmbed': 'Pochette intégrée',
+    'editor.noCover': 'Pas de pochette',
+    'editor.saving': 'Enregistrement…',
+    'editor.saved': 'Enregistré ✓',
+    'editor.errorSave': "Erreur d'enregistrement",
+    'cm.play': 'Lire',
+    'cm.addToPlaylist': 'Ajouter à la playlist',
+    'cm.removeFromPlaylist': 'Retirer de la playlist',
+    'cm.reveal': 'Afficher dans le dossier',
+    'cm.editTags': 'Modifier les tags…',
+    'cm.delete': 'Retirer de la bibliothèque',
+    'palette.placeholder': 'Rechercher pistes, albums, actions…',
+    'palette.nav': '↑↓ navigation',
+    'palette.choose': '↵ sélectionner',
+    'palette.close': 'ESC fermer',
+    'palette.tracks': 'Pistes',
+    'palette.actions': 'Actions',
+    'palette.itemHint': '↵ lire',
+    'palette.empty': 'Aucun résultat',
+    'palette.action.openFiles': 'Ouvrir des fichiers…',
+    'palette.action.gotoSettings': 'Aller aux Paramètres',
+    'palette.action.gotoPlaylists': 'Aller aux Playlists',
+    'palette.action.gotoFavorites': 'Aller aux Favoris',
+    'label.unknownArtist': 'Artiste inconnu',
+    'label.noAlbum': 'Sans album',
+    'label.tracksShort': 'p.',
+    'error.deleteFile': "Impossible de supprimer le fichier du disque : ",
+    'error.unknown': 'erreur inconnue',
+  },
+  uk: {
+    'nav.library': 'Бібліотека',
+    'nav.artists': 'Виконавці',
+    'nav.playlists': 'Плейлисти',
+    'nav.favorites': 'Улюблене',
+    'nav.downloads': 'Завантаження',
+    'nav.search': 'Пошук',
+    'nav.recents': 'Нещодавнє',
+    'nav.openFiles': 'Відкрити файли',
+    'nav.settings': 'Налаштування',
+    'crumb.collection': 'Колекція',
+    'search.placeholder': 'Пошук…',
+    'search.artistPlaceholder': 'Пошук виконавця…',
+    'search.trackPlaceholder': 'Пошук треку…',
+    'filter.all': 'Усі',
+    'filter.recent': 'Нещодавно додані',
+    'filter.favorites': 'Тільки улюблене',
+    'sort.label': 'Сортування:',
+    'sort.dateDesc': 'Дата додавання ↓',
+    'sort.alpha': 'За алфавітом',
+    'sort.byTracks': 'За кількістю треків',
+    'sort.recent': 'Нещодавно додані',
+    'table.title': 'Назва',
+    'table.artist': 'Виконавець',
+    'table.album': 'Альбом',
+    'table.time': 'Час',
+    'empty.library.title': 'Бібліотека порожня',
+    'empty.library.text': 'Відкрий файли або теку, щоб почати.',
+    'empty.playlists.title': 'Плейлистів поки немає',
+    'empty.playlists.text': 'Створи свій перший плейлист — збери треки за настроєм, часом доби чи альбомом.',
+    'empty.artists.title': 'Виконавців поки немає',
+    'empty.artists.text': 'Додай треки до бібліотеки, щоб побачити тут перелік виконавців.',
+    'empty.favorites.title': 'Немає улюблених треків',
+    'empty.favorites.text': 'Натисни сердечко на будь-якому треку, щоб додати його сюди.',
+    'btn.newPlaylist': 'Новий плейлист',
+    'btn.playAll': 'Грати все',
+    'btn.shuffle': 'Перемішати',
+    'btn.deletePlaylist': 'Видалити плейлист',
+    'btn.choose': 'Обрати…',
+    'btn.cancel': 'Скасувати',
+    'btn.delete': 'Видалити',
+    'btn.create': 'Створити',
+    'btn.close': 'Закрити',
+    'btn.save': 'Зберегти',
+    'btn.minimize': 'Згорнути',
+    'btn.album': 'Альбом',
+    'btn.favorite': 'До улюбленого',
+    'btn.unfavorite': 'Прибрати з улюбленого',
+    'btn.favoriteOn': 'В улюбленому',
+    'btn.addToPlaylist': 'До плейлиста',
+    'tooltip.favorite': 'До улюбленого',
+    'tooltip.shuffle': 'Випадковий порядок',
+    'tooltip.prev': 'Попередній',
+    'tooltip.playPause': 'Відтворення/Пауза',
+    'tooltip.next': 'Наступний',
+    'tooltip.repeat': 'Повтор',
+    'tooltip.fullscreen': 'На весь екран',
+    'tooltip.volume': 'Звук',
+    'tooltip.wip': 'Розділ у розробці',
+    'hint.favorites': 'Збережені треки з\'являються тут',
+    'eyebrow.playlist': 'Плейлист',
+    'eyebrow.artist': 'Виконавець',
+    'autoChip.artists': 'Список збирається автоматично з бібліотеки',
+    'np.empty.title': 'Не обрано',
+    'np.empty.artist': '—',
+    'fs.nowPlayingFrom': 'Зараз грає · з',
+    'fs.fromLibrary': 'Бібліотеки',
+    'fs.nowPlaying': 'Зараз грає',
+    'fs.queue': 'Черга',
+    'fs.queueAhead': '{n} попереду',
+    'downloads.title': 'Завантаження з інтернету',
+    'downloads.subtitle': 'Тут з\'явиться можливість зберігати треки за прямим посиланням. Розділ у розробці.',
+    'settings.title': 'Налаштування',
+    'settings.subtitle': 'Зовнішній вигляд, джерела музики та поведінка застосунку.',
+    'section.appearance': 'Зовнішній вигляд',
+    'section.music': 'Музика',
+    'section.downloads': 'Завантаження з інтернету',
+    'section.language': 'Мова',
+    'section.about': 'Про застосунок',
+    'theme.dark': 'Темна',
+    'theme.light': 'Світла',
+    'theme.system': 'Системна',
+    'setting.defaultFolder': 'Тека за замовчуванням',
+    'setting.defaultFolderDesc': 'Звідки завантажувати треки під час запуску.',
+    'setting.scanSubdirs': 'Сканувати підтеки',
+    'setting.scanSubdirsDesc': 'Враховувати вкладені каталоги під час індексації.',
+    'setting.autoRescan': 'Авто-оновлення під час старту',
+    'setting.autoRescanDesc': 'Перевіряти теку під час кожного запуску.',
+    'setting.showDownloads': 'Показати вкладку «Завантаження»',
+    'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
+    'setting.uiLanguage': 'Мова інтерфейсу',
+    'setting.uiLanguageDesc': 'Застосовується одразу.',
+    'setting.version': 'Версія',
+    'badge.wip': 'у розробці',
+    'placeholder.noFolder': '— не обрано —',
+    'modal.deleteTrack.title': 'Видалити трек?',
+    'modal.deleteTrack.text': 'Трек буде вилучено з бібліотеки, а файл — переміщено у смітник.',
+    'modal.deleteTrackFull.text': '«{title}» від {artist} буде вилучено з бібліотеки, а файл — переміщено у смітник.',
+    'modal.deletePlaylist.title': 'Видалити плейлист?',
+    'modal.deletePlaylist.text': 'Плейлист «{name}» буде вилучено. Треки в бібліотеці залишаться.',
+    'modal.newPlaylist.title': 'Новий плейлист',
+    'modal.newPlaylist.namePh': 'Назва плейлиста',
+    'modal.newPlaylist.descPh': 'Опис (необов\'язково)',
+    'modal.addToPlaylist.title': 'Додати до плейлиста',
+    'modal.addToPlaylist.empty': 'Спершу створи плейлист на вкладці «Плейлисти».',
+    'modal.addToPlaylist.alreadyAdded': 'вже додано',
+    'editor.title': 'Редагувати теги',
+    'editor.cover': 'Обкладинка',
+    'editor.field.title': 'Назва',
+    'editor.field.artist': 'Виконавець',
+    'editor.field.album': 'Альбом',
+    'editor.field.albumArtist': 'Викон. альбому',
+    'editor.field.year': 'Рік',
+    'editor.field.genre': 'Жанр',
+    'editor.field.trackNo': 'Трек №',
+    'editor.field.discNo': 'Диск №',
+    'editor.field.comment': 'Коментар',
+    'editor.commentPh': 'Нотатка про трек…',
+    'editor.coverEmbed': 'Вбудована обкладинка',
+    'editor.noCover': 'Немає обкладинки',
+    'editor.saving': 'Збереження…',
+    'editor.saved': 'Збережено ✓',
+    'editor.errorSave': 'Помилка збереження',
+    'cm.play': 'Грати',
+    'cm.addToPlaylist': 'Додати до плейлиста',
+    'cm.removeFromPlaylist': 'Прибрати з плейлиста',
+    'cm.reveal': 'Показати у теці',
+    'cm.editTags': 'Редагувати теги…',
+    'cm.delete': 'Вилучити з бібліотеки',
+    'palette.placeholder': 'Пошук треку, альбому, дії…',
+    'palette.nav': '↑↓ навігація',
+    'palette.choose': '↵ обрати',
+    'palette.close': 'ESC закрити',
+    'palette.tracks': 'Треки',
+    'palette.actions': 'Дії',
+    'palette.itemHint': '↵ грати',
+    'palette.empty': 'Нічого не знайдено',
+    'palette.action.openFiles': 'Відкрити файли…',
+    'palette.action.gotoSettings': 'Перейти в Налаштування',
+    'palette.action.gotoPlaylists': 'Перейти в Плейлисти',
+    'palette.action.gotoFavorites': 'Перейти в Улюблене',
+    'label.unknownArtist': 'Невідомий виконавець',
+    'label.noAlbum': 'Без альбому',
+    'label.tracksShort': 'тр.',
+    'error.deleteFile': 'Не вдалося видалити файл з диска: ',
+    'error.unknown': 'невідома помилка',
+  },
+};
+
+// Slavic-style 3-form plural (ru, uk): n%10==1 && n%100!=11 → one;
+// n%10 in 2..4 && n%100 not in 12..14 → few; else → many.
+function slavicPluralIdx(n) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 0;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 1;
+  return 2;
+}
+// Pluralized noun forms for "tracks/albums/artists/playlists" per language.
+// ru/uk use [one, few, many]; en/de/fr use [one, other].
+const PLURAL_FORMS = {
+  ru: {
+    tracks:    ['трек', 'трека', 'треков'],
+    albums:    ['альбом', 'альбома', 'альбомов'],
+    artists:   ['исполнитель', 'исполнителя', 'исполнителей'],
+    playlists: ['плейлист', 'плейлиста', 'плейлистов'],
+  },
+  uk: {
+    tracks:    ['трек', 'треки', 'треків'],
+    albums:    ['альбом', 'альбоми', 'альбомів'],
+    artists:   ['виконавець', 'виконавці', 'виконавців'],
+    playlists: ['плейлист', 'плейлисти', 'плейлистів'],
+  },
+  en: {
+    tracks:    ['track', 'tracks'],
+    albums:    ['album', 'albums'],
+    artists:   ['artist', 'artists'],
+    playlists: ['playlist', 'playlists'],
+  },
+  de: {
+    tracks:    ['Titel', 'Titel'],
+    albums:    ['Album', 'Alben'],
+    artists:   ['Interpret', 'Interpreten'],
+    playlists: ['Playlist', 'Playlists'],
+  },
+  fr: {
+    tracks:    ['piste', 'pistes'],
+    albums:    ['album', 'albums'],
+    artists:   ['artiste', 'artistes'],
+    playlists: ['playlist', 'playlists'],
+  },
+};
+// "h X min" / "X min" — total duration formatting.
+const DURATION_UNITS = {
+  ru: { h: 'ч', m: 'мин' },
+  uk: { h: 'год', m: 'хв' },
+  en: { h: 'h', m: 'min' },
+  de: { h: 'h', m: 'Min' },
+  fr: { h: 'h', m: 'min' },
+};
+
+let currentLang = I18N[settings.language] ? settings.language : 'ru';
+
+function tr(key, params) {
+  const dict = I18N[currentLang] || I18N.ru;
+  let s = dict[key];
+  if (s == null) s = I18N.ru[key] != null ? I18N.ru[key] : key;
+  if (params) {
+    for (const k in params) s = s.split('{' + k + '}').join(params[k]);
+  }
+  return s;
+}
+
+function plural(kind, n) {
+  const forms = (PLURAL_FORMS[currentLang] || PLURAL_FORMS.ru)[kind];
+  const idx = (currentLang === 'ru' || currentLang === 'uk')
+    ? slavicPluralIdx(n)
+    : (n === 1 ? 0 : 1);
+  return forms[idx];
+}
+function withCount(kind, n) { return `${n} ${plural(kind, n)}`; }
+
+function applyLanguage(lang) {
+  if (!I18N[lang]) lang = 'ru';
+  currentLang = lang;
+  document.documentElement.setAttribute('lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = tr(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = tr(el.getAttribute('data-i18n-placeholder'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = tr(el.getAttribute('data-i18n-title'));
+  });
+}
+
 // ── Utils ──
 function formatTime(seconds) {
   if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
@@ -97,7 +928,8 @@ function formatTotalDuration(tracks) {
   const total = tracks.reduce((a, t) => a + (t.duration || 0), 0);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
-  return h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
+  const u = DURATION_UNITS[currentLang] || DURATION_UNITS.ru;
+  return h > 0 ? `${h} ${u.h} ${m} ${u.m}` : `${m} ${u.m}`;
 }
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({
@@ -391,12 +1223,7 @@ function renderLibrary() {
   renderCounts();
 }
 
-function pluralTracks(n) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'трек';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'трека';
-  return 'треков';
-}
+function pluralTracks(n) { return plural('tracks', n); }
 
 // ── Render: favorites ──
 function renderFavorites() {
@@ -432,9 +1259,7 @@ function renderPlaylists() {
   const grid = $('playlists-grid');
   const empty = $('playlists-empty');
   grid.innerHTML = '';
-  $('playlists-count-label').textContent = playlists.length === 0
-    ? '0 плейлистов'
-    : `${playlists.length} ${playlists.length === 1 ? 'плейлист' : (playlists.length < 5 ? 'плейлиста' : 'плейлистов')}`;
+  $('playlists-count-label').textContent = `${playlists.length} ${plural('playlists', playlists.length)}`;
   if (playlists.length === 0) {
     grid.style.display = 'none';
     empty.classList.add('show');
@@ -504,7 +1329,11 @@ function renderPlaylistDetail(plId) {
       playTrackByPath(random.path, tracks);
     }
   };
-  $('btn-pl-delete').onclick = () => confirmDelete({ kind: 'playlist', payload: pl.id, title: 'Удалить плейлист?', text: `Плейлист «${pl.name}» будет удалён. Треки в библиотеке останутся.` });
+  $('btn-pl-delete').onclick = () => confirmDelete({
+    kind: 'playlist', payload: pl.id,
+    title: tr('modal.deletePlaylist.title'),
+    text: tr('modal.deletePlaylist.text', { name: pl.name }),
+  });
 }
 
 // ── Artists ──
@@ -514,9 +1343,10 @@ function renderPlaylistDetail(plId) {
 const ARTIST_SEP = /\s*&\s*/;
 
 function splitArtists(s) {
-  if (!s) return ['Неизвестный исполнитель'];
+  const unknown = tr('label.unknownArtist');
+  if (!s) return [unknown];
   const parts = s.split(ARTIST_SEP).map(p => p.trim()).filter(Boolean);
-  return parts.length > 0 ? parts : ['Неизвестный исполнитель'];
+  return parts.length > 0 ? parts : [unknown];
 }
 
 function artistInitials(name) {
@@ -527,18 +1357,8 @@ function artistInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function pluralAlbums(n) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'альбом';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'альбома';
-  return 'альбомов';
-}
-function pluralArtists(n) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'исполнитель';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'исполнителя';
-  return 'исполнителей';
-}
+function pluralAlbums(n) { return plural('albums', n); }
+function pluralArtists(n) { return plural('artists', n); }
 
 function buildArtistsIndex() {
   const map = new Map();
@@ -599,7 +1419,7 @@ function buildArtistCard(a) {
     </div>
     <div class="artist-card-name">${escapeHtml(a.name)}</div>
     <div class="artist-card-stats">
-      <span>${a.trackCount} тр.</span>
+      <span>${a.trackCount} ${escapeHtml(tr('label.tracksShort'))}</span>
       <span>·</span>
       <span>${a.albumCount} ${pluralAlbums(a.albumCount)}</span>
     </div>
@@ -739,7 +1559,7 @@ function renderArtistDetail(name) {
     const key = t.album || '';
     if (!seen.has(key)) {
       seen.set(key, byAlbum.length);
-      byAlbum.push({ album: t.album || 'Без альбома', year: t.year, cover: t.cover, tracks: [] });
+      byAlbum.push({ album: t.album || tr('label.noAlbum'), year: t.year, cover: t.cover, tracks: [] });
     }
     const slot = byAlbum[seen.get(key)];
     slot.tracks.push(t);
@@ -765,7 +1585,7 @@ function renderArtistDetail(name) {
       </div>
       <button class="artist-album-play" data-album-idx="${gIdx}">
         <svg class="i" width="10" height="10"><use href="#i-play"/></svg>
-        Альбом
+        ${escapeHtml(tr('btn.album'))}
       </button>
     `;
     head.querySelector('.artist-album-play').addEventListener('click', e => {
@@ -1075,7 +1895,7 @@ function updateFavoriteUI() {
   const fsFav = $('fs-btn-favorite');
   fsFav.classList.toggle('active', fav);
   fsFav.querySelector('use').setAttribute('href', fav ? '#i-heart-filled' : '#i-heart');
-  $('fs-fav-label').textContent = fav ? 'В избранном' : 'В избранное';
+  $('fs-fav-label').textContent = fav ? tr('btn.favoriteOn') : tr('btn.favorite');
 }
 
 function togglePlay() {
@@ -1388,7 +2208,7 @@ function updateFullscreenQueue() {
   const curPath = currentTrackIndex >= 0 ? library[currentTrackIndex].path : null;
   const idx = currentQueue.findIndex(t => t.path === curPath);
   const upcoming = currentQueue.slice(idx + 1, idx + 1 + 8);
-  $('fs-queue-count').textContent = `${upcoming.length} впереди`;
+  $('fs-queue-count').textContent = tr('fs.queueAhead', { n: upcoming.length });
   upcoming.forEach(t => {
     if (!t.cover) ensureCoverFor(t);
     const el = document.createElement('div');
@@ -1410,8 +2230,8 @@ function updateFullscreenQueue() {
 // ── Confirm delete modal ──
 function confirmDelete({ kind, payload, title, text }) {
   pendingDelete = { kind, payload };
-  $('confirm-title').textContent = title || 'Удалить трек?';
-  $('confirm-text').textContent = text || 'Трек будет удалён из библиотеки, а файл — перемещён в корзину.';
+  $('confirm-title').textContent = title || tr('modal.deleteTrack.title');
+  $('confirm-text').textContent = text || tr('modal.deleteTrack.text');
   $('confirm-modal').classList.add('active');
 }
 $('btn-cancel-delete').addEventListener('click', () => {
@@ -1431,7 +2251,7 @@ async function deleteTrack(path) {
   if (idx < 0) return;
   const res = await window.electronAPI.deleteFile(path);
   if (!res || !res.success) {
-    alert('Не удалось удалить файл с диска: ' + (res && res.error ? res.error : 'неизвестная ошибка'));
+    alert(tr('error.deleteFile') + (res && res.error ? res.error : tr('error.unknown')));
     return;
   }
   library.splice(idx, 1);
@@ -1439,7 +2259,7 @@ async function deleteTrack(path) {
     audio.pause();
     isPlaying = false;
     currentTrackIndex = -1;
-    $('track-title').textContent = 'Не выбрано';
+    $('track-title').textContent = tr('np.empty.title');
     $('track-artist').textContent = '—';
     updatePlayButtonUI();
   } else if (currentTrackIndex > idx) {
@@ -1492,13 +2312,13 @@ function openAddToPlaylistModal(trackPath) {
   const list = $('add-to-playlist-list');
   list.innerHTML = '';
   if (playlists.length === 0) {
-    list.innerHTML = `<div class="sl-empty">Сначала создай плейлист на вкладке «Плейлисты».</div>`;
+    list.innerHTML = `<div class="sl-empty">${escapeHtml(tr('modal.addToPlaylist.empty'))}</div>`;
   } else {
     playlists.forEach(pl => {
       const el = document.createElement('div');
       el.className = 'sl-item';
       const has = pl.trackPaths.includes(trackPath);
-      el.innerHTML = `${escapeHtml(pl.name)} ${has ? '<span style="color:var(--accent-ok);font-size:11px;margin-left:6px">уже добавлен</span>' : ''}`;
+      el.innerHTML = `${escapeHtml(pl.name)} ${has ? `<span style="color:var(--accent-ok);font-size:11px;margin-left:6px">${escapeHtml(tr('modal.addToPlaylist.alreadyAdded'))}</span>` : ''}`;
       el.addEventListener('click', () => {
         if (!has) {
           pl.trackPaths.push(trackPath);
@@ -1520,7 +2340,7 @@ $('fs-btn-add-playlist').addEventListener('click', () => {
 function openContextMenu(e, path) {
   pendingContextTrackPath = path;
   const menu = $('track-context-menu');
-  $('cm-fav-label').textContent = favorites.includes(path) ? 'Убрать из избранного' : 'В избранное';
+  $('cm-fav-label').textContent = favorites.includes(path) ? tr('btn.unfavorite') : tr('btn.favorite');
   $('cm-remove-from-pl').hidden = !(currentView === 'playlist-detail' && activePlaylistId);
   menu.classList.add('open');
   // position
@@ -1564,8 +2384,8 @@ document.querySelectorAll('#track-context-menu .cm-item').forEach(btn => {
     }
     else if (action === 'delete') confirmDelete({
       kind: 'track', payload: path,
-      title: 'Удалить трек?',
-      text: `«${track.title}» от ${track.artist} будет удалён из библиотеки, а сам файл — перемещён в корзину.`,
+      title: tr('modal.deleteTrack.title'),
+      text: tr('modal.deleteTrackFull.text', { title: track.title, artist: track.artist }),
     });
   });
 });
@@ -1590,11 +2410,11 @@ async function openMetadataEditor(path) {
   if (meta.cover) {
     cover.style.backgroundImage = `url('${meta.cover}')`;
     $('editor-cover-letter').textContent = '';
-    $('editor-cover-tag').textContent = 'Встроенная обложка';
+    $('editor-cover-tag').textContent = tr('editor.coverEmbed');
   } else {
     cover.style.backgroundImage = '';
     $('editor-cover-letter').textContent = (meta.title || '?')[0];
-    $('editor-cover-tag').textContent = 'Нет обложки';
+    $('editor-cover-tag').textContent = tr('editor.noCover');
   }
   $('editor-filename').textContent = path;
   $('editor-status').textContent = '';
@@ -1606,7 +2426,7 @@ $('btn-cancel-editor').addEventListener('click', () => $('metadata-modal').class
 $('btn-save-editor').addEventListener('click', async () => {
   if (!pendingMetadataPath) return;
   const status = $('editor-status');
-  status.textContent = 'Сохранение…';
+  status.textContent = tr('editor.saving');
   status.className = 'editor-foot-status';
   const tags = {
     title: $('md-title').value,
@@ -1621,7 +2441,7 @@ $('btn-save-editor').addEventListener('click', async () => {
   };
   const res = await window.electronAPI.writeMetadata(pendingMetadataPath, tags);
   if (res.success) {
-    status.textContent = 'Сохранено ✓';
+    status.textContent = tr('editor.saved');
     status.className = 'editor-foot-status ok';
     // update in-memory library
     const t = trackByPath(pendingMetadataPath);
@@ -1643,7 +2463,7 @@ $('btn-save-editor').addEventListener('click', async () => {
     }
     setTimeout(() => $('metadata-modal').classList.remove('active'), 600);
   } else {
-    status.textContent = res.error || 'Ошибка сохранения';
+    status.textContent = res.error || tr('editor.errorSave');
     status.className = 'editor-foot-status error';
   }
 });
@@ -1677,7 +2497,7 @@ function renderPaletteResults(query) {
   if (tracks.length > 0) {
     const lbl = document.createElement('div');
     lbl.className = 'palette-section-label';
-    lbl.textContent = 'Треки';
+    lbl.textContent = tr('palette.tracks');
     container.appendChild(lbl);
     tracks.forEach(t => {
       if (!t.cover) ensureCoverFor(t);
@@ -1692,7 +2512,7 @@ function renderPaletteResults(query) {
           <div class="palette-item-title">${highlightMatch(t.title, q)}</div>
           <div class="palette-item-sub">${escapeHtml(t.artist)} · ${escapeHtml(t.album)}</div>
         </div>
-        <span class="palette-item-hint">↵ играть</span>
+        <span class="palette-item-hint">${escapeHtml(tr('palette.itemHint'))}</span>
       `;
       el.addEventListener('click', () => runPaletteAction(paletteResults[+el.dataset.idx]));
       container.appendChild(el);
@@ -1701,15 +2521,15 @@ function renderPaletteResults(query) {
 
   // Actions
   const actions = [
-    { label: 'Открыть файлы…', kind: 'open-files', icon: '#i-folder' },
-    { label: 'Перейти в Настройки', kind: 'goto-settings', icon: '#i-settings' },
-    { label: 'Перейти в Плейлисты', kind: 'goto-playlists', icon: '#i-list' },
-    { label: 'Перейти в Избранное', kind: 'goto-favorites', icon: '#i-heart' },
+    { label: tr('palette.action.openFiles'),       kind: 'open-files',      icon: '#i-folder' },
+    { label: tr('palette.action.gotoSettings'),    kind: 'goto-settings',   icon: '#i-settings' },
+    { label: tr('palette.action.gotoPlaylists'),   kind: 'goto-playlists',  icon: '#i-list' },
+    { label: tr('palette.action.gotoFavorites'),   kind: 'goto-favorites',  icon: '#i-heart' },
   ].filter(a => !q || a.label.toLowerCase().includes(q));
   if (actions.length > 0) {
     const lbl = document.createElement('div');
     lbl.className = 'palette-section-label';
-    lbl.textContent = 'Действия';
+    lbl.textContent = tr('palette.actions');
     container.appendChild(lbl);
     actions.forEach(a => {
       paletteResults.push({ kind: a.kind });
@@ -1728,7 +2548,7 @@ function renderPaletteResults(query) {
   }
 
   if (paletteResults.length === 0) {
-    container.innerHTML = `<div class="palette-empty">Ничего не найдено</div>`;
+    container.innerHTML = `<div class="palette-empty">${escapeHtml(tr('palette.empty'))}</div>`;
   } else {
     highlightPaletteItem();
   }
@@ -1829,10 +2649,10 @@ function renderSettings() {
     if (settings[map[key]]) t.classList.add('on'); else t.classList.remove('on');
   });
   // Folder
-  $('default-folder-path').textContent = settings.defaultFolder || '— не выбрана —';
-  // Language
+  $('default-folder-path').textContent = settings.defaultFolder || tr('placeholder.noFolder');
+  // Language — labels stay in their native language regardless of currentLang.
   const lblMap = { ru: 'Русский', en: 'English', de: 'Deutsch', fr: 'Français', uk: 'Українська' };
-  $('lang-current').textContent = lblMap[settings.language] || 'Русский';
+  $('lang-current').textContent = lblMap[settings.language] || lblMap.ru;
   document.querySelectorAll('.select-opt').forEach(o => {
     o.classList.toggle('active', o.dataset.lang === settings.language);
   });
@@ -1878,6 +2698,18 @@ document.querySelectorAll('.select-opt').forEach(o => {
     settings.language = o.dataset.lang;
     saveSettings();
     langSelect.classList.remove('open');
+    applyLanguage(settings.language);
+    // Re-render dynamic surfaces so plurals, counts, and rendered strings update.
+    refreshCurrentViewRows();
+    if (currentView === 'playlists') renderPlaylists();
+    renderCounts();
+    renderRecents();
+    if (currentTrackIndex >= 0) updateNowPlayingUI(library[currentTrackIndex]);
+    else $('track-title').textContent = tr('np.empty.title');
+    updateFullscreenQueue();
+    if ($('palette-overlay').classList.contains('active')) {
+      renderPaletteResults($('palette-input').value);
+    }
     renderSettings();
   });
 });
@@ -1916,6 +2748,8 @@ async function maybeAutoRescan() {
 }
 
 // Boot
+applyLanguage(settings.language);
+renderSettings();
 renderLibrary();
 renderRecents();
 updateShuffleUI();

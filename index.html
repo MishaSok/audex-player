@@ -68,48 +68,48 @@
       <nav class="nav-menu">
         <a href="#" class="nav-item active" data-view="library">
           <svg class="i" width="14" height="14"><use href="#i-library"/></svg>
-          <span>Библиотека</span>
+          <span data-i18n="nav.library">Библиотека</span>
           <span class="nav-meta" id="count-library">0</span>
         </a>
         <a href="#" class="nav-item" data-view="artists">
           <svg class="i" width="14" height="14"><use href="#i-mic"/></svg>
-          <span>Исполнители</span>
+          <span data-i18n="nav.artists">Исполнители</span>
           <span class="nav-meta" id="count-artists">0</span>
         </a>
         <a href="#" class="nav-item" data-view="playlists">
           <svg class="i" width="14" height="14"><use href="#i-list"/></svg>
-          <span>Плейлисты</span>
+          <span data-i18n="nav.playlists">Плейлисты</span>
           <span class="nav-meta" id="count-playlists">0</span>
         </a>
         <a href="#" class="nav-item" data-view="favorites">
           <svg class="i" width="14" height="14"><use href="#i-heart"/></svg>
-          <span>Избранное</span>
+          <span data-i18n="nav.favorites">Избранное</span>
           <span class="nav-meta" id="count-favorites">0</span>
         </a>
         <a href="#" class="nav-item nav-downloads" data-view="downloads" id="nav-downloads" hidden>
           <svg class="i" width="14" height="14"><use href="#i-download"/></svg>
-          <span>Загрузки</span>
+          <span data-i18n="nav.downloads">Загрузки</span>
         </a>
         <a href="#" class="nav-item" data-action="open-palette">
           <svg class="i" width="14" height="14"><use href="#i-search"/></svg>
-          <span>Поиск</span>
+          <span data-i18n="nav.search">Поиск</span>
           <span class="nav-shortcut">⌘K</span>
         </a>
       </nav>
 
       <div class="nav-section recents">
-        <div class="nav-label">Недавнее</div>
+        <div class="nav-label" data-i18n="nav.recents">Недавнее</div>
         <div id="recents-list"></div>
       </div>
 
       <div class="sidebar-actions">
         <button id="btn-add-files" class="btn-primary">
           <svg class="i" width="13" height="13"><use href="#i-plus"/></svg>
-          Открыть файлы
+          <span data-i18n="nav.openFiles">Открыть файлы</span>
         </button>
         <a href="#" class="nav-item nav-settings" data-view="settings">
           <svg class="i" width="14" height="14"><use href="#i-settings"/></svg>
-          <span>Настройки</span>
+          <span data-i18n="nav.settings">Настройки</span>
         </a>
       </div>
     </aside>
@@ -120,42 +120,42 @@
       <section id="view-library" class="view-section active">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item">Коллекция</span>
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item active">Библиотека</span>
+            <span class="crumb-item active" data-i18n="nav.library">Библиотека</span>
             <span class="crumb-count" id="library-count-label">0 треков</span>
           </div>
           <div class="searchbox">
             <svg class="i" width="13" height="13"><use href="#i-search"/></svg>
-            <input type="text" placeholder="Поиск…" id="library-search">
+            <input type="text" placeholder="Поиск…" data-i18n-placeholder="search.placeholder" id="library-search">
             <span class="kbd">⌘K</span>
           </div>
         </header>
 
         <div class="filters">
-          <button class="chip active" data-filter="all">Все</button>
-          <button class="chip" data-filter="recent">Недавно добавленные</button>
-          <button class="chip" data-filter="favorites">Только избранное</button>
+          <button class="chip active" data-filter="all" data-i18n="filter.all">Все</button>
+          <button class="chip" data-filter="recent" data-i18n="filter.recent">Недавно добавленные</button>
+          <button class="chip" data-filter="favorites" data-i18n="filter.favorites">Только избранное</button>
           <div class="sort-right">
-            <span>Сортировка:</span>
-            <span class="sort-active" id="sort-label">Дата добавления ↓</span>
+            <span data-i18n="sort.label">Сортировка:</span>
+            <span class="sort-active" id="sort-label" data-i18n="sort.dateDesc">Дата добавления ↓</span>
           </div>
         </div>
 
         <div class="track-table">
           <div class="thead">
             <div>#</div>
-            <div>Название</div>
-            <div>Исполнитель</div>
-            <div>Альбом</div>
-            <div class="ta-right">Время</div>
+            <div data-i18n="table.title">Название</div>
+            <div data-i18n="table.artist">Исполнитель</div>
+            <div data-i18n="table.album">Альбом</div>
+            <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
           <div class="tbody" id="library-list"></div>
           <div class="empty-state" id="library-empty">
             <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-library"/></svg></div>
-            <div class="empty-title">Библиотека пуста</div>
-            <div class="empty-text">Открой файлы или папку, чтобы начать.</div>
+            <div class="empty-title" data-i18n="empty.library.title">Библиотека пуста</div>
+            <div class="empty-text" data-i18n="empty.library.text">Открой файлы или папку, чтобы начать.</div>
           </div>
         </div>
       </section>
@@ -164,9 +164,9 @@
       <section id="view-playlists" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item">Коллекция</span>
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item active">Плейлисты</span>
+            <span class="crumb-item active" data-i18n="nav.playlists">Плейлисты</span>
             <span class="crumb-count" id="playlists-count-label">0 плейлистов</span>
           </div>
         </header>
@@ -174,18 +174,18 @@
         <div class="row-actions">
           <button class="btn-solid" id="btn-new-playlist">
             <svg class="i" width="13" height="13"><use href="#i-plus"/></svg>
-            Новый плейлист
+            <span data-i18n="btn.newPlaylist">Новый плейлист</span>
           </button>
         </div>
 
         <div class="playlists-grid" id="playlists-grid"></div>
         <div class="empty-block" id="playlists-empty">
           <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-list"/></svg></div>
-          <div class="empty-title-lg">Плейлистов пока нет</div>
-          <div class="empty-text">Создай свой первый плейлист — собери треки по настроению, времени дня или альбому.</div>
+          <div class="empty-title-lg" data-i18n="empty.playlists.title">Плейлистов пока нет</div>
+          <div class="empty-text" data-i18n="empty.playlists.text">Создай свой первый плейлист — собери треки по настроению, времени дня или альбому.</div>
           <button class="btn-solid" id="btn-new-playlist-empty">
             <svg class="i" width="13" height="13"><use href="#i-plus"/></svg>
-            Новый плейлист
+            <span data-i18n="btn.newPlaylist">Новый плейлист</span>
           </button>
         </div>
       </section>
@@ -194,9 +194,9 @@
       <section id="view-playlist-detail" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item link" data-view="playlists">Коллекция</span>
+            <span class="crumb-item link" data-view="playlists" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item link" data-view="playlists">Плейлисты</span>
+            <span class="crumb-item link" data-view="playlists" data-i18n="nav.playlists">Плейлисты</span>
             <span class="crumb-sep">/</span>
             <span class="crumb-item active" id="pl-detail-crumb"></span>
           </div>
@@ -205,19 +205,19 @@
         <div class="pl-hero">
           <div class="pl-hero-cover" id="pl-hero-cover"><span id="pl-hero-letter"></span></div>
           <div class="pl-hero-body">
-            <div class="pl-eyebrow">Плейлист</div>
+            <div class="pl-eyebrow" data-i18n="eyebrow.playlist">Плейлист</div>
             <div class="pl-title" id="pl-detail-title"></div>
             <div class="pl-meta" id="pl-detail-meta"></div>
             <div class="pl-actions">
               <button class="btn-solid" id="btn-pl-play">
                 <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
-                Играть всё
+                <span data-i18n="btn.playAll">Играть всё</span>
               </button>
               <button class="btn-ghost" id="btn-pl-shuffle">
                 <svg class="i" width="13" height="13"><use href="#i-shuffle"/></svg>
-                Перемешать
+                <span data-i18n="btn.shuffle">Перемешать</span>
               </button>
-              <button class="btn-ghost icon-only" id="btn-pl-delete" title="Удалить плейлист">
+              <button class="btn-ghost icon-only" id="btn-pl-delete" title="Удалить плейлист" data-i18n-title="btn.deletePlaylist">
                 <svg class="i" width="14" height="14"><use href="#i-trash"/></svg>
               </button>
             </div>
@@ -227,10 +227,10 @@
         <div class="track-table">
           <div class="thead">
             <div>#</div>
-            <div>Название</div>
-            <div>Исполнитель</div>
-            <div>Альбом</div>
-            <div class="ta-right">Время</div>
+            <div data-i18n="table.title">Название</div>
+            <div data-i18n="table.artist">Исполнитель</div>
+            <div data-i18n="table.album">Альбом</div>
+            <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
           <div class="tbody" id="pl-detail-list"></div>
@@ -241,25 +241,25 @@
       <section id="view-artists" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item">Коллекция</span>
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item active">Исполнители</span>
+            <span class="crumb-item active" data-i18n="nav.artists">Исполнители</span>
             <span class="crumb-count" id="artists-count-label">0 исполнителей</span>
           </div>
           <div class="searchbox">
             <svg class="i" width="13" height="13"><use href="#i-search"/></svg>
-            <input type="text" placeholder="Поиск исполнителя…" id="artists-search">
+            <input type="text" placeholder="Поиск исполнителя…" data-i18n-placeholder="search.artistPlaceholder" id="artists-search">
           </div>
         </header>
 
         <div class="filters">
-          <button class="chip active" data-artists-sort="alpha">По алфавиту</button>
-          <button class="chip" data-artists-sort="tracks">По числу треков</button>
-          <button class="chip" data-artists-sort="recent">Недавно добавленные</button>
+          <button class="chip active" data-artists-sort="alpha" data-i18n="sort.alpha">По алфавиту</button>
+          <button class="chip" data-artists-sort="tracks" data-i18n="sort.byTracks">По числу треков</button>
+          <button class="chip" data-artists-sort="recent" data-i18n="sort.recent">Недавно добавленные</button>
           <div class="auto-chip-wrap">
             <span class="auto-chip">
               <svg class="i" width="11" height="11"><use href="#i-sparkle"/></svg>
-              Список собирается автоматически из библиотеки
+              <span data-i18n="autoChip.artists">Список собирается автоматически из библиотеки</span>
             </span>
           </div>
         </div>
@@ -267,8 +267,8 @@
         <div class="artists-grid" id="artists-grid"></div>
         <div class="empty-state" id="artists-empty">
           <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-mic"/></svg></div>
-          <div class="empty-title">Исполнителей пока нет</div>
-          <div class="empty-text">Добавь треки в библиотеку, чтобы увидеть здесь список исполнителей.</div>
+          <div class="empty-title" data-i18n="empty.artists.title">Исполнителей пока нет</div>
+          <div class="empty-text" data-i18n="empty.artists.text">Добавь треки в библиотеку, чтобы увидеть здесь список исполнителей.</div>
         </div>
       </section>
 
@@ -276,32 +276,32 @@
       <section id="view-artist-detail" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item link" data-view="artists">Коллекция</span>
+            <span class="crumb-item link" data-view="artists" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item link" data-view="artists">Исполнители</span>
+            <span class="crumb-item link" data-view="artists" data-i18n="nav.artists">Исполнители</span>
             <span class="crumb-sep">/</span>
             <span class="crumb-item active" id="artist-detail-crumb"></span>
           </div>
           <div class="searchbox">
             <svg class="i" width="13" height="13"><use href="#i-search"/></svg>
-            <input type="text" placeholder="Поиск трека…" id="artist-detail-search">
+            <input type="text" placeholder="Поиск трека…" data-i18n-placeholder="search.trackPlaceholder" id="artist-detail-search">
           </div>
         </header>
 
         <div class="artist-hero">
           <div class="artist-hero-avatar" id="artist-hero-avatar"><span id="artist-hero-letter"></span></div>
           <div class="artist-hero-body">
-            <div class="pl-eyebrow">Исполнитель</div>
+            <div class="pl-eyebrow" data-i18n="eyebrow.artist">Исполнитель</div>
             <div class="pl-title" id="artist-detail-title"></div>
             <div class="pl-meta" id="artist-detail-meta"></div>
             <div class="pl-actions">
               <button class="btn-solid" id="btn-artist-play">
                 <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
-                Играть всё
+                <span data-i18n="btn.playAll">Играть всё</span>
               </button>
               <button class="btn-ghost" id="btn-artist-shuffle">
                 <svg class="i" width="13" height="13"><use href="#i-shuffle"/></svg>
-                Перемешать
+                <span data-i18n="btn.shuffle">Перемешать</span>
               </button>
             </div>
           </div>
@@ -314,32 +314,32 @@
       <section id="view-favorites" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item">Коллекция</span>
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item active">Избранное</span>
+            <span class="crumb-item active" data-i18n="nav.favorites">Избранное</span>
             <span class="crumb-count" id="favorites-count-label">0 треков</span>
           </div>
         </header>
 
         <div class="hint-pill">
           <svg class="i" width="11" height="11"><use href="#i-heart-filled"/></svg>
-          Сохранённые треки появляются здесь
+          <span data-i18n="hint.favorites">Сохранённые треки появляются здесь</span>
         </div>
 
         <div class="track-table">
           <div class="thead">
             <div>#</div>
-            <div>Название</div>
-            <div>Исполнитель</div>
-            <div>Альбом</div>
-            <div class="ta-right">Время</div>
+            <div data-i18n="table.title">Название</div>
+            <div data-i18n="table.artist">Исполнитель</div>
+            <div data-i18n="table.album">Альбом</div>
+            <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
           <div class="tbody" id="favorites-list"></div>
           <div class="empty-state" id="favorites-empty">
             <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-heart"/></svg></div>
-            <div class="empty-title">Нет избранных треков</div>
-            <div class="empty-text">Нажми сердечко на любом треке, чтобы добавить его сюда.</div>
+            <div class="empty-title" data-i18n="empty.favorites.title">Нет избранных треков</div>
+            <div class="empty-text" data-i18n="empty.favorites.text">Нажми сердечко на любом треке, чтобы добавить его сюда.</div>
           </div>
         </div>
       </section>
@@ -348,16 +348,16 @@
       <section id="view-downloads" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item">Коллекция</span>
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
             <span class="crumb-sep">/</span>
-            <span class="crumb-item active">Загрузки</span>
+            <span class="crumb-item active" data-i18n="nav.downloads">Загрузки</span>
           </div>
         </header>
 
         <div class="empty-block">
           <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
-          <div class="empty-title-lg">Скачивание из интернета</div>
-          <div class="empty-text">Здесь появится возможность сохранять треки по прямой ссылке. Раздел в разработке.</div>
+          <div class="empty-title-lg" data-i18n="downloads.title">Скачивание из интернета</div>
+          <div class="empty-text" data-i18n="downloads.subtitle">Здесь появится возможность сохранять треки по прямой ссылке. Раздел в разработке.</div>
         </div>
       </section>
 
@@ -365,21 +365,21 @@
       <section id="view-settings" class="view-section">
         <header class="topbar">
           <div class="crumb">
-            <span class="crumb-item active">Настройки</span>
+            <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
           </div>
           <div class="version-tag">Audex 1.0.0</div>
         </header>
 
         <div class="settings-page">
           <div class="settings-head">
-            <div class="settings-title">Настройки</div>
-            <div class="settings-sub">Внешний вид, источники музыки и поведение приложения.</div>
+            <div class="settings-title" data-i18n="settings.title">Настройки</div>
+            <div class="settings-sub" data-i18n="settings.subtitle">Внешний вид, источники музыки и поведение приложения.</div>
           </div>
 
           <section class="setting-section">
             <div class="section-label">
               <svg class="i" width="11" height="11"><use href="#i-sun"/></svg>
-              Внешний вид
+              <span data-i18n="section.appearance">Внешний вид</span>
             </div>
             <div class="theme-cards">
               <button class="theme-card" data-theme="dark">
@@ -389,7 +389,7 @@
                 </div>
                 <div class="theme-card-foot">
                   <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span>Тёмная</span>
+                  <span data-i18n="theme.dark">Тёмная</span>
                   <span class="theme-radio"></span>
                 </div>
               </button>
@@ -400,7 +400,7 @@
                 </div>
                 <div class="theme-card-foot">
                   <svg class="i" width="13" height="13"><use href="#i-sun"/></svg>
-                  <span>Светлая</span>
+                  <span data-i18n="theme.light">Светлая</span>
                   <span class="theme-radio"></span>
                 </div>
               </button>
@@ -411,7 +411,7 @@
                 </div>
                 <div class="theme-card-foot">
                   <svg class="i" width="13" height="13"><use href="#i-monitor"/></svg>
-                  <span>Системная</span>
+                  <span data-i18n="theme.system">Системная</span>
                   <span class="theme-radio"></span>
                 </div>
               </button>
@@ -421,31 +421,31 @@
           <section class="setting-section">
             <div class="section-label">
               <svg class="i" width="11" height="11"><use href="#i-library"/></svg>
-              Музыка
+              <span data-i18n="section.music">Музыка</span>
             </div>
             <div class="setting-card">
               <div class="setting-row">
                 <div class="setting-text">
-                  <div class="setting-label">Папка по умолчанию</div>
+                  <div class="setting-label" data-i18n="setting.defaultFolder">Папка по умолчанию</div>
                   <div class="setting-path" id="default-folder-path">—</div>
-                  <div class="setting-desc">Откуда загружать треки при запуске.</div>
+                  <div class="setting-desc" data-i18n="setting.defaultFolderDesc">Откуда загружать треки при запуске.</div>
                 </div>
                 <button class="btn-ghost" id="btn-choose-default-folder">
                   <svg class="i" width="13" height="13"><use href="#i-folder-open"/></svg>
-                  Выбрать…
+                  <span data-i18n="btn.choose">Выбрать…</span>
                 </button>
               </div>
               <div class="setting-row">
                 <div class="setting-text">
-                  <div class="setting-label">Сканировать подпапки</div>
-                  <div class="setting-desc">Учитывать вложенные директории при индексации.</div>
+                  <div class="setting-label" data-i18n="setting.scanSubdirs">Сканировать подпапки</div>
+                  <div class="setting-desc" data-i18n="setting.scanSubdirsDesc">Учитывать вложенные директории при индексации.</div>
                 </div>
                 <button class="toggle" data-setting="scan-subdirs"><div class="toggle-knob"></div></button>
               </div>
               <div class="setting-row">
                 <div class="setting-text">
-                  <div class="setting-label">Авто-обновление при старте</div>
-                  <div class="setting-desc">Перепроверять папку при каждом запуске.</div>
+                  <div class="setting-label" data-i18n="setting.autoRescan">Авто-обновление при старте</div>
+                  <div class="setting-desc" data-i18n="setting.autoRescanDesc">Перепроверять папку при каждом запуске.</div>
                 </div>
                 <button class="toggle" data-setting="auto-rescan"><div class="toggle-knob"></div></button>
               </div>
@@ -455,18 +455,18 @@
           <section class="setting-section">
             <div class="section-label">
               <svg class="i" width="11" height="11"><use href="#i-download"/></svg>
-              Скачивание из интернета
+              <span data-i18n="section.downloads">Скачивание из интернета</span>
             </div>
             <div class="setting-card">
               <div class="setting-row">
                 <div class="setting-text">
                   <div class="setting-label">
-                    Показать вкладку «Загрузки»
-                    <span class="setting-badge">в разработке</span>
+                    <span data-i18n="setting.showDownloads">Показать вкладку «Загрузки»</span>
+                    <span class="setting-badge" data-i18n="badge.wip">в разработке</span>
                   </div>
-                  <div class="setting-desc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
+                  <div class="setting-desc" data-i18n="setting.showDownloadsDesc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
                 </div>
-                <button class="toggle is-disabled" data-setting="downloads" disabled aria-disabled="true" title="Раздел находится в разработке"><div class="toggle-knob"></div></button>
+                <button class="toggle is-disabled" data-setting="downloads" disabled aria-disabled="true" title="Раздел находится в разработке" data-i18n-title="tooltip.wip"><div class="toggle-knob"></div></button>
               </div>
             </div>
           </section>
@@ -474,13 +474,13 @@
           <section class="setting-section">
             <div class="section-label">
               <span class="lang-glyph">文</span>
-              Язык
+              <span data-i18n="section.language">Язык</span>
             </div>
             <div class="setting-card">
               <div class="setting-row">
                 <div class="setting-text">
-                  <div class="setting-label">Язык интерфейса</div>
-                  <div class="setting-desc">Применится после перезапуска приложения.</div>
+                  <div class="setting-label" data-i18n="setting.uiLanguage">Язык интерфейса</div>
+                  <div class="setting-desc" data-i18n="setting.uiLanguageDesc">Применяется сразу.</div>
                 </div>
                 <div class="select" id="lang-select">
                   <button class="select-btn">
@@ -492,7 +492,7 @@
                     <div class="select-opt" data-lang="en">English</div>
                     <div class="select-opt" data-lang="de">Deutsch</div>
                     <div class="select-opt" data-lang="fr">Français</div>
-                    <div class="select-opt" data-lang="uk">Хохлятский</div>
+                    <div class="select-opt" data-lang="uk">Українська</div>
                   </div>
                 </div>
               </div>
@@ -500,11 +500,11 @@
           </section>
 
           <section class="setting-section">
-            <div class="section-label">О приложении</div>
+            <div class="section-label" data-i18n="section.about">О приложении</div>
             <div class="setting-card">
               <div class="setting-row">
                 <div class="setting-text">
-                  <div class="setting-label">Версия</div>
+                  <div class="setting-label" data-i18n="setting.version">Версия</div>
                   <div class="setting-desc">1.0.0 · Electron · Linux</div>
                 </div>
               </div>
@@ -522,21 +522,21 @@
         <span class="mini-cover-letter" id="mini-cover-letter"></span>
       </div>
       <div class="mini-info">
-        <div class="mini-title" id="track-title">Не выбрано</div>
+        <div class="mini-title" id="track-title" data-i18n="np.empty.title">Не выбрано</div>
         <div class="mini-artist" id="track-artist">—</div>
       </div>
-      <button class="btn-ic heart" id="btn-favorite" title="В избранное">
+      <button class="btn-ic heart" id="btn-favorite" title="В избранное" data-i18n-title="tooltip.favorite">
         <svg class="i" width="15" height="15"><use href="#i-heart"/></svg>
       </button>
     </div>
 
     <div class="playbar-center">
       <div class="ctrls">
-        <button class="btn-ic" id="btn-shuffle" title="Случайный порядок"><svg class="i" width="14" height="14"><use href="#i-shuffle"/></svg></button>
-        <button class="btn-ic" id="btn-prev" title="Предыдущий"><svg class="i" width="15" height="15"><use href="#i-prev"/></svg></button>
-        <button class="btn-play" id="btn-play" title="Воспроизведение/Пауза"><svg class="i play-i" width="12" height="12"><use href="#i-play"/></svg></button>
-        <button class="btn-ic" id="btn-next" title="Следующий"><svg class="i" width="15" height="15"><use href="#i-next"/></svg></button>
-        <button class="btn-ic" id="btn-repeat" title="Повтор"><svg class="i" width="14" height="14"><use href="#i-repeat"/></svg></button>
+        <button class="btn-ic" id="btn-shuffle" title="Случайный порядок" data-i18n-title="tooltip.shuffle"><svg class="i" width="14" height="14"><use href="#i-shuffle"/></svg></button>
+        <button class="btn-ic" id="btn-prev" title="Предыдущий" data-i18n-title="tooltip.prev"><svg class="i" width="15" height="15"><use href="#i-prev"/></svg></button>
+        <button class="btn-play" id="btn-play" title="Воспроизведение/Пауза" data-i18n-title="tooltip.playPause"><svg class="i play-i" width="12" height="12"><use href="#i-play"/></svg></button>
+        <button class="btn-ic" id="btn-next" title="Следующий" data-i18n-title="tooltip.next"><svg class="i" width="15" height="15"><use href="#i-next"/></svg></button>
+        <button class="btn-ic" id="btn-repeat" title="Повтор" data-i18n-title="tooltip.repeat"><svg class="i" width="14" height="14"><use href="#i-repeat"/></svg></button>
       </div>
       <div class="progress-row">
         <span class="time" id="time-current">0:00</span>
@@ -549,8 +549,8 @@
     </div>
 
     <div class="playbar-right">
-      <button class="btn-ic" id="btn-fullscreen" title="Полноэкранный"><svg class="i" width="13" height="13"><use href="#i-expand"/></svg></button>
-      <button class="btn-ic" id="btn-mute" title="Звук"><svg class="i" width="15" height="15"><use href="#i-volume"/></svg></button>
+      <button class="btn-ic" id="btn-fullscreen" title="Полноэкранный" data-i18n-title="tooltip.fullscreen"><svg class="i" width="13" height="13"><use href="#i-expand"/></svg></button>
+      <button class="btn-ic" id="btn-mute" title="Звук" data-i18n-title="tooltip.volume"><svg class="i" width="15" height="15"><use href="#i-volume"/></svg></button>
       <div class="vol-track" id="vol-track">
         <div class="vol-fill" id="vol-fill"></div>
       </div>
@@ -561,11 +561,11 @@
   <div id="fullscreen-overlay" class="fs-overlay">
     <div class="fs-backdrop" id="fs-backdrop"></div>
     <div class="fs-topbar">
-      <button id="btn-close-fullscreen" class="fs-chip" title="Свернуть">
+      <button id="btn-close-fullscreen" class="fs-chip" title="Свернуть" data-i18n-title="btn.minimize">
         <svg class="i" width="12" height="12" style="transform:rotate(180deg)"><use href="#i-expand"/></svg>
       </button>
-      <div class="fs-eyebrow">Сейчас играет · из <span style="color:var(--text-strong)">Библиотеки</span></div>
-      <button class="fs-chip" id="btn-close-fullscreen-x" title="Закрыть"><svg class="i" width="13" height="13"><use href="#i-close"/></svg></button>
+      <div class="fs-eyebrow"><span data-i18n="fs.nowPlayingFrom">Сейчас играет · из</span> <span style="color:var(--text-strong)" data-i18n="fs.fromLibrary">Библиотеки</span></div>
+      <button class="fs-chip" id="btn-close-fullscreen-x" title="Закрыть" data-i18n-title="btn.close"><svg class="i" width="13" height="13"><use href="#i-close"/></svg></button>
     </div>
 
     <div class="fs-body">
@@ -574,7 +574,7 @@
         <div class="fs-info">
           <div class="fs-eyebrow eq-line">
             <span class="equalizer"><span></span><span></span><span></span></span>
-            Сейчас играет
+            <span data-i18n="fs.nowPlaying">Сейчас играет</span>
           </div>
           <div class="fs-title" id="fs-title">Title</div>
           <div class="fs-artist" id="fs-artist">Artist</div>
@@ -602,11 +602,11 @@
           <div class="fs-secondary">
             <button class="btn-ghost" id="fs-btn-favorite">
               <svg class="i" width="13" height="13"><use href="#i-heart"/></svg>
-              <span id="fs-fav-label">В избранное</span>
+              <span id="fs-fav-label" data-i18n="btn.favorite">В избранное</span>
             </button>
             <button class="btn-ghost" id="fs-btn-add-playlist">
               <svg class="i" width="13" height="13"><use href="#i-plus"/></svg>
-              В плейлист
+              <span data-i18n="btn.addToPlaylist">В плейлист</span>
             </button>
           </div>
         </div>
@@ -614,7 +614,7 @@
 
       <div class="fs-queue">
         <div class="fs-queue-head">
-          <span>Очередь</span>
+          <span data-i18n="fs.queue">Очередь</span>
           <span class="fs-queue-count" id="fs-queue-count">0 впереди</span>
         </div>
         <div id="fs-queue-list"></div>
@@ -629,8 +629,8 @@
       <div class="modal-title" id="confirm-title">Удалить трек?</div>
       <div class="modal-text" id="confirm-text">Трек будет удалён из библиотеки, а файл — перемещён в корзину.</div>
       <div class="modal-actions">
-        <button id="btn-cancel-delete" class="btn-ghost">Отмена</button>
-        <button id="btn-confirm-delete" class="btn-danger">Удалить</button>
+        <button id="btn-cancel-delete" class="btn-ghost" data-i18n="btn.cancel">Отмена</button>
+        <button id="btn-confirm-delete" class="btn-danger" data-i18n="btn.delete">Удалить</button>
       </div>
     </div>
   </div>
@@ -638,12 +638,12 @@
   <!-- New Playlist Modal -->
   <div id="new-playlist-modal" class="modal-overlay">
     <div class="modal-card modal-card-md">
-      <div class="modal-title">Новый плейлист</div>
-      <input type="text" class="modal-input" id="new-playlist-name" placeholder="Название плейлиста">
-      <input type="text" class="modal-input" id="new-playlist-desc" placeholder="Описание (необязательно)">
+      <div class="modal-title" data-i18n="modal.newPlaylist.title">Новый плейлист</div>
+      <input type="text" class="modal-input" id="new-playlist-name" placeholder="Название плейлиста" data-i18n-placeholder="modal.newPlaylist.namePh">
+      <input type="text" class="modal-input" id="new-playlist-desc" placeholder="Описание (необязательно)" data-i18n-placeholder="modal.newPlaylist.descPh">
       <div class="modal-actions">
-        <button id="btn-cancel-new-playlist" class="btn-ghost">Отмена</button>
-        <button id="btn-create-playlist" class="btn-solid">Создать</button>
+        <button id="btn-cancel-new-playlist" class="btn-ghost" data-i18n="btn.cancel">Отмена</button>
+        <button id="btn-create-playlist" class="btn-solid" data-i18n="btn.create">Создать</button>
       </div>
     </div>
   </div>
@@ -651,10 +651,10 @@
   <!-- Add-to-playlist Modal -->
   <div id="add-to-playlist-modal" class="modal-overlay">
     <div class="modal-card modal-card-md">
-      <div class="modal-title">Добавить в плейлист</div>
+      <div class="modal-title" data-i18n="modal.addToPlaylist.title">Добавить в плейлист</div>
       <div class="select-list" id="add-to-playlist-list"></div>
       <div class="modal-actions">
-        <button id="btn-cancel-add-pl" class="btn-ghost">Закрыть</button>
+        <button id="btn-cancel-add-pl" class="btn-ghost" data-i18n="btn.close">Закрыть</button>
       </div>
     </div>
   </div>
@@ -665,7 +665,7 @@
       <div class="editor-head">
         <div class="editor-title">
           <svg class="i" width="14" height="14"><use href="#i-edit"/></svg>
-          <span>Редактировать теги</span>
+          <span data-i18n="editor.title">Редактировать теги</span>
           <span class="editor-tag">ID3v2.4</span>
         </div>
         <button class="btn-ic" id="btn-close-editor"><svg class="i" width="14" height="14"><use href="#i-close"/></svg></button>
@@ -673,7 +673,7 @@
 
       <div class="editor-body">
         <div class="editor-cover-col">
-          <div class="field-label">Обложка</div>
+          <div class="field-label" data-i18n="editor.cover">Обложка</div>
           <div class="editor-cover" id="editor-cover">
             <span class="editor-cover-letter" id="editor-cover-letter"></span>
             <div class="editor-cover-tag" id="editor-cover-tag">—</div>
@@ -682,46 +682,46 @@
 
         <div class="editor-fields">
           <div class="field">
-            <div class="field-label">Название</div>
+            <div class="field-label" data-i18n="editor.field.title">Название</div>
             <input type="text" class="field-input" id="md-title">
           </div>
           <div class="field">
-            <div class="field-label">Исполнитель</div>
+            <div class="field-label" data-i18n="editor.field.artist">Исполнитель</div>
             <input type="text" class="field-input" id="md-artist">
           </div>
           <div class="field-row">
             <div class="field">
-              <div class="field-label">Альбом</div>
+              <div class="field-label" data-i18n="editor.field.album">Альбом</div>
               <input type="text" class="field-input" id="md-album">
             </div>
             <div class="field">
-              <div class="field-label">Исп. альбома</div>
+              <div class="field-label" data-i18n="editor.field.albumArtist">Исп. альбома</div>
               <input type="text" class="field-input" id="md-album-artist">
             </div>
           </div>
           <div class="field-row">
             <div class="field">
-              <div class="field-label">Год</div>
+              <div class="field-label" data-i18n="editor.field.year">Год</div>
               <input type="text" class="field-input" id="md-year">
             </div>
             <div class="field">
-              <div class="field-label">Жанр</div>
+              <div class="field-label" data-i18n="editor.field.genre">Жанр</div>
               <input type="text" class="field-input" id="md-genre">
             </div>
           </div>
           <div class="field-row">
             <div class="field">
-              <div class="field-label">Трек №</div>
+              <div class="field-label" data-i18n="editor.field.trackNo">Трек №</div>
               <input type="text" class="field-input" id="md-track-no">
             </div>
             <div class="field">
-              <div class="field-label">Диск №</div>
+              <div class="field-label" data-i18n="editor.field.discNo">Диск №</div>
               <input type="text" class="field-input" id="md-disc-no">
             </div>
           </div>
           <div class="field">
-            <div class="field-label">Комментарий</div>
-            <textarea class="field-input field-textarea" id="md-comment" placeholder="Заметка о треке…"></textarea>
+            <div class="field-label" data-i18n="editor.field.comment">Комментарий</div>
+            <textarea class="field-input field-textarea" id="md-comment" placeholder="Заметка о треке…" data-i18n-placeholder="editor.commentPh"></textarea>
           </div>
         </div>
       </div>
@@ -730,8 +730,8 @@
       <div class="editor-foot">
         <div class="editor-foot-status" id="editor-status"></div>
         <div class="editor-foot-actions">
-          <button class="btn-ghost" id="btn-cancel-editor">Отмена</button>
-          <button class="btn-solid" id="btn-save-editor">Сохранить</button>
+          <button class="btn-ghost" id="btn-cancel-editor" data-i18n="btn.cancel">Отмена</button>
+          <button class="btn-solid" id="btn-save-editor" data-i18n="btn.save">Сохранить</button>
         </div>
       </div>
     </div>
@@ -739,16 +739,16 @@
 
   <!-- Track Context Menu -->
   <div id="track-context-menu" class="context-menu">
-    <button class="cm-item" data-action="play"><svg class="i" width="11" height="11"><use href="#i-play"/></svg><span>Играть</span><span class="cm-sh">↵</span></button>
-    <button class="cm-item" data-action="add-to-playlist"><svg class="i" width="11" height="11"><use href="#i-plus"/></svg><span>Добавить в плейлист</span></button>
-    <button class="cm-item" data-action="remove-from-playlist" id="cm-remove-from-pl" hidden><svg class="i" width="11" height="11"><use href="#i-close"/></svg><span>Убрать из плейлиста</span></button>
+    <button class="cm-item" data-action="play"><svg class="i" width="11" height="11"><use href="#i-play"/></svg><span data-i18n="cm.play">Играть</span><span class="cm-sh">↵</span></button>
+    <button class="cm-item" data-action="add-to-playlist"><svg class="i" width="11" height="11"><use href="#i-plus"/></svg><span data-i18n="cm.addToPlaylist">Добавить в плейлист</span></button>
+    <button class="cm-item" data-action="remove-from-playlist" id="cm-remove-from-pl" hidden><svg class="i" width="11" height="11"><use href="#i-close"/></svg><span data-i18n="cm.removeFromPlaylist">Убрать из плейлиста</span></button>
     <div class="cm-divider"></div>
     <button class="cm-item" data-action="favorite"><svg class="i" width="11" height="11"><use href="#i-heart"/></svg><span id="cm-fav-label">В избранное</span><span class="cm-sh">L</span></button>
-    <button class="cm-item" data-action="reveal"><svg class="i" width="11" height="11"><use href="#i-folder"/></svg><span>Показать в папке</span></button>
+    <button class="cm-item" data-action="reveal"><svg class="i" width="11" height="11"><use href="#i-folder"/></svg><span data-i18n="cm.reveal">Показать в папке</span></button>
     <div class="cm-divider"></div>
-    <button class="cm-item cm-highlight" data-action="edit-tags"><svg class="i" width="11" height="11"><use href="#i-edit"/></svg><span>Редактировать теги…</span><span class="cm-sh">⌘E</span></button>
+    <button class="cm-item cm-highlight" data-action="edit-tags"><svg class="i" width="11" height="11"><use href="#i-edit"/></svg><span data-i18n="cm.editTags">Редактировать теги…</span><span class="cm-sh">⌘E</span></button>
     <div class="cm-divider"></div>
-    <button class="cm-item cm-danger" data-action="delete"><svg class="i" width="11" height="11"><use href="#i-trash"/></svg><span>Удалить из библиотеки</span><span class="cm-sh">⌫</span></button>
+    <button class="cm-item cm-danger" data-action="delete"><svg class="i" width="11" height="11"><use href="#i-trash"/></svg><span data-i18n="cm.delete">Удалить из библиотеки</span><span class="cm-sh">⌫</span></button>
   </div>
 
   <!-- Command Palette (⌘K) -->
@@ -756,14 +756,14 @@
     <div class="palette-card">
       <div class="palette-search">
         <svg class="i" width="15" height="15"><use href="#i-search"/></svg>
-        <input id="palette-input" type="text" placeholder="Поиск трека, альбома, действия…" autocomplete="off">
+        <input id="palette-input" type="text" placeholder="Поиск трека, альбома, действия…" data-i18n-placeholder="palette.placeholder" autocomplete="off">
         <span class="kbd">ESC</span>
       </div>
       <div class="palette-results" id="palette-results"></div>
       <div class="palette-foot">
-        <span>↑↓ навигация</span>
-        <span>↵ выбрать</span>
-        <span>ESC закрыть</span>
+        <span data-i18n="palette.nav">↑↓ навигация</span>
+        <span data-i18n="palette.choose">↵ выбрать</span>
+        <span data-i18n="palette.close">ESC закрыть</span>
       </div>
     </div>
   </div>
