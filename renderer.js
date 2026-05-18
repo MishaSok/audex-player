@@ -1,5 +1,10 @@
 // State
-let library = JSON.parse(localStorage.getItem('ambevor-library')) || [];
+// Library stored without covers (to stay within localStorage 5MB limit)
+let libraryMeta = JSON.parse(localStorage.getItem('ambevor-library-meta')) || [];
+// Covers stored in memory only (re-parsed on each session)
+const coverCache = {};
+// Rebuild full library: merge meta + cached covers
+let library = libraryMeta.map(t => ({ ...t, cover: coverCache[t.path] || null }));
 let currentTrackIndex = -1;
 let isPlaying = false;
 let isShuffle = false;
@@ -64,10 +69,20 @@ btnAddFiles.addEventListener('click', async () => {
     for (const filePath of filePaths) {
       if (!library.some(t => t.path === filePath)) {
         const metadata = await window.electronAPI.parseMetadata(filePath);
+        // Cache cover in memory
+        if (metadata.cover) {
+          coverCache[filePath] = metadata.cover;
+        }
         library.push(metadata);
       }
     }
-    localStorage.setItem('ambevor-library', JSON.stringify(library));
+    // Save metadata WITHOUT covers to avoid exceeding localStorage limit
+    libraryMeta = library.map(({ cover, ...rest }) => rest);
+    try {
+      localStorage.setItem('ambevor-library-meta', JSON.stringify(libraryMeta));
+    } catch(e) {
+      console.warn('localStorage full, could not save library:', e);
+    }
     renderLibrary();
   }
 });
@@ -150,8 +165,13 @@ function togglePlay() {
 function nextTrack() {
   if (library.length === 0) return;
   
-  if (isShuffle) {
-    playTrack(Math.floor(Math.random() * library.length));
+  if (isShuffle && library.length > 1) {
+    // Pick a random index different from the current one
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * library.length);
+    } while (randomIndex === currentTrackIndex);
+    playTrack(randomIndex);
   } else {
     let nextIndex = currentTrackIndex + 1;
     if (nextIndex >= library.length) {
@@ -267,7 +287,24 @@ btnCloseFs.addEventListener('click', () => {
 // Sync progress bar color on start
 progressBar.style.background = `linear-gradient(to right, var(--accent-color) 0%, rgba(255,255,255,0.1) 0%)`;
 
-// Initial Render
+// Initial Render — restore covers async from disk for already-saved tracks
+async function restoreCovers() {
+  if (library.length === 0) return;
+  for (const track of library) {
+    if (!track.cover) {
+      try {
+        const metadata = await window.electronAPI.parseMetadata(track.path);
+        if (metadata.cover) {
+          track.cover = metadata.cover;
+          coverCache[track.path] = metadata.cover;
+        }
+      } catch(e) { /* file may have moved, ignore */ }
+    }
+  }
+  renderLibrary();
+}
+
 if (library.length > 0) {
   renderLibrary();
+  restoreCovers();
 }
