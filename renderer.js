@@ -1,6 +1,7 @@
 // State
 // Library stored without covers (to stay within localStorage 5MB limit)
 let libraryMeta = JSON.parse(localStorage.getItem('ambevor-library-meta')) || [];
+let favorites = JSON.parse(localStorage.getItem('ambevor-favorites')) || [];
 // Covers stored in memory only (re-parsed on each session)
 const coverCache = {};
 // Rebuild full library: merge meta + cached covers
@@ -14,6 +15,8 @@ let repeatMode = 0; // 0: off, 1: all, 2: one
 const audio = document.getElementById('audio-player');
 const btnAddFiles = document.getElementById('btn-add-files');
 const libraryList = document.getElementById('library-list');
+const favoritesList = document.getElementById('favorites-list');
+const favoritesEmpty = document.getElementById('favorites-empty');
 
 // Playback Controls
 const btnPlay = document.getElementById('btn-play');
@@ -62,6 +65,16 @@ function formatTime(seconds) {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+function saveState() {
+  libraryMeta = library.map(({ cover, ...rest }) => rest);
+  try {
+    localStorage.setItem('ambevor-library-meta', JSON.stringify(libraryMeta));
+    localStorage.setItem('ambevor-favorites', JSON.stringify(favorites));
+  } catch(e) {
+    console.warn('localStorage full, could not save state:', e);
+  }
+}
+
 // Open Files
 btnAddFiles.addEventListener('click', async () => {
   const filePaths = await window.electronAPI.openFiles();
@@ -76,13 +89,7 @@ btnAddFiles.addEventListener('click', async () => {
         library.push(metadata);
       }
     }
-    // Save metadata WITHOUT covers to avoid exceeding localStorage limit
-    libraryMeta = library.map(({ cover, ...rest }) => rest);
-    try {
-      localStorage.setItem('ambevor-library-meta', JSON.stringify(libraryMeta));
-    } catch(e) {
-      console.warn('localStorage full, could not save library:', e);
-    }
+    saveState();
     renderLibrary();
   }
 });
@@ -99,14 +106,95 @@ function renderLibrary() {
       <td>${track.artist}</td>
       <td>${track.album}</td>
       <td>${formatTime(track.duration)}</td>
+      <td class="action-cell"><button class="btn-icon btn-delete" title="Удалить">✕</button></td>
     `;
     
-    tr.addEventListener('click', () => {
+    tr.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-delete')) {
+        e.stopPropagation();
+        deleteTrack(index);
+        return;
+      }
       playTrack(index);
     });
     
     libraryList.appendChild(tr);
   });
+  renderFavorites();
+}
+
+function renderFavorites() {
+  if (!favoritesList) return;
+  favoritesList.innerHTML = '';
+  const favTracks = library.filter(t => favorites.includes(t.path));
+  
+  if (favTracks.length === 0) {
+    favoritesEmpty.style.display = 'block';
+    favoritesList.parentElement.parentElement.style.display = 'none';
+  } else {
+    favoritesEmpty.style.display = 'none';
+    favoritesList.parentElement.parentElement.style.display = 'block';
+    
+    favTracks.forEach((track) => {
+      const index = library.indexOf(track);
+      const tr = document.createElement('tr');
+      if (index === currentTrackIndex) tr.classList.add('playing');
+      
+      tr.innerHTML = `
+        <td>${track.title}</td>
+        <td>${track.artist}</td>
+        <td>${track.album}</td>
+        <td>${formatTime(track.duration)}</td>
+        <td class="action-cell"><button class="btn-icon btn-delete" title="Убрать из избранного">✕</button></td>
+      `;
+      
+      tr.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-delete')) {
+          e.stopPropagation();
+          toggleFavorite(track.path);
+          return;
+        }
+        playTrack(index);
+      });
+      
+      favoritesList.appendChild(tr);
+    });
+  }
+}
+
+function deleteTrack(index) {
+  const deletedPath = library[index].path;
+  library.splice(index, 1);
+  
+  if (currentTrackIndex === index) {
+    audio.pause();
+    isPlaying = false;
+    currentTrackIndex = -1;
+    btnPlay.innerHTML = '▶';
+    btnPlay.classList.remove('is-playing');
+    fsCover.classList.remove('playing');
+  } else if (currentTrackIndex > index) {
+    currentTrackIndex--;
+  }
+  
+  // Remove from favorites if it's there
+  favorites = favorites.filter(p => p !== deletedPath);
+  saveState();
+  renderLibrary();
+}
+
+function toggleFavorite(path) {
+  if (favorites.includes(path)) {
+    favorites = favorites.filter(p => p !== path);
+  } else {
+    favorites.push(path);
+  }
+  saveState();
+  renderLibrary();
+  
+  if (currentTrackIndex !== -1 && library[currentTrackIndex].path === path) {
+    updateUIForPlaying(library[currentTrackIndex]);
+  }
 }
 
 // Playback Logic
@@ -135,6 +223,15 @@ function updateUIForPlaying(track) {
   fsTitle.textContent = track.title;
   fsArtist.textContent = track.artist;
   fsAlbum.textContent = track.album;
+  
+  const btnFavorite = document.getElementById('btn-favorite');
+  if (favorites.includes(track.path)) {
+    btnFavorite.classList.add('active');
+    btnFavorite.innerHTML = '♥';
+  } else {
+    btnFavorite.classList.remove('active');
+    btnFavorite.innerHTML = '♡';
+  }
   
   btnPlay.innerHTML = '⏸';
   btnPlay.classList.add('is-playing');
@@ -195,6 +292,12 @@ function prevTrack() {
 btnPlay.addEventListener('click', togglePlay);
 btnNext.addEventListener('click', nextTrack);
 btnPrev.addEventListener('click', prevTrack);
+
+const btnFavorite = document.getElementById('btn-favorite');
+btnFavorite.addEventListener('click', () => {
+  if (currentTrackIndex === -1) return;
+  toggleFavorite(library[currentTrackIndex].path);
+});
 
 btnShuffle.addEventListener('click', () => {
   isShuffle = !isShuffle;

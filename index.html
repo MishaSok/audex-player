@@ -40,6 +40,7 @@
                 <th data-sort="artist">Исполнитель</th>
                 <th data-sort="album">Альбом</th>
                 <th data-sort="duration">Время</th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="library-list">
@@ -57,7 +58,22 @@
 
       <section id="view-favorites" class="view-section">
         <h1 class="view-title">Избранное</h1>
-        <p class="empty-state">Нет избранных треков</p>
+        <div class="table-container">
+          <table class="tracks-table">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>Исполнитель</th>
+                <th>Альбом</th>
+                <th>Время</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="favorites-list">
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-state" id="favorites-empty">Нет избранных треков</p>
       </section>
     </main>
   </div>

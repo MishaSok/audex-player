@@ -1,6 +1,25 @@
-const { app, BrowserWindow, ipcMain, dialog, protocol, net } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const musicMetadata = require('music-metadata');
+
+const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac']);
+
+function scanDir(dirPath) {
+  let results = [];
+  try {
+    const items = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const item of items) {
+      const fullPath = path.join(dirPath, item.name);
+      if (item.isDirectory()) {
+        results = results.concat(scanDir(fullPath));
+      } else if (AUDIO_EXTENSIONS.has(path.extname(item.name).toLowerCase())) {
+        results.push(fullPath);
+      }
+    }
+  } catch (e) { /* skip unreadable dirs */ }
+  return results;
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -31,14 +50,22 @@ app.on('window-all-closed', function () {
 
 ipcMain.handle('dialog:openFiles', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ['openFile', 'multiSelections'],
-    filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac'] }]
+    properties: ['openFile', 'multiSelections', 'openDirectory'],
+    filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'] }]
   });
-  if (canceled) {
-    return [];
-  } else {
-    return filePaths;
+  if (canceled) return [];
+
+  // Expand directories into individual audio files
+  let allFiles = [];
+  for (const p of filePaths) {
+    const stat = fs.statSync(p);
+    if (stat.isDirectory()) {
+      allFiles = allFiles.concat(scanDir(p));
+    } else {
+      allFiles.push(p);
+    }
   }
+  return allFiles;
 });
 
 ipcMain.handle('music:parseMetadata', async (event, filePath) => {
