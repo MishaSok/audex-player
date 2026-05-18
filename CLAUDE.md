@@ -27,6 +27,19 @@ Builds are **unsigned**:
 - Windows: SmartScreen will warn until the binary gains reputation; users click "More info → Run anyway".
 Release notes should mention both. The `release/` directory is gitignored.
 
+#### Packaging gotchas (do not relearn these)
+
+These all caused real CI failures during initial setup — keep them in mind when touching `package.json` build config or the workflow:
+
+- **`electron` must be in `devDependencies`.** electron-builder refuses to package if it's in `dependencies` (error: *"Package electron is only allowed in devDependencies"*). Same rule for any future dev-only tooling.
+- **`author` field in `package.json` is required.** electron-builder warns and may fail without it. Don't replace it with just `contributors`.
+- **CI builds must pass `--publish never`.** When a git tag is present (which is always the case for tag-triggered runs), electron-builder otherwise tries to publish to GitHub itself and fails with *"GH_TOKEN is not set"* — even though all artifacts were built successfully. Artifact upload is done by the next workflow step (`softprops/action-gh-release`), not by electron-builder.
+- **macOS arm64 needs both `identity: null` AND `CSC_IDENTITY_AUTO_DISCOVERY: false`.** The config flag disables signing per-target; the env var prevents electron-builder from auto-discovering an unrelated keychain identity on the runner.
+- **GitHub token needs the `workflow` scope** to push changes to `.github/workflows/*`. If `git push` is rejected with *"refusing to allow an OAuth App to … without `workflow` scope"*, run `gh auth refresh -h github.com -s workflow` in an interactive terminal (not via `!` — it's an interactive device-code flow).
+- **Re-triggering a release for the same tag is destructive.** The workflow only runs on tag push, so to rebuild `v1.0.0` you must delete the tag locally and remotely and re-push it (`git push origin :refs/tags/vX && git tag -d vX && git tag -a vX -m "..." && git push origin vX`). The GitHub release itself and any existing assets are preserved — `softprops/action-gh-release` adds to it rather than replacing it.
+- **Artifact globs in the workflow are platform-scoped by filename, not by directory.** macOS produces `Audex-<v>-mac.zip` and `Audex-<v>-arm64-mac.zip`; Windows produces `Audex-<v>-win.zip`. The `release/*.zip` glob in each job is safe because each job runs on its own runner with its own `release/` directory. If you ever combine jobs onto one runner, switch to explicit filenames to avoid cross-platform collisions.
+- **`softprops/action-gh-release@v2` still runs on Node 20** as of this writing — the GitHub-Actions Node-20 deprecation warning will show up in every run until the action ships a v3. It's not blocking. `actions/checkout` and `actions/setup-node` are already pinned to v5 (Node 24).
+
 ## Architecture
 
 Electron app, three processes wired through `contextBridge`:
