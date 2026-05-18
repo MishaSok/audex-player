@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Ambevor Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Grain Overlay -->
+  <div class="grain-overlay"></div>
+
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Ambevor</div>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-view="library">Библиотека</a>
+        <a href="#" class="nav-item" data-view="playlists">Плейлисты</a>
+        <a href="#" class="nav-item" data-view="favorites">Избранное</a>
+      </nav>
+      
+      <div class="sidebar-actions">
+        <button id="btn-add-files" class="btn-primary">Открыть файлы</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Library View -->
+      <section id="view-library" class="view-section active">
+        <h1 class="view-title">Библиотека</h1>
+        <div class="table-container">
+          <table class="tracks-table">
+            <thead>
+              <tr>
+                <th data-sort="title">Название</th>
+                <th data-sort="artist">Исполнитель</th>
+                <th data-sort="album">Альбом</th>
+                <th data-sort="duration">Время</th>
+              </tr>
+            </thead>
+            <tbody id="library-list">
+              <!-- Tracks will be injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Placeholder views -->
+      <section id="view-playlists" class="view-section">
+        <h1 class="view-title">Плейлисты</h1>
+        <p class="empty-state">Плейлисты пока не созданы</p>
+      </section>
+
+      <section id="view-favorites" class="view-section">
+        <h1 class="view-title">Избранное</h1>
+        <p class="empty-state">Нет избранных треков</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Playback Bar -->
+  <footer class="playback-bar">
+    <div class="now-playing" id="now-playing-container">
+      <div class="cover-wrapper" id="mini-cover-wrapper">
+        <img id="track-cover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23222' width='100' height='100'/></svg>" alt="Cover">
+      </div>
+      <div class="track-info">
+        <div id="track-title" class="track-title">Не выбрано</div>
+        <div id="track-artist" class="track-artist">-</div>
+      </div>
+      <button class="btn-icon btn-favorite" id="btn-favorite">♡</button>
+    </div>
+
+    <div class="player-controls-container">
+      <div class="controls-main">
+        <button class="btn-icon" id="btn-shuffle" title="Случайный порядок">🔀</button>
+        <button class="btn-icon" id="btn-prev" title="Предыдущий">⏮</button>
+        <button class="btn-icon btn-play" id="btn-play" title="Воспроизведение/Пауза">▶</button>
+        <button class="btn-icon" id="btn-next" title="Следующий">⏭</button>
+        <button class="btn-icon" id="btn-repeat" title="Повтор">🔁</button>
+      </div>
+      <div class="progress-container">
+        <span id="time-current">0:00</span>
+        <input type="range" id="progress-bar" min="0" max="100" value="0">
+        <span id="time-total">0:00</span>
+      </div>
+    </div>
+
+    <div class="volume-controls">
+      <button class="btn-icon" id="btn-mute" title="Звук">🔊</button>
+      <input type="range" id="volume-bar" min="0" max="1" step="0.01" value="1">
+    </div>
+  </footer>
+
+  <!-- Fullscreen Player Overlay -->
+  <div id="fullscreen-overlay" class="fullscreen-overlay">
+    <button id="btn-close-fullscreen" class="btn-close">✕</button>
+    <div class="fs-content">
+      <div class="fs-cover-container">
+        <img id="fs-cover" class="vinyl" src="" alt="Cover">
+      </div>
+      <div class="fs-info">
+        <h2 id="fs-title" class="fs-title">Title</h2>
+        <h3 id="fs-artist" class="fs-artist">Artist</h3>
+        <h4 id="fs-album" class="fs-album">Album</h4>
+      </div>
+      <!-- Controls inside fullscreen are synced with main controls -->
+    </div>
+  </div>
+
+  <audio id="audio-player"></audio>
+  <script src="renderer.js"></script>
+</body>
+</html>
