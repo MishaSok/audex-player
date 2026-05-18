@@ -17,9 +17,15 @@ GitHub releases combine local Linux artifacts with macOS artifacts produced by C
 2. `npm run dist` locally — produces `release/Audex-<v>.AppImage` and `release/audex-player_<v>_amd64.deb`.
 3. Commit, then `git tag -a v<v> -m "..."` and `git push origin main v<v>`.
 4. `gh release create v<v> release/Audex-<v>.AppImage release/audex-player_<v>_amd64.deb --title "..." --notes "..."`.
-5. The tag push triggers `.github/workflows/release.yml` on a `macos-latest` runner, which builds `.dmg` and `.zip` for both x64 and arm64 and attaches them to the same release (`softprops/action-gh-release` matches by tag).
+5. The tag push triggers `.github/workflows/release.yml`, which runs two parallel jobs:
+   - **`build-macos`** on `macos-latest` → `.dmg` and `.zip` for x64 and arm64.
+   - **`build-windows`** on `windows-latest` → NSIS installer (`.exe`) and `.zip` for x64.
+   Both jobs attach artifacts to the release matched by tag (`softprops/action-gh-release`).
 
-The macOS build is **unsigned** (`CSC_IDENTITY_AUTO_DISCOVERY=false`, `mac.identity: null`); users have to bypass Gatekeeper manually (right-click → Open, or `xattr -d com.apple.quarantine`). The release notes should mention this. The `release/` directory is gitignored.
+Builds are **unsigned**:
+- macOS (`CSC_IDENTITY_AUTO_DISCOVERY=false`, `mac.identity: null`): users have to bypass Gatekeeper manually (right-click → Open, or `xattr -d com.apple.quarantine`).
+- Windows: SmartScreen will warn until the binary gains reputation; users click "More info → Run anyway".
+Release notes should mention both. The `release/` directory is gitignored.
 
 ## Architecture
 
