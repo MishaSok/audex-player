@@ -126,6 +126,16 @@
       </div>
       <!-- Controls inside fullscreen are synced with main controls -->
     </div>
+  <!-- Confirm Delete Modal -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title">Удалить трек?</h3>
+      <p class="modal-text">Вы уверены, что хотите удалить этот трек из библиотеки?</p>
+      <div class="modal-actions">
+        <button id="btn-cancel-delete" class="btn-secondary">Отмена</button>
+        <button id="btn-confirm-delete" class="btn-danger">Удалить</button>
+      </div>
+    </div>
   </div>
 
   <audio id="audio-player"></audio>

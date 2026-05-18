@@ -10,6 +10,7 @@ let currentTrackIndex = -1;
 let isPlaying = false;
 let isShuffle = false;
 let repeatMode = 0; // 0: off, 1: all, 2: one
+let trackToDeleteIndex = -1;
 
 // DOM Elements
 const audio = document.getElementById('audio-player');
@@ -44,6 +45,11 @@ const fsCover = document.getElementById('fs-cover');
 const fsTitle = document.getElementById('fs-title');
 const fsArtist = document.getElementById('fs-artist');
 const fsAlbum = document.getElementById('fs-album');
+
+// Modal Elements
+const modalOverlay = document.getElementById('confirm-modal');
+const btnCancelDelete = document.getElementById('btn-cancel-delete');
+const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
 // Navigation
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -112,7 +118,7 @@ function renderLibrary() {
     tr.addEventListener('click', (e) => {
       if (e.target.closest('.btn-delete')) {
         e.stopPropagation();
-        deleteTrack(index);
+        confirmDelete(index);
         return;
       }
       playTrack(index);
@@ -151,7 +157,7 @@ function renderFavorites() {
       tr.addEventListener('click', (e) => {
         if (e.target.closest('.btn-delete')) {
           e.stopPropagation();
-          toggleFavorite(track.path);
+          confirmDelete(index);
           return;
         }
         playTrack(index);
@@ -161,6 +167,24 @@ function renderFavorites() {
     });
   }
 }
+
+function confirmDelete(index) {
+  trackToDeleteIndex = index;
+  modalOverlay.classList.add('active');
+}
+
+btnCancelDelete.addEventListener('click', () => {
+  modalOverlay.classList.remove('active');
+  trackToDeleteIndex = -1;
+});
+
+btnConfirmDelete.addEventListener('click', () => {
+  if (trackToDeleteIndex !== -1) {
+    deleteTrack(trackToDeleteIndex);
+    modalOverlay.classList.remove('active');
+    trackToDeleteIndex = -1;
+  }
+});
 
 function deleteTrack(index) {
   const deletedPath = library[index].path;
@@ -183,6 +207,45 @@ function deleteTrack(index) {
   renderLibrary();
 }
 
+// Color Extraction
+function getAverageColor(imgElement) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  
+  if (!imgElement || !imgElement.complete || imgElement.naturalWidth === 0) {
+    return { r: 28, g: 24, b: 21 }; // Fallback color
+  }
+  
+  canvas.width = imgElement.naturalWidth || imgElement.width;
+  canvas.height = imgElement.naturalHeight || imgElement.height;
+  
+  context.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+  
+  try {
+    const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let r = 0, g = 0, b = 0;
+    const step = 4 * 10;
+    let count = 0;
+    
+    for (let i = 0; i < data.length; i += step) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count++;
+    }
+    
+    if (count > 0) {
+      r = Math.floor(r / count);
+      g = Math.floor(g / count);
+      b = Math.floor(b / count);
+    }
+    return { r, g, b };
+  } catch(e) {
+    return { r: 28, g: 24, b: 21 };
+  }
+}
+
+// Playback Logic
 function toggleFavorite(path) {
   if (favorites.includes(path)) {
     favorites = favorites.filter(p => p !== path);
@@ -213,6 +276,18 @@ function playTrack(index) {
 
 function updateUIForPlaying(track) {
   const coverSrc = track.cover || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23222' width='100' height='100'/></svg>";
+  
+  trackCover.onload = () => {
+    const playbackBar = document.querySelector('.playback-bar');
+    if (track.cover) {
+      const color = getAverageColor(trackCover);
+      playbackBar.style.backgroundColor = `rgba(${Math.max(20, color.r * 0.15)}, ${Math.max(20, color.g * 0.15)}, ${Math.max(20, color.b * 0.15)}, 0.95)`;
+      playbackBar.style.borderTopColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.2)`;
+    } else {
+      playbackBar.style.backgroundColor = 'var(--bg-color-light)';
+      playbackBar.style.borderTopColor = 'var(--border-color)';
+    }
+  };
   
   trackCover.src = coverSrc;
   fsCover.src = coverSrc;

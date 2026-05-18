@@ -201,6 +201,7 @@ body {
   padding: 0 24px;
   z-index: 20;
   position: relative;
+  transition: background-color 0.5s ease, border-top-color 0.5s ease;
 }
 
 .now-playing {
@@ -474,4 +475,87 @@ input[type=range]:hover::-webkit-slider-thumb {
   font-size: 16px;
   color: var(--text-muted);
   font-weight: 400;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--bg-color-light);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  border: 1px solid var(--border-color);
+  max-width: 400px;
+  text-align: center;
+  transform: translateY(20px);
+  transition: transform 0.2s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.modal-text {
+  color: var(--text-muted);
+  font-size: 15px;
+  margin-bottom: 25px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: var(--text-main);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  color: #ff6b6b;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  background: rgba(220, 53, 69, 0.4);
 }
