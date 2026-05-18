@@ -163,3 +163,14 @@ ipcMain.handle('shell:revealInFolder', async (event, filePath) => {
   }
   return false;
 });
+
+ipcMain.handle('shell:deleteFile', async (event, filePath) => {
+  if (!filePath) return { success: false, error: 'No path' };
+  if (!fs.existsSync(filePath)) return { success: true, missing: true };
+  try {
+    await shell.trashItem(filePath);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: String(err) };
+  }
+});

@@ -8,8 +8,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "contributors": [
+    "Mikhail Sokov <mikhail.sokov2006@gmail.com>",
+    "Sergei <sergeifed2015@gmail.com>"
+  ],
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "electron": "^42.1.0",

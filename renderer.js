@@ -20,6 +20,7 @@ let settings = Object.assign({
   defaultFolder: '',
   scanSubdirs: true,
   autoRescan: false,
+  downloads: false,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -40,6 +41,11 @@ let pendingContextTrackPath = null;
 let pendingMetadataPath = null;
 let pendingAddPath = null;
 let activePlaylistId = null;
+let activeArtistName = null;
+let artistsSort = 'alpha';           // 'alpha' | 'tracks' | 'recent'
+let artistsList = [];                // current filtered+sorted list of artist objects
+let artistsCursor = 0;               // how many of artistsList have been mounted in the grid
+let artistsObserver = null;          // IntersectionObserver on the sentinel
 
 // ── DOM ──
 const $ = id => document.getElementById(id);
@@ -98,6 +104,142 @@ function escapeHtml(s) {
 }
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
+// ── Virtual list ──
+// Only renders rows visible in the scroll viewport (+ overscan buffer).
+// `listEl` is the row container; rows are absolutely positioned inside it.
+// `scrollEl` is the actual scroll container (here: .main-content).
+const ROW_HEIGHT = 42;
+const OVERSCAN = 8;
+
+function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan = OVERSCAN }) {
+  let items = [];
+  let renderRow = () => document.createElement('div');
+  const nodes = new Map(); // index -> element
+  let rafPending = false;
+
+  function placeNode(node, index) {
+    node.style.position = 'absolute';
+    node.style.top = `${index * rowHeight}px`;
+    node.style.left = '0';
+    node.style.right = '0';
+  }
+
+  function update() {
+    rafPending = false;
+    const total = items.length;
+    listEl.style.position = 'relative';
+    listEl.style.paddingTop = '0';
+    listEl.style.height = `${total * rowHeight}px`;
+    if (total === 0) {
+      for (const [, node] of nodes) node.remove();
+      nodes.clear();
+      return;
+    }
+    const scrollTop = scrollEl.scrollTop;
+    const viewportH = scrollEl.clientHeight;
+    // listEl position relative to the scroll container (account for header/topbar above it)
+    const listOffset = listEl.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollTop;
+    const visibleStart = (scrollTop - listOffset) / rowHeight;
+    const visibleEnd = (scrollTop - listOffset + viewportH) / rowHeight;
+    const start = Math.max(0, Math.floor(visibleStart) - overscan);
+    const end = Math.min(total, Math.ceil(visibleEnd) + overscan);
+
+    for (const [i, node] of nodes) {
+      if (i < start || i >= end) {
+        node.remove();
+        nodes.delete(i);
+      }
+    }
+    for (let i = start; i < end; i++) {
+      if (!nodes.has(i)) {
+        const node = renderRow(items[i], i, items);
+        placeNode(node, i);
+        listEl.appendChild(node);
+        nodes.set(i, node);
+      }
+    }
+  }
+
+  function schedule() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(update);
+  }
+
+  const onScroll = () => schedule();
+  scrollEl.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', schedule);
+
+  return {
+    setItems(newItems, renderRowFn) {
+      items = newItems;
+      if (renderRowFn) renderRow = renderRowFn;
+      for (const [, node] of nodes) node.remove();
+      nodes.clear();
+      update();
+    },
+    // Re-render all currently mounted rows in place (used when only row visuals change, e.g. playing/favorite).
+    refreshVisible() {
+      for (const [i, oldNode] of nodes) {
+        const node = renderRow(items[i], i, items);
+        placeNode(node, i);
+        oldNode.replaceWith(node);
+        nodes.set(i, node);
+      }
+    },
+    // Re-render a single row if it's currently visible (used when one row's data changes, e.g. cover loaded).
+    updateRow(index) {
+      const old = nodes.get(index);
+      if (!old) return;
+      const node = renderRow(items[index], index, items);
+      placeNode(node, index);
+      old.replaceWith(node);
+      nodes.set(index, node);
+    },
+    // Locate index of a row by predicate, for partial updates.
+    findIndex(pred) { return items.findIndex(pred); },
+    getItems() { return items; },
+  };
+}
+
+const scrollEl = document.querySelector('.main-content');
+let libraryVList = null;
+let favoritesVList = null;
+let playlistVList = null;
+
+// ── Lazy cover loading ──
+// Covers can be heavy (base64 data URLs). Only fetch them for tracks that actually become visible.
+const pendingCoverLoad = new Set();
+let coverRefreshPending = false;
+function scheduleCoverRefresh() {
+  if (coverRefreshPending) return;
+  coverRefreshPending = true;
+  requestAnimationFrame(() => {
+    coverRefreshPending = false;
+    refreshPlayingHighlight();
+    renderRecents();
+    if (currentView === 'artists') refreshArtistsCoversInPlace();
+    else if (currentView === 'artist-detail') renderArtistDetail(activeArtistName);
+    if ($('fullscreen-overlay').classList.contains('active')) updateFullscreenQueue();
+    if ($('palette-overlay').classList.contains('active')) renderPaletteResults($('palette-input').value);
+  });
+}
+async function ensureCoverFor(track) {
+  if (!track || track.cover || pendingCoverLoad.has(track.path)) return;
+  pendingCoverLoad.add(track.path);
+  try {
+    const md = await window.electronAPI.parseMetadata(track.path);
+    if (md && md.cover) {
+      track.cover = md.cover;
+      coverCache[track.path] = md.cover;
+      scheduleCoverRefresh();
+      if (currentTrackIndex >= 0 && library[currentTrackIndex] && library[currentTrackIndex].path === track.path) {
+        updateNowPlayingUI(library[currentTrackIndex]);
+      }
+    }
+  } catch (e) { /* file moved / unreadable */ }
+}
+
 // ── Library track helpers ──
 function trackByPath(path) { return library.find(t => t.path === path); }
 function trackIndexByPath(path) { return library.findIndex(t => t.path === path); }
@@ -130,6 +272,8 @@ function setView(view) {
   else if (view === 'favorites') renderFavorites();
   else if (view === 'playlists') renderPlaylists();
   else if (view === 'playlist-detail') renderPlaylistDetail(activePlaylistId);
+  else if (view === 'artists') renderArtists();
+  else if (view === 'artist-detail') renderArtistDetail(activeArtistName);
   else if (view === 'settings') renderSettings();
 }
 
@@ -149,6 +293,8 @@ function renderCounts() {
   $('count-library').textContent = library.length;
   $('count-playlists').textContent = playlists.length;
   $('count-favorites').textContent = favorites.length;
+  const artistsCountEl = $('count-artists');
+  if (artistsCountEl) artistsCountEl.textContent = buildArtistsIndex().length;
 }
 function renderRecents() {
   const list = $('recents-list');
@@ -156,6 +302,7 @@ function renderRecents() {
   recents.slice(0, 4).forEach(path => {
     const t = trackByPath(path);
     if (!t) return;
+    if (!t.cover) ensureCoverFor(t);
     const el = document.createElement('div');
     el.className = 'recent-item';
     const cover = t.cover ? `background-image:url('${t.cover}')` : '';
@@ -173,6 +320,7 @@ function renderRecents() {
 
 // ── Render: track row ──
 function renderTrackRow(track, displayIndex, queue) {
+  if (!track.cover) ensureCoverFor(track);
   const realIndex = trackIndexByPath(track.path);
   const isPlayingRow = currentTrackIndex >= 0
     && library[currentTrackIndex]
@@ -211,17 +359,32 @@ function renderTrackRow(track, displayIndex, queue) {
 }
 
 // ── Render: library ──
+function currentLibraryTracks() {
+  const q = ($('library-search').value || '').trim().toLowerCase();
+  if (q) {
+    return library.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      t.artist.toLowerCase().includes(q) ||
+      t.album.toLowerCase().includes(q));
+  }
+  return sortedFilteredLibrary();
+}
+
 function renderLibrary() {
   const list = $('library-list');
   const empty = $('library-empty');
-  const tracks = sortedFilteredLibrary();
-  list.innerHTML = '';
+  const tracks = currentLibraryTracks();
   $('library-count-label').textContent = `${library.length} ${pluralTracks(library.length)}`;
   if (library.length === 0) {
+    list.innerHTML = '';
+    list.style.height = '';
     empty.classList.add('show');
   } else {
     empty.classList.remove('show');
-    tracks.forEach((t, i) => list.appendChild(renderTrackRow(t, i, tracks)));
+    if (!libraryVList) {
+      libraryVList = createVirtualList({ listEl: list, scrollEl });
+    }
+    libraryVList.setItems(tracks, (t, i, queue) => renderTrackRow(t, i, queue));
   }
   renderCounts();
 }
@@ -237,14 +400,18 @@ function pluralTracks(n) {
 function renderFavorites() {
   const list = $('favorites-list');
   const empty = $('favorites-empty');
-  list.innerHTML = '';
   const tracks = library.filter(t => favorites.includes(t.path));
   $('favorites-count-label').textContent = `${tracks.length} ${pluralTracks(tracks.length)}`;
   if (tracks.length === 0) {
+    list.innerHTML = '';
+    list.style.height = '';
     empty.classList.add('show');
   } else {
     empty.classList.remove('show');
-    tracks.forEach((t, i) => list.appendChild(renderTrackRow(t, i, tracks)));
+    if (!favoritesVList) {
+      favoritesVList = createVirtualList({ listEl: list, scrollEl });
+    }
+    favoritesVList.setItems(tracks, (t, i, queue) => renderTrackRow(t, i, queue));
   }
   renderCounts();
 }
@@ -314,8 +481,15 @@ function renderPlaylistDetail(plId) {
     <span>${formatTotalDuration(tracks)}</span>
   `;
   const list = $('pl-detail-list');
-  list.innerHTML = '';
-  tracks.forEach((t, i) => list.appendChild(renderTrackRow(t, i, tracks)));
+  if (tracks.length === 0) {
+    list.innerHTML = '';
+    list.style.height = '';
+  } else {
+    if (!playlistVList) {
+      playlistVList = createVirtualList({ listEl: list, scrollEl });
+    }
+    playlistVList.setItems(tracks, (t, i, queue) => renderTrackRow(t, i, queue));
+  }
 
   $('btn-pl-play').onclick = () => {
     if (tracks.length > 0) playTrackByPath(tracks[0].path, tracks);
@@ -331,6 +505,295 @@ function renderPlaylistDetail(plId) {
   $('btn-pl-delete').onclick = () => confirmDelete({ kind: 'playlist', payload: pl.id, title: 'Удалить плейлист?', text: `Плейлист «${pl.name}» будет удалён. Треки в библиотеке останутся.` });
 }
 
+// ── Artists ──
+// A track's `artist` field may list multiple performers joined by " & ".
+// Each side counts as a separate artist; the same track shows up on every
+// artist's page. Pure " & " is the only separator (per product spec).
+const ARTIST_SEP = /\s*&\s*/;
+
+function splitArtists(s) {
+  if (!s) return ['Неизвестный исполнитель'];
+  const parts = s.split(ARTIST_SEP).map(p => p.trim()).filter(Boolean);
+  return parts.length > 0 ? parts : ['Неизвестный исполнитель'];
+}
+
+function artistInitials(name) {
+  const stop = new Set(['the', 'of', 'a', 'an', 'and', 'и']);
+  const parts = name.split(/\s+/).filter(p => !stop.has(p.toLowerCase()));
+  if (parts.length === 0) return (name[0] || '?').toUpperCase();
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function pluralAlbums(n) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'альбом';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'альбома';
+  return 'альбомов';
+}
+function pluralArtists(n) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'исполнитель';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'исполнителя';
+  return 'исполнителей';
+}
+
+function buildArtistsIndex() {
+  const map = new Map();
+  library.forEach((t, idx) => {
+    const names = splitArtists(t.artist);
+    for (const name of names) {
+      let a = map.get(name);
+      if (!a) {
+        a = { name, tracks: [], lastIdx: idx };
+        map.set(name, a);
+      }
+      a.tracks.push(t);
+      if (idx > a.lastIdx) a.lastIdx = idx;
+    }
+  });
+  const out = [];
+  for (const a of map.values()) {
+    const albums = new Set(a.tracks.map(t => t.album));
+    const cover = (a.tracks.find(t => t.cover) || {}).cover || null;
+    out.push({
+      name: a.name,
+      tracks: a.tracks,
+      trackCount: a.tracks.length,
+      albumCount: albums.size,
+      lastIdx: a.lastIdx,
+      cover,
+    });
+  }
+  return out;
+}
+
+function sortArtists(arr) {
+  const c = arr.slice();
+  if (artistsSort === 'tracks') c.sort((a, b) => b.trackCount - a.trackCount || a.name.localeCompare(b.name, 'ru'));
+  else if (artistsSort === 'recent') c.sort((a, b) => b.lastIdx - a.lastIdx);
+  else c.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  return c;
+}
+
+// Page size = enough rows to fill a typical viewport so the first paint is
+// always visually complete. Subsequent rows stream in as the user scrolls.
+const ARTISTS_PAGE_SIZE = 36;
+
+function buildArtistCard(a) {
+  // Trigger cover load lazily for cards as they mount — first track without
+  // a cover is enough; ensureCoverFor is idempotent.
+  if (!a.cover) {
+    const t = a.tracks.find(t => !t.cover);
+    if (t) ensureCoverFor(t);
+  }
+  const card = document.createElement('div');
+  card.className = 'artist-card';
+  card.dataset.artist = a.name;
+  const cover = a.cover ? `background-image:url('${a.cover}')` : '';
+  card.innerHTML = `
+    <div class="artist-avatar" style="${cover}">
+      ${a.cover ? '' : `<span class="artist-avatar-letter">${escapeHtml(artistInitials(a.name))}</span>`}
+    </div>
+    <div class="artist-card-name">${escapeHtml(a.name)}</div>
+    <div class="artist-card-stats">
+      <span>${a.trackCount} тр.</span>
+      <span>·</span>
+      <span>${a.albumCount} ${pluralAlbums(a.albumCount)}</span>
+    </div>
+  `;
+  card.addEventListener('click', () => {
+    activeArtistName = a.name;
+    setView('artist-detail');
+  });
+  return card;
+}
+
+function appendArtistsBatch() {
+  const grid = $('artists-grid');
+  // Remove any previous sentinel so it doesn't end up mid-grid.
+  const oldSentinel = grid.querySelector('.artists-sentinel');
+  if (oldSentinel) oldSentinel.remove();
+
+  const end = Math.min(artistsCursor + ARTISTS_PAGE_SIZE, artistsList.length);
+  const frag = document.createDocumentFragment();
+  for (let i = artistsCursor; i < end; i++) {
+    frag.appendChild(buildArtistCard(artistsList[i]));
+  }
+  grid.appendChild(frag);
+  artistsCursor = end;
+
+  if (artistsCursor < artistsList.length) {
+    const sentinel = document.createElement('div');
+    sentinel.className = 'artists-sentinel';
+    grid.appendChild(sentinel);
+    if (!artistsObserver) {
+      artistsObserver = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) appendArtistsBatch();
+      }, { root: scrollEl, rootMargin: '400px 0px' });
+    }
+    artistsObserver.observe(sentinel);
+  } else if (artistsObserver) {
+    artistsObserver.disconnect();
+    artistsObserver = null;
+  }
+}
+
+function renderArtists() {
+  const all = buildArtistsIndex();
+  const q = ($('artists-search').value || '').trim().toLowerCase();
+  const filtered = q ? all.filter(a => a.name.toLowerCase().includes(q)) : all;
+  const sorted = sortArtists(filtered);
+
+  $('artists-count-label').textContent = `${all.length} ${pluralArtists(all.length)}`;
+  const grid = $('artists-grid');
+  const empty = $('artists-empty');
+
+  // Reset previous batch state — any new render starts fresh.
+  if (artistsObserver) { artistsObserver.disconnect(); artistsObserver = null; }
+  grid.innerHTML = '';
+  artistsCursor = 0;
+
+  if (all.length === 0) {
+    grid.style.display = 'none';
+    empty.classList.add('show');
+    artistsList = [];
+    renderCounts();
+    return;
+  }
+  empty.classList.remove('show');
+  grid.style.display = 'grid';
+
+  artistsList = sorted;
+  appendArtistsBatch();
+  renderCounts();
+}
+
+// Cover loads should update existing cards in place — re-rendering would reset
+// the scroll position and the lazy-load cursor.
+function refreshArtistsCoversInPlace() {
+  const grid = $('artists-grid');
+  if (!grid) return;
+  const cards = grid.querySelectorAll('.artist-card');
+  if (cards.length === 0) return;
+  // Recompute covers from current library state.
+  const byName = new Map();
+  for (let i = 0; i < library.length; i++) {
+    const t = library[i];
+    if (!t.cover) continue;
+    for (const name of splitArtists(t.artist)) {
+      if (!byName.has(name)) byName.set(name, t.cover);
+    }
+  }
+  cards.forEach(card => {
+    const avatar = card.querySelector('.artist-avatar');
+    if (!avatar || avatar.style.backgroundImage) return;
+    const cover = byName.get(card.dataset.artist);
+    if (!cover) return;
+    avatar.style.backgroundImage = `url('${cover}')`;
+    const letter = avatar.querySelector('.artist-avatar-letter');
+    if (letter) letter.remove();
+  });
+}
+
+function renderArtistDetail(name) {
+  const all = buildArtistsIndex();
+  const artist = all.find(a => a.name === name);
+  if (!artist) { setView('artists'); return; }
+
+  $('artist-detail-crumb').textContent = artist.name;
+  $('artist-detail-title').textContent = artist.name;
+  const avatar = $('artist-hero-avatar');
+  if (artist.cover) {
+    avatar.style.backgroundImage = `url('${artist.cover}')`;
+    $('artist-hero-letter').textContent = '';
+  } else {
+    avatar.style.backgroundImage = '';
+    $('artist-hero-letter').textContent = artistInitials(artist.name);
+    // Try to populate a cover from any track for next render.
+    const t = artist.tracks.find(t => !t.cover);
+    if (t) ensureCoverFor(t);
+  }
+  $('artist-detail-meta').innerHTML = `
+    <span>${artist.trackCount} ${pluralTracks(artist.trackCount)}</span>
+    <span>·</span>
+    <span>${artist.albumCount} ${pluralAlbums(artist.albumCount)}</span>
+    <span>·</span>
+    <span>${formatTotalDuration(artist.tracks)}</span>
+  `;
+
+  // Filter by search input
+  const q = ($('artist-detail-search').value || '').trim().toLowerCase();
+  const tracks = q
+    ? artist.tracks.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        (t.album || '').toLowerCase().includes(q))
+    : artist.tracks;
+
+  // Group by album, preserving insertion order.
+  const byAlbum = [];
+  const seen = new Map();
+  tracks.forEach(t => {
+    const key = t.album || '';
+    if (!seen.has(key)) {
+      seen.set(key, byAlbum.length);
+      byAlbum.push({ album: t.album || 'Без альбома', year: t.year, cover: t.cover, tracks: [] });
+    }
+    const slot = byAlbum[seen.get(key)];
+    slot.tracks.push(t);
+    if (!slot.cover && t.cover) slot.cover = t.cover;
+  });
+
+  const container = $('artist-albums');
+  container.innerHTML = '';
+  byAlbum.forEach((alb, gIdx) => {
+    const block = document.createElement('div');
+    block.className = 'artist-album';
+    const coverStyle = alb.cover ? `background-image:url('${alb.cover}')` : '';
+    const head = document.createElement('div');
+    head.className = 'artist-album-head';
+    head.innerHTML = `
+      <div class="artist-album-cover" style="${coverStyle}"></div>
+      <div class="artist-album-info">
+        <div class="artist-album-name">${escapeHtml(alb.album)}</div>
+        <div class="artist-album-meta">
+          ${alb.year ? `<span>${escapeHtml(String(alb.year))}</span><span>·</span>` : ''}
+          <span>${alb.tracks.length} ${pluralTracks(alb.tracks.length)}</span>
+        </div>
+      </div>
+      <button class="artist-album-play" data-album-idx="${gIdx}">
+        <svg class="i" width="10" height="10"><use href="#i-play"/></svg>
+        Альбом
+      </button>
+    `;
+    head.querySelector('.artist-album-play').addEventListener('click', e => {
+      e.stopPropagation();
+      if (alb.tracks.length > 0) playTrackByPath(alb.tracks[0].path, artist.tracks);
+    });
+    block.appendChild(head);
+
+    const list = document.createElement('div');
+    list.className = 'artist-album-tracks';
+    alb.tracks.forEach((t, j) => {
+      list.appendChild(renderTrackRow(t, j, artist.tracks));
+    });
+    block.appendChild(list);
+    container.appendChild(block);
+  });
+
+  $('btn-artist-play').onclick = () => {
+    if (artist.tracks.length > 0) playTrackByPath(artist.tracks[0].path, artist.tracks);
+  };
+  $('btn-artist-shuffle').onclick = () => {
+    if (artist.tracks.length > 0) {
+      isShuffle = true;
+      updateShuffleUI();
+      const random = artist.tracks[Math.floor(Math.random() * artist.tracks.length)];
+      playTrackByPath(random.path, artist.tracks);
+    }
+  };
+}
+
 // ── Playback ──
 function playTrackByPath(path, queue) {
   const realIndex = trackIndexByPath(path);
@@ -338,6 +801,7 @@ function playTrackByPath(path, queue) {
   currentTrackIndex = realIndex;
   currentQueue = queue && queue.length > 0 ? queue : library;
   const track = library[realIndex];
+  if (!track.cover) ensureCoverFor(track);
   audio.src = 'file://' + track.path;
   audio.play().catch(e => console.warn('play error:', e));
   isPlaying = true;
@@ -346,13 +810,39 @@ function playTrackByPath(path, queue) {
   saveRecents();
   renderRecents();
   updateNowPlayingUI(track);
-  refreshCurrentViewRows();
+  refreshPlayingHighlight();
+}
+
+function loadLastTrack() {
+  const lastPath = recents[0];
+  if (!lastPath) return;
+  const realIndex = trackIndexByPath(lastPath);
+  if (realIndex < 0) return;
+  currentTrackIndex = realIndex;
+  currentQueue = library;
+  const track = library[realIndex];
+  if (!track.cover) ensureCoverFor(track);
+  audio.src = 'file://' + track.path;
+  isPlaying = false;
+  updateNowPlayingUI(track);
+  refreshPlayingHighlight();
 }
 
 function refreshCurrentViewRows() {
   if (currentView === 'library') renderLibrary();
   else if (currentView === 'favorites') renderFavorites();
   else if (currentView === 'playlist-detail') renderPlaylistDetail(activePlaylistId);
+  else if (currentView === 'artists') renderArtists();
+  else if (currentView === 'artist-detail') renderArtistDetail(activeArtistName);
+}
+
+// Cheap path: only the .playing/equalizer indicator changes — repaint visible rows in place.
+function refreshPlayingHighlight() {
+  const v = currentView === 'library' ? libraryVList
+    : currentView === 'favorites' ? favoritesVList
+    : currentView === 'playlist-detail' ? playlistVList
+    : null;
+  if (v) v.refreshVisible();
 }
 
 function updateNowPlayingUI(track) {
@@ -492,7 +982,10 @@ function toggleFavorite(path) {
   else favorites.push(path);
   saveLibrary();
   updateFavoriteUI();
-  refreshCurrentViewRows();
+  // Row visuals don't show favorite state, so only the favorites view's list changes.
+  if (currentView === 'favorites') renderFavorites();
+  else if (currentView === 'library' && activeFilter === 'favorites') renderLibrary();
+  renderCounts();
 }
 $('btn-favorite').addEventListener('click', () => {
   if (currentTrackIndex < 0) return;
@@ -626,6 +1119,7 @@ function updateFullscreenQueue() {
   const upcoming = currentQueue.slice(idx + 1, idx + 1 + 8);
   $('fs-queue-count').textContent = `${upcoming.length} впереди`;
   upcoming.forEach(t => {
+    if (!t.cover) ensureCoverFor(t);
     const el = document.createElement('div');
     el.className = 'fs-queue-item';
     const cover = t.cover ? `background-image:url('${t.cover}')` : '';
@@ -646,7 +1140,7 @@ function updateFullscreenQueue() {
 function confirmDelete({ kind, payload, title, text }) {
   pendingDelete = { kind, payload };
   $('confirm-title').textContent = title || 'Удалить трек?';
-  $('confirm-text').textContent = text || 'Будет удалён из библиотеки. Сам файл на диске останется.';
+  $('confirm-text').textContent = text || 'Трек будет удалён из библиотеки, а файл — перемещён в корзину.';
   $('confirm-modal').classList.add('active');
 }
 $('btn-cancel-delete').addEventListener('click', () => {
@@ -661,9 +1155,14 @@ $('btn-confirm-delete').addEventListener('click', () => {
   pendingDelete = null;
 });
 
-function deleteTrack(path) {
+async function deleteTrack(path) {
   const idx = trackIndexByPath(path);
   if (idx < 0) return;
+  const res = await window.electronAPI.deleteFile(path);
+  if (!res || !res.success) {
+    alert('Не удалось удалить файл с диска: ' + (res && res.error ? res.error : 'неизвестная ошибка'));
+    return;
+  }
   library.splice(idx, 1);
   if (currentTrackIndex === idx) {
     audio.pause();
@@ -785,7 +1284,7 @@ document.querySelectorAll('#track-context-menu .cm-item').forEach(btn => {
     else if (action === 'delete') confirmDelete({
       kind: 'track', payload: path,
       title: 'Удалить трек?',
-      text: `«${track.title}» от ${track.artist} будет удалён из библиотеки. Сам файл на диске останется.`,
+      text: `«${track.title}» от ${track.artist} будет удалён из библиотеки, а сам файл — перемещён в корзину.`,
     });
   });
 });
@@ -900,6 +1399,7 @@ function renderPaletteResults(query) {
     lbl.textContent = 'Треки';
     container.appendChild(lbl);
     tracks.forEach(t => {
+      if (!t.cover) ensureCoverFor(t);
       paletteResults.push({ kind: 'play-track', path: t.path });
       const el = document.createElement('div');
       el.className = 'palette-item';
@@ -1017,17 +1517,22 @@ document.querySelectorAll('#view-library .chip').forEach(chip => {
 });
 
 // Library inline search
-$('library-search').addEventListener('input', e => {
-  const q = e.target.value.trim().toLowerCase();
-  const list = $('library-list');
-  list.innerHTML = '';
-  const filtered = (q
-    ? library.filter(t =>
-        t.title.toLowerCase().includes(q) ||
-        t.artist.toLowerCase().includes(q) ||
-        t.album.toLowerCase().includes(q))
-    : sortedFilteredLibrary());
-  filtered.forEach((t, i) => list.appendChild(renderTrackRow(t, i, filtered)));
+$('library-search').addEventListener('input', () => {
+  renderLibrary();
+});
+
+// Artists sort chips + search
+document.querySelectorAll('#view-artists .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#view-artists .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    artistsSort = chip.dataset.artistsSort;
+    renderArtists();
+  });
+});
+$('artists-search').addEventListener('input', () => renderArtists());
+$('artist-detail-search').addEventListener('input', () => {
+  if (activeArtistName) renderArtistDetail(activeArtistName);
 });
 
 // ── Settings UI ──
@@ -1039,7 +1544,7 @@ function renderSettings() {
   // Toggles
   document.querySelectorAll('.toggle').forEach(t => {
     const key = t.dataset.setting;
-    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan' };
+    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan', 'downloads': 'downloads' };
     if (settings[map[key]]) t.classList.add('on'); else t.classList.remove('on');
   });
   // Folder
@@ -1062,11 +1567,12 @@ document.querySelectorAll('.theme-card').forEach(card => {
 });
 document.querySelectorAll('.toggle').forEach(t => {
   t.addEventListener('click', () => {
-    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan' };
+    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan', 'downloads': 'downloads' };
     const key = map[t.dataset.setting];
     settings[key] = !settings[key];
     saveSettings();
     t.classList.toggle('on', settings[key]);
+    if (key === 'downloads') applyDownloadsVisibility();
   });
 });
 $('btn-choose-default-folder').addEventListener('click', async () => {
@@ -1094,23 +1600,28 @@ document.querySelectorAll('.select-opt').forEach(o => {
   });
 });
 
-// ── Initial render + restore covers ──
+function applyDownloadsVisibility() {
+  $('nav-downloads').hidden = !settings.downloads;
+  if (!settings.downloads && currentView === 'downloads') setView('library');
+}
+applyDownloadsVisibility();
+
+// Covers for recents (sidebar) and the now-playing track are loaded eagerly,
+// since they're always visible. Library/favorites/playlist covers load lazily
+// as rows scroll into view (see ensureCoverFor + renderTrackRow).
 async function restoreCovers() {
   if (library.length === 0) return;
-  for (const track of library) {
-    if (!track.cover) {
-      try {
-        const md = await window.electronAPI.parseMetadata(track.path);
-        if (md.cover) {
-          track.cover = md.cover;
-          coverCache[track.path] = md.cover;
-        }
-      } catch (e) { /* file moved */ }
-    }
+  const priority = new Set();
+  recents.slice(0, 4).forEach(p => priority.add(p));
+  if (currentTrackIndex >= 0 && library[currentTrackIndex]) {
+    priority.add(library[currentTrackIndex].path);
   }
-  refreshCurrentViewRows();
-  if (currentTrackIndex >= 0) updateNowPlayingUI(library[currentTrackIndex]);
+  for (const path of priority) {
+    const t = trackByPath(path);
+    if (t) await ensureCoverFor(t);
+  }
   renderRecents();
+  if (currentTrackIndex >= 0) updateNowPlayingUI(library[currentTrackIndex]);
 }
 
 // Optional: scan default folder on startup
@@ -1127,5 +1638,6 @@ renderLibrary();
 renderRecents();
 updateShuffleUI();
 updateRepeatUI();
+loadLastTrack();
 restoreCovers();
 maybeAutoRescan();
