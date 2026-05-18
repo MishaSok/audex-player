@@ -1,7 +1,7 @@
 {
-  "name": "ambevor-player",
+  "name": "audex-player",
   "version": "1.0.0",
-  "description": "",
+  "description": "Audex — minimal desktop music player",
   "main": "main.js",
   "scripts": {
     "start": "electron . --no-sandbox",
@@ -13,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "electron": "^42.1.0",
-    "music-metadata": "^11.12.3"
+    "music-metadata": "^11.12.3",
+    "node-id3": "^0.2.9"
   }
 }
