@@ -763,6 +763,23 @@ input { font-family: inherit; color: inherit; }
   background: var(--text);
 }
 .toggle.on .toggle-knob { background: var(--bg); }
+.toggle.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.setting-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  vertical-align: 2px;
+}
 
 /* Theme cards */
 .theme-cards { display: flex; gap: 10px; }
@@ -914,7 +931,9 @@ input { font-family: inherit; color: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
+.mini-title:hover { text-decoration: underline; }
 .mini-artist {
   font-size: 11.5px;
   color: var(--text-muted);
@@ -922,7 +941,9 @@ input { font-family: inherit; color: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
+.mini-artist:hover { color: var(--text); text-decoration: underline; }
 
 .btn-ic {
   background: transparent;

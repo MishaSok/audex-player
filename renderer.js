@@ -22,6 +22,8 @@ let settings = Object.assign({
   autoRescan: false,
   downloads: false,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
+// Downloads section is in development — force off regardless of stored value.
+settings.downloads = false;
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
 const coverCache = {};
@@ -842,7 +844,30 @@ function refreshPlayingHighlight() {
     : currentView === 'favorites' ? favoritesVList
     : currentView === 'playlist-detail' ? playlistVList
     : null;
-  if (v) v.refreshVisible();
+  if (v) { v.refreshVisible(); return; }
+  // Artist detail renders rows directly (no virtual list) — patch them in place.
+  if (currentView === 'artist-detail') refreshPlainListHighlight($('artist-albums'));
+}
+
+function refreshPlainListHighlight(container) {
+  if (!container) return;
+  const playingPath = currentTrackIndex >= 0 && library[currentTrackIndex]
+    ? library[currentTrackIndex].path : null;
+  container.querySelectorAll('.trow').forEach(row => {
+    const isPlayingRow = row.dataset.path === playingPath;
+    const wasPlaying = row.classList.contains('playing');
+    if (isPlayingRow === wasPlaying) return;
+    row.classList.toggle('playing', isPlayingRow);
+    const numCell = row.querySelector('.trow-num');
+    if (!numCell) return;
+    if (isPlayingRow) {
+      numCell.innerHTML = `<span class="equalizer"><span></span><span></span><span></span></span>`;
+    } else {
+      const parent = row.parentElement;
+      const idx = parent ? Array.prototype.indexOf.call(parent.children, row) : 0;
+      numCell.textContent = String(idx + 1).padStart(2, '0');
+    }
+  });
 }
 
 function updateNowPlayingUI(track) {
@@ -877,6 +902,7 @@ function updateNowPlayingUI(track) {
   updateFavoriteUI();
   updatePlayButtonUI();
   updateFullscreenQueue();
+  updateMediaSessionMetadata(track);
 }
 
 function updatePlayButtonUI() {
@@ -884,6 +910,34 @@ function updatePlayButtonUI() {
   const fsPlayBtn = $('fs-btn-play').querySelector('use');
   playBtn.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
   fsPlayBtn.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }
+}
+
+// MediaSession (maps to MPRIS on Linux — controls in the GNOME top bar)
+function updateMediaSessionMetadata(track) {
+  if (!('mediaSession' in navigator) || !track) return;
+  const mime = track.cover ? (track.cover.match(/^data:([^;]+);/) || [])[1] : null;
+  const artwork = track.cover
+    ? [{ src: track.cover, sizes: '512x512', ...(mime ? { type: mime } : {}) }]
+    : [];
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: track.title || '',
+    artist: track.artist || '',
+    album: (track.album || '') + (track.year ? ` · ${track.year}` : ''),
+    artwork,
+  });
+}
+
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play', () => { if (!isPlaying) togglePlay(); });
+  navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) togglePlay(); });
+  navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+  navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+  navigator.mediaSession.setActionHandler('seekto', (e) => {
+    if (e.seekTime != null && isFinite(audio.duration)) audio.currentTime = e.seekTime;
+  });
 }
 
 function updateFavoriteUI() {
@@ -975,6 +1029,38 @@ async function importPaths(paths) {
     renderCounts();
   }
 }
+
+// ── Mini-player navigation ──
+function gotoCurrentTrackInLibrary() {
+  if (currentTrackIndex < 0) return;
+  const track = library[currentTrackIndex];
+  $('library-search').value = '';
+  activeFilter = 'all';
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === 'all');
+  });
+  setView('library');
+  requestAnimationFrame(() => {
+    if (!libraryVList) return;
+    const idx = libraryVList.findIndex(t => t.path === track.path);
+    if (idx < 0) return;
+    const listEl = $('library-list');
+    const listOffset = listEl.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop;
+    scrollEl.scrollTop = Math.max(0, listOffset + idx * ROW_HEIGHT - scrollEl.clientHeight / 2 + ROW_HEIGHT / 2);
+  });
+}
+
+function gotoCurrentTrackArtist() {
+  if (currentTrackIndex < 0) return;
+  const track = library[currentTrackIndex];
+  const artists = splitArtists(track.artist);
+  if (!artists.length) return;
+  activeArtistName = artists[0];
+  setView('artist-detail');
+}
+
+$('track-title').addEventListener('click', gotoCurrentTrackInLibrary);
+$('track-artist').addEventListener('click', gotoCurrentTrackArtist);
 
 // ── Favorites ──
 function toggleFavorite(path) {
@@ -1567,6 +1653,7 @@ document.querySelectorAll('.theme-card').forEach(card => {
 });
 document.querySelectorAll('.toggle').forEach(t => {
   t.addEventListener('click', () => {
+    if (t.classList.contains('is-disabled')) return;
     const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan', 'downloads': 'downloads' };
     const key = map[t.dataset.setting];
     settings[key] = !settings[key];

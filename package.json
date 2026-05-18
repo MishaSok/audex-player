@@ -1,5 +1,6 @@
 {
   "name": "audex-player",
+  "productName": "Audex",
   "version": "1.0.0",
   "description": "Audex — minimal desktop music player",
   "main": "main.js",

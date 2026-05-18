@@ -4,6 +4,8 @@ const fs = require('fs');
 const musicMetadata = require('music-metadata');
 const NodeID3 = require('node-id3');
 
+app.setName('Audex');
+
 const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac']);
 
 function scanDir(dirPath) {
