@@ -331,6 +331,7 @@ ipcMain.handle('downloads:ytDownload', async (event, payload) => {
   const args = [
     '--no-playlist',
     '--no-warnings',
+    '--no-quiet',
     '--newline',
     '--progress-template', '[dlprog] %(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s',
     '--extract-audio',
@@ -365,7 +366,10 @@ ipcMain.handle('downloads:ytDownload', async (event, payload) => {
     return { success: false, error: errLine };
   }
 
-  let filePath = stdout.trim().split('\n').filter(l => l && !l.startsWith('[')).pop() || '';
+  let filePath = stdout.split('\n')
+    .map(l => l.trim())
+    .filter(l => l && (l.startsWith('/') || /^[A-Za-z]:\\/.test(l)))
+    .pop() || '';
   if (!filePath || !fs.existsSync(filePath)) {
     try {
       const files = fs.readdirSync(downloadsDir)
