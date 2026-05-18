@@ -29,7 +29,9 @@ jobs:
           # Build unsigned: users will need to bypass Gatekeeper manually
           # (right-click → Open, or `xattr -d com.apple.quarantine /Applications/Audex.app`).
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run dist -- --mac
+        # --publish never: electron-builder otherwise auto-publishes when a git tag
+        # is present and demands GH_TOKEN. We attach artifacts in the next step.
+        run: npm run dist -- --mac --publish never
 
       - name: Attach artifacts to release
         uses: softprops/action-gh-release@v2
