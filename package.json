@@ -6,9 +6,35 @@
   "main": "main.js",
   "scripts": {
     "start": "electron . --no-sandbox",
+    "dist": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "appId": "com.audex.player",
+    "productName": "Audex",
+    "copyright": "Copyright © 2026 Mikhail Sokov and Sergei",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "style.css",
+      "LICENSE",
+      "package.json"
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "AudioVideo;Audio;Player",
+      "synopsis": "Minimal desktop music player",
+      "description": "Audex is a minimal local music player built with Electron.",
+      "maintainer": "Mikhail Sokov <mikhail.sokov2006@gmail.com>"
+    }
+  },
   "keywords": [],
+  "author": "Mikhail Sokov <mikhail.sokov2006@gmail.com>",
   "contributors": [
     "Mikhail Sokov <mikhail.sokov2006@gmail.com>",
     "Sergei <sergeifed2015@gmail.com>"
@@ -16,8 +42,11 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
-    "electron": "^42.1.0",
     "music-metadata": "^11.12.3",
     "node-id3": "^0.2.9"
+  },
+  "devDependencies": {
+    "electron": "^42.1.0",
+    "electron-builder": "^26.8.1"
   }
 }
