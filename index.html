@@ -387,6 +387,8 @@
             <div id="dl-yt-rows" class="dl-results-body"></div>
           </div>
 
+          <div id="dl-yt-tag-note" class="dl-tag-note" hidden data-i18n="downloads.yt.tagNote">После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.</div>
+
           <div id="dl-yt-empty" class="empty-block show">
             <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
             <div class="empty-title-lg" data-i18n="downloads.yt.idle.title">Найдите трек на YouTube</div>
@@ -395,7 +397,7 @@
         </div>
 
         <div class="dl-pane" data-dl-pane="parsing" hidden>
-          <div class="empty-block">
+          <div class="empty-block show">
             <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
             <div class="empty-title-lg" data-i18n="downloads.parsing.title">Парсинг</div>
             <div class="empty-text" data-i18n="downloads.parsing.subtitle">Здесь появится возможность собирать треки парсингом со страниц. Раздел в разработке.</div>
@@ -526,12 +528,12 @@
                 </div>
                 <div class="select" id="lang-select">
                   <button class="select-btn">
-                    <span id="lang-current">Русский</span>
+                    <span id="lang-current">English</span>
                     <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
                   </button>
                   <div class="select-menu">
-                    <div class="select-opt" data-lang="ru">Русский</div>
                     <div class="select-opt" data-lang="en">English</div>
+                    <div class="select-opt" data-lang="ru">Русский</div>
                     <div class="select-opt" data-lang="de">Deutsch</div>
                     <div class="select-opt" data-lang="fr">Français</div>
                     <div class="select-opt" data-lang="uk">Українська</div>

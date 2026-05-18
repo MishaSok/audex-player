@@ -16,7 +16,7 @@ let favorites = JSON.parse(localStorage.getItem(LS.favorites) || '[]');
 let playlists = JSON.parse(localStorage.getItem(LS.playlists) || '[]');
 let settings = Object.assign({
   theme: 'dark',          // 'dark' | 'light' | 'system'
-  language: 'ru',
+  language: 'en',
   defaultFolder: '',
   scanSubdirs: true,
   autoRescan: false,
@@ -184,6 +184,7 @@ const I18N = {
     'downloads.yt.action.retry': 'Повторить',
     'downloads.yt.downloadError': 'Не удалось: {e}',
     'downloads.yt.downloadOk': 'Скачано и добавлено в библиотеку: {t}',
+    'downloads.yt.tagNote': 'После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.',
     'settings.title': 'Настройки',
     'settings.subtitle': 'Внешний вид, источники музыки и поведение приложения.',
     'section.appearance': 'Внешний вид',
@@ -352,6 +353,7 @@ const I18N = {
     'downloads.yt.action.retry': 'Retry',
     'downloads.yt.downloadError': 'Failed: {e}',
     'downloads.yt.downloadOk': 'Downloaded and added to library: {t}',
+    'downloads.yt.tagNote': 'After downloading, you may need to manually fix the MP3 tags (title, artist, cover) via the track context menu.',
     'settings.title': 'Settings',
     'settings.subtitle': 'Appearance, music sources, and app behavior.',
     'section.appearance': 'Appearance',
@@ -520,6 +522,7 @@ const I18N = {
     'downloads.yt.action.retry': 'Erneut',
     'downloads.yt.downloadError': 'Fehlgeschlagen: {e}',
     'downloads.yt.downloadOk': 'Heruntergeladen und zur Bibliothek hinzugefügt: {t}',
+    'downloads.yt.tagNote': 'Nach dem Download müssen die MP3-Tags (Titel, Interpret, Cover) eventuell manuell über das Kontextmenü des Titels angepasst werden.',
     'settings.title': 'Einstellungen',
     'settings.subtitle': 'Aussehen, Musikquellen und App-Verhalten.',
     'section.appearance': 'Aussehen',
@@ -688,6 +691,7 @@ const I18N = {
     'downloads.yt.action.retry': 'Réessayer',
     'downloads.yt.downloadError': 'Échec : {e}',
     'downloads.yt.downloadOk': 'Téléchargé et ajouté à la bibliothèque : {t}',
+    'downloads.yt.tagNote': "Après le téléchargement, il peut être nécessaire de corriger manuellement les tags MP3 (titre, artiste, pochette) via le menu contextuel de la piste.",
     'settings.title': 'Paramètres',
     'settings.subtitle': "Apparence, sources musicales et comportement de l'application.",
     'section.appearance': 'Apparence',
@@ -856,6 +860,7 @@ const I18N = {
     'downloads.yt.action.retry': 'Повторити',
     'downloads.yt.downloadError': 'Не вдалося: {e}',
     'downloads.yt.downloadOk': 'Завантажено і додано до бібліотеки: {t}',
+    'downloads.yt.tagNote': 'Після завантаження, можливо, доведеться вручну виправити MP3-теги (назва, виконавець, обкладинка) через контекстне меню треку.',
     'settings.title': 'Налаштування',
     'settings.subtitle': 'Зовнішній вигляд, джерела музики та поведінка застосунку.',
     'section.appearance': 'Зовнішній вигляд',
@@ -984,7 +989,7 @@ const DURATION_UNITS = {
   fr: { h: 'h', m: 'min' },
 };
 
-let currentLang = I18N[settings.language] ? settings.language : 'ru';
+let currentLang = I18N[settings.language] ? settings.language : 'en';
 
 function tr(key, params) {
   const dict = I18N[currentLang] || I18N.ru;
@@ -1283,13 +1288,16 @@ function renderYtResults(results) {
   const wrap = $('dl-yt-results');
   const rows = $('dl-yt-rows');
   const empty = $('dl-yt-empty');
+  const note = $('dl-yt-tag-note');
   if (!wrap || !rows) return;
   if (!ytLastResults.length) {
     wrap.hidden = true;
+    if (note) note.hidden = true;
     if (empty) empty.classList.add('show');
     return;
   }
   if (empty) empty.classList.remove('show');
+  if (note) note.hidden = false;
   rows.innerHTML = ytLastResults.map((r, i) => `
     <div class="dl-row" data-yt-row="${i}">
       <div class="thumb" style="background-image: url('${escapeHtml(r.thumbnail || '')}')"></div>
@@ -2942,7 +2950,7 @@ function renderSettings() {
   $('default-folder-path').textContent = settings.defaultFolder || tr('placeholder.noFolder');
   // Language — labels stay in their native language regardless of currentLang.
   const lblMap = { ru: 'Русский', en: 'English', de: 'Deutsch', fr: 'Français', uk: 'Українська' };
-  $('lang-current').textContent = lblMap[settings.language] || lblMap.ru;
+  $('lang-current').textContent = lblMap[settings.language] || lblMap.en;
   document.querySelectorAll('.select-opt').forEach(o => {
     o.classList.toggle('active', o.dataset.lang === settings.language);
   });

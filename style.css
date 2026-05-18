@@ -507,7 +507,6 @@ input { font-family: inherit; color: inherit; }
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 .dl-pane[hidden] { display: none; }
-.dl-pane .empty-block { display: flex; }
 
 .dl-search { margin-bottom: 14px; max-width: 720px; }
 .dl-search-row {
@@ -626,7 +625,13 @@ input { font-family: inherit; color: inherit; }
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.dl-row .action { justify-self: end; }
+.dl-row .action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  min-width: 0;
+}
 .dl-download-btn {
   appearance: none;
   border: 1px solid var(--border-strong);
@@ -661,7 +666,8 @@ input { font-family: inherit; color: inherit; }
   width: 100%;
 }
 .dl-progress-bar {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 60px;
   height: 6px;
   background: var(--active-bg);
   border-radius: 999px;
@@ -691,6 +697,16 @@ input { font-family: inherit; color: inherit; }
   min-width: 34px;
   text-align: right;
 }
+
+.dl-tag-note {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--border-strong);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.dl-tag-note[hidden] { display: none; }
 .empty-title-lg {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
