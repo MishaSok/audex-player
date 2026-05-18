@@ -870,8 +870,121 @@ function refreshPlainListHighlight(container) {
   });
 }
 
+// ── Track-change animation ──
+let trackChangeDirection = 0;   // +1 = next, -1 = prev, 0 = direct pick (fade)
+let lastNowPlayingPath = null;
+const swapState = new WeakMap();
+
+function cancelSwap(el) {
+  const s = swapState.get(el);
+  if (!s) return;
+  try { s.cloneAnim && s.cloneAnim.cancel(); } catch {}
+  try { s.targetAnim && s.targetAnim.cancel(); } catch {}
+  if (s.clone && s.clone.parentNode) s.clone.remove();
+  swapState.delete(el);
+}
+
+function cloneForSwap(el) {
+  const rect = el.getBoundingClientRect();
+  if (rect.width < 2 || rect.height < 2) return null;
+  const clone = el.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+  const cs = getComputedStyle(el);
+  if (cs.backgroundImage && cs.backgroundImage !== 'none') {
+    clone.style.backgroundImage = cs.backgroundImage;
+  }
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.margin = '0';
+  clone.style.pointerEvents = 'none';
+  clone.style.zIndex = '500';
+  return { clone, originalEl: el, rect };
+}
+
+function animateSwap(snap, direction, kind) {
+  if (!snap) return;
+  const { clone, originalEl, rect } = snap;
+  cancelSwap(originalEl);
+  document.body.appendChild(clone);
+
+  let outFrames, inFrames, outDuration, inDuration, inDelay;
+  if (kind === 'cover') {
+    const dist = Math.max(24, rect.width * 0.28);
+    if (direction > 0) {
+      outFrames = [{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translateX(${-dist}px)`, opacity: 0 }];
+      inFrames  = [{ transform: `translateX(${dist}px)`, opacity: 0 }, { transform: 'translate(0,0)', opacity: 1 }];
+    } else if (direction < 0) {
+      outFrames = [{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translateX(${dist}px)`, opacity: 0 }];
+      inFrames  = [{ transform: `translateX(${-dist}px)`, opacity: 0 }, { transform: 'translate(0,0)', opacity: 1 }];
+    } else {
+      outFrames = [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(0.92)', opacity: 0 }];
+      inFrames  = [{ transform: 'scale(1.06)', opacity: 0 }, { transform: 'scale(1)', opacity: 1 }];
+    }
+    outDuration = 320; inDuration = 440; inDelay = 60;
+  } else {
+    const dy = direction === 0 ? 6 : 12;
+    if (direction > 0) {
+      outFrames = [{ transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(${-dy}px)`, opacity: 0 }];
+      inFrames  = [{ transform: `translateY(${dy}px)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }];
+    } else if (direction < 0) {
+      outFrames = [{ transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(${dy}px)`, opacity: 0 }];
+      inFrames  = [{ transform: `translateY(${-dy}px)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }];
+    } else {
+      outFrames = [{ transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(${-dy}px)`, opacity: 0 }];
+      inFrames  = [{ transform: `translateY(${dy}px)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }];
+    }
+    outDuration = 240; inDuration = 320; inDelay = 90;
+  }
+
+  const cloneAnim = clone.animate(outFrames, {
+    duration: outDuration,
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    fill: 'forwards',
+  });
+  const targetAnim = originalEl.animate(inFrames, {
+    duration: inDuration,
+    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    fill: 'both',
+    delay: inDelay,
+  });
+
+  const cleanup = () => {
+    if (clone.parentNode) clone.remove();
+    try { targetAnim.cancel(); } catch {}
+    if (swapState.get(originalEl)?.clone === clone) swapState.delete(originalEl);
+  };
+  Promise.all([cloneAnim.finished, targetAnim.finished]).then(cleanup).catch(cleanup);
+
+  swapState.set(originalEl, { clone, cloneAnim, targetAnim });
+}
+
 function updateNowPlayingUI(track) {
   const coverSrc = track.cover || null;
+  const isTrackChange = lastNowPlayingPath !== null && lastNowPlayingPath !== track.path;
+  const direction = isTrackChange ? trackChangeDirection : 0;
+  trackChangeDirection = 0;
+  const overlayActive = $('fullscreen-overlay').classList.contains('active');
+
+  // Snapshot previous visuals BEFORE applying new state.
+  // When the fullscreen overlay is open, the mini-player is hidden behind it —
+  // skip its clones so they don't float over the overlay.
+  let snaps = null;
+  if (isTrackChange) {
+    snaps = {
+      miniCover:  overlayActive ? null : cloneForSwap($('mini-cover-wrapper')),
+      miniTitle:  overlayActive ? null : cloneForSwap($('track-title')),
+      miniArtist: overlayActive ? null : cloneForSwap($('track-artist')),
+      fsCover:    overlayActive ? cloneForSwap($('fs-cover'))   : null,
+      fsTitle:    overlayActive ? cloneForSwap($('fs-title'))   : null,
+      fsArtist:   overlayActive ? cloneForSwap($('fs-artist'))  : null,
+      fsAlbum:    overlayActive ? cloneForSwap($('fs-album'))   : null,
+    };
+  }
+
   // Mini cover
   const miniCover = $('mini-cover-wrapper');
   if (coverSrc) {
@@ -898,6 +1011,17 @@ function updateNowPlayingUI(track) {
   $('fs-title').textContent = track.title;
   $('fs-artist').textContent = track.artist;
   $('fs-album').textContent = track.album + (track.year ? ` · ${track.year}` : '');
+
+  if (snaps) {
+    animateSwap(snaps.miniCover,  direction, 'cover');
+    animateSwap(snaps.miniTitle,  direction, 'text');
+    animateSwap(snaps.miniArtist, direction, 'text');
+    animateSwap(snaps.fsCover,    direction, 'cover');
+    animateSwap(snaps.fsTitle,    direction, 'text');
+    animateSwap(snaps.fsArtist,   direction, 'text');
+    animateSwap(snaps.fsAlbum,    direction, 'text');
+  }
+  lastNowPlayingPath = track.path;
 
   updateFavoriteUI();
   updatePlayButtonUI();
@@ -966,6 +1090,7 @@ function togglePlay() {
 
 function nextTrack() {
   if (currentQueue.length === 0) return;
+  trackChangeDirection = 1;
   const curPath = currentTrackIndex >= 0 ? library[currentTrackIndex].path : null;
   const inQueueIdx = currentQueue.findIndex(t => t.path === curPath);
   if (isShuffle && currentQueue.length > 1) {
@@ -985,6 +1110,7 @@ function nextTrack() {
 
 function prevTrack() {
   if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+  trackChangeDirection = -1;
   const curPath = currentTrackIndex >= 0 ? library[currentTrackIndex].path : null;
   const inQueueIdx = currentQueue.findIndex(t => t.path === curPath);
   let prevIdx = inQueueIdx - 1;
@@ -1182,20 +1308,79 @@ audio.volume = 1;
 updateVolumeUI();
 
 // ── Fullscreen ──
-$('mini-cover-wrapper').addEventListener('click', () => {
-  if (currentTrackIndex >= 0) {
-    $('fullscreen-overlay').classList.add('active');
-    updateFullscreenQueue();
-  }
-});
-$('btn-fullscreen').addEventListener('click', () => {
-  if (currentTrackIndex >= 0) {
-    $('fullscreen-overlay').classList.add('active');
-    updateFullscreenQueue();
-  }
-});
-$('btn-close-fullscreen').addEventListener('click', () => $('fullscreen-overlay').classList.remove('active'));
-$('btn-close-fullscreen-x').addEventListener('click', () => $('fullscreen-overlay').classList.remove('active'));
+let fsAnimating = false;
+let fsCoverAnim = null;
+
+function flipCover(direction) {
+  const mini = $('mini-cover-wrapper');
+  const big = $('fs-cover');
+  const mr = mini.getBoundingClientRect();
+  const br = big.getBoundingClientRect();
+  if (!mr.width || !br.width) return null;
+  const dx = (mr.left + mr.width / 2) - (br.left + br.width / 2);
+  const dy = (mr.top + mr.height / 2) - (br.top + br.height / 2);
+  const sx = mr.width / br.width;
+  const sy = mr.height / br.height;
+  const small = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+  const frames = direction === 'in'
+    ? [{ transform: small }, { transform: 'translate(0, 0) scale(1, 1)' }]
+    : [{ transform: 'translate(0, 0) scale(1, 1)' }, { transform: small }];
+  return big.animate(frames, {
+    duration: direction === 'in' ? 480 : 360,
+    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    fill: 'both',
+  });
+}
+
+function cancelCoverAnim() {
+  if (fsCoverAnim) { try { fsCoverAnim.cancel(); } catch {} }
+  fsCoverAnim = null;
+}
+
+function openFullscreen() {
+  if (currentTrackIndex < 0 || fsAnimating) return;
+  const overlay = $('fullscreen-overlay');
+  if (overlay.classList.contains('active')) return;
+  fsAnimating = true;
+  cancelCoverAnim();
+  overlay.classList.add('active');
+  updateFullscreenQueue();
+  // Force layout so getBoundingClientRect returns measurable values for FLIP.
+  void overlay.offsetHeight;
+  $('mini-cover-wrapper').classList.add('is-morphing');
+  fsCoverAnim = flipCover('in');
+  requestAnimationFrame(() => overlay.classList.add('is-in'));
+  const done = () => {
+    cancelCoverAnim();
+    fsAnimating = false;
+    $('mini-cover-wrapper').classList.remove('is-morphing');
+  };
+  if (fsCoverAnim) fsCoverAnim.finished.then(done).catch(done);
+  else done();
+}
+
+function closeFullscreen() {
+  const overlay = $('fullscreen-overlay');
+  if (!overlay.classList.contains('active') || fsAnimating) return;
+  fsAnimating = true;
+  cancelCoverAnim();
+  overlay.classList.remove('is-in');
+  $('mini-cover-wrapper').classList.add('is-morphing');
+  fsCoverAnim = flipCover('out');
+  const done = () => {
+    cancelCoverAnim();
+    overlay.classList.remove('active');
+    fsAnimating = false;
+    $('mini-cover-wrapper').classList.remove('is-morphing');
+  };
+  if (fsCoverAnim) fsCoverAnim.finished.then(done).catch(done);
+  else setTimeout(done, 320);
+}
+
+$('mini-cover-wrapper').addEventListener('click', openFullscreen);
+$('btn-fullscreen').addEventListener('click', openFullscreen);
+$('btn-close-fullscreen').addEventListener('click', closeFullscreen);
+$('btn-close-fullscreen-x').addEventListener('click', closeFullscreen);
 
 function updateFullscreenQueue() {
   const list = $('fs-queue-list');
@@ -1336,6 +1521,7 @@ function openContextMenu(e, path) {
   pendingContextTrackPath = path;
   const menu = $('track-context-menu');
   $('cm-fav-label').textContent = favorites.includes(path) ? 'Убрать из избранного' : 'В избранное';
+  $('cm-remove-from-pl').hidden = !(currentView === 'playlist-detail' && activePlaylistId);
   menu.classList.add('open');
   // position
   const rect = menu.getBoundingClientRect();
@@ -1367,6 +1553,15 @@ document.querySelectorAll('#track-context-menu .cm-item').forEach(btn => {
     else if (action === 'reveal') window.electronAPI.revealInFolder(path);
     else if (action === 'edit-tags') openMetadataEditor(path);
     else if (action === 'add-to-playlist') openAddToPlaylistModal(path);
+    else if (action === 'remove-from-playlist') {
+      const pl = playlists.find(p => p.id === activePlaylistId);
+      if (pl) {
+        pl.trackPaths = pl.trackPaths.filter(p => p !== path);
+        savePlaylists();
+        renderPlaylistDetail(activePlaylistId);
+        renderCounts();
+      }
+    }
     else if (action === 'delete') confirmDelete({
       kind: 'track', payload: path,
       title: 'Удалить трек?',
@@ -1585,7 +1780,7 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     togglePlay();
   } else if (e.key === 'Escape') {
-    if ($('fullscreen-overlay').classList.contains('active')) $('fullscreen-overlay').classList.remove('active');
+    if ($('fullscreen-overlay').classList.contains('active')) closeFullscreen();
     else if ($('metadata-modal').classList.contains('active')) $('metadata-modal').classList.remove('active');
     else if ($('new-playlist-modal').classList.contains('active')) $('new-playlist-modal').classList.remove('active');
     else if ($('add-to-playlist-modal').classList.contains('active')) $('add-to-playlist-modal').classList.remove('active');

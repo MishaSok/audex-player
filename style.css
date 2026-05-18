@@ -1064,13 +1064,24 @@ input { font-family: inherit; color: inherit; }
 .fs-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+  background: transparent;
   z-index: 100;
   display: none;
   flex-direction: column;
   overflow: hidden;
+  pointer-events: none;
 }
-.fs-overlay.active { display: flex; }
+.fs-overlay.active { display: flex; pointer-events: auto; }
+.fs-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+}
+.fs-overlay.is-in::before { opacity: 1; }
 .fs-backdrop {
   position: absolute;
   top: -20%;
@@ -1078,11 +1089,47 @@ input { font-family: inherit; color: inherit; }
   transform: translateX(-50%);
   width: 1100px;
   height: 1100px;
-  opacity: 0.18;
+  opacity: 0;
   filter: blur(120px);
   pointer-events: none;
   background: var(--panel-alt);
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) 80ms;
 }
+.fs-overlay.is-in .fs-backdrop { opacity: 0.18; }
+
+/* Staggered fade-up for fullscreen UI */
+.fs-overlay .fs-topbar,
+.fs-overlay .fs-queue,
+.fs-overlay .eq-line,
+.fs-overlay .fs-title,
+.fs-overlay .fs-artist,
+.fs-overlay .fs-album,
+.fs-overlay .fs-progress,
+.fs-overlay .fs-ctrls,
+.fs-overlay .fs-secondary {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.fs-overlay.is-in .fs-topbar     { opacity: 1; transform: none; transition-delay: 60ms; }
+.fs-overlay.is-in .eq-line       { opacity: 1; transform: none; transition-delay: 160ms; }
+.fs-overlay.is-in .fs-title      { opacity: 1; transform: none; transition-delay: 200ms; }
+.fs-overlay.is-in .fs-artist     { opacity: 1; transform: none; transition-delay: 240ms; }
+.fs-overlay.is-in .fs-album      { opacity: 1; transform: none; transition-delay: 270ms; }
+.fs-overlay.is-in .fs-progress   { opacity: 1; transform: none; transition-delay: 300ms; }
+.fs-overlay.is-in .fs-ctrls      { opacity: 1; transform: none; transition-delay: 330ms; }
+.fs-overlay.is-in .fs-secondary  { opacity: 1; transform: none; transition-delay: 360ms; }
+.fs-overlay.is-in .fs-queue      { opacity: 1; transform: none; transition-delay: 220ms; }
+
+/* During the cover morph the JS drives fs-cover via Web Animations API.
+   Smooth class lets it ease back to its rest position if the JS animation is interrupted. */
+.fs-overlay .fs-cover { will-change: transform; }
+
+/* Hide the mini-cover while the morph is in flight to avoid a duplicate cover flash. */
+.mini-cover.is-morphing { opacity: 0; }
 
 .fs-topbar {
   position: relative;
@@ -1320,7 +1367,37 @@ input { font-family: inherit; color: inherit; }
   justify-content: center;
   z-index: 200;
 }
-.modal-overlay.active { display: flex; }
+.modal-overlay.active { display: flex; animation: modalScrimIn 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+.modal-overlay.active .modal-card,
+.modal-overlay.active .editor-card { animation: modalCardIn 280ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes modalScrimIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalCardIn {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes modalListItemIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#add-to-playlist-modal.active .sl-item,
+#add-to-playlist-modal.active .sl-empty {
+  animation: modalListItemIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+#add-to-playlist-modal.active .sl-item:nth-child(1) { animation-delay: 90ms; }
+#add-to-playlist-modal.active .sl-item:nth-child(2) { animation-delay: 130ms; }
+#add-to-playlist-modal.active .sl-item:nth-child(3) { animation-delay: 165ms; }
+#add-to-playlist-modal.active .sl-item:nth-child(4) { animation-delay: 195ms; }
+#add-to-playlist-modal.active .sl-item:nth-child(5) { animation-delay: 220ms; }
+#add-to-playlist-modal.active .sl-item:nth-child(n+6) { animation-delay: 240ms; }
+#add-to-playlist-modal.active .sl-empty { animation-delay: 120ms; }
+
+/* Tactile press feedback on the trigger */
+#fs-btn-add-playlist { transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1); }
+#fs-btn-add-playlist:active { transform: scale(0.94); }
 .modal-card {
   width: 380px;
   background: var(--panel-elev);
@@ -1559,6 +1636,7 @@ input { font-family: inherit; color: inherit; }
   color: var(--text);
   text-align: left;
 }
+.cm-item[hidden] { display: none; }
 .cm-item:hover { background: var(--hover-bg); }
 .cm-item .i { color: var(--text-muted); }
 .cm-highlight { background: var(--hover-bg); color: var(--text-strong); }
