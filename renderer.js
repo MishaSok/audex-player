@@ -8,6 +8,9 @@ const LS = {
   playlists: 'audex-playlists',
   settings: 'audex-settings',
   recents: 'audex-recents',
+  ytState: 'audex-dl-yt-state',
+  ymState: 'audex-dl-ym-state',
+  queue: 'audex-dl-queue',
 };
 
 // State
@@ -278,6 +281,26 @@ const I18N = {
     'label.tracksShort': 'тр.',
     'error.deleteFile': 'Не удалось удалить файл с диска: ',
     'error.unknown': 'неизвестная ошибка',
+    'downloads.tab.queue': 'Очередь',
+    'downloads.queue.add': 'В очередь',
+    'downloads.queue.queued': 'В очереди',
+    'downloads.queue.addAll': 'Все треки в очередь',
+    'downloads.queue.remove': 'Убрать из очереди',
+    'downloads.queue.clearDone': 'Очистить завершённые',
+    'downloads.queue.clearAll': 'Очистить всё',
+    'downloads.queue.empty.title': 'Очередь пуста',
+    'downloads.queue.empty.text': 'Добавьте треки в очередь со вкладки «Парсинг», и они начнут скачиваться один за другим.',
+    'downloads.queue.status.queued': 'Ожидает',
+    'downloads.queue.status.downloading': 'Скачивается',
+    'downloads.queue.status.done': 'Готово',
+    'downloads.queue.status.error': 'Ошибка',
+    'downloads.queue.stats.downloading': 'качается: {n}',
+    'downloads.queue.stats.queued': 'в очереди: {n}',
+    'downloads.queue.stats.done': 'готово: {n}',
+    'downloads.queue.stats.error': 'ошибок: {n}',
+    'downloads.queue.stats.paused': 'на паузе',
+    'downloads.queue.pause': 'Пауза',
+    'downloads.queue.resume': 'Продолжить',
   },
   en: {
     'nav.library': 'Library',
@@ -466,6 +489,26 @@ const I18N = {
     'label.tracksShort': 'tr.',
     'error.deleteFile': 'Could not delete file from disk: ',
     'error.unknown': 'unknown error',
+    'downloads.tab.queue': 'Queue',
+    'downloads.queue.add': 'Queue',
+    'downloads.queue.queued': 'Queued',
+    'downloads.queue.addAll': 'Queue all tracks',
+    'downloads.queue.remove': 'Remove from queue',
+    'downloads.queue.clearDone': 'Clear finished',
+    'downloads.queue.clearAll': 'Clear all',
+    'downloads.queue.empty.title': 'Queue is empty',
+    'downloads.queue.empty.text': 'Add tracks from the Parsing tab and they will be downloaded one after another.',
+    'downloads.queue.status.queued': 'Waiting',
+    'downloads.queue.status.downloading': 'Downloading',
+    'downloads.queue.status.done': 'Done',
+    'downloads.queue.status.error': 'Failed',
+    'downloads.queue.stats.downloading': 'downloading: {n}',
+    'downloads.queue.stats.queued': 'queued: {n}',
+    'downloads.queue.stats.done': 'done: {n}',
+    'downloads.queue.stats.error': 'errors: {n}',
+    'downloads.queue.stats.paused': 'paused',
+    'downloads.queue.pause': 'Pause',
+    'downloads.queue.resume': 'Resume',
   },
   de: {
     'nav.library': 'Bibliothek',
@@ -654,6 +697,26 @@ const I18N = {
     'label.tracksShort': 'Tit.',
     'error.deleteFile': 'Datei konnte nicht gelöscht werden: ',
     'error.unknown': 'unbekannter Fehler',
+    'downloads.tab.queue': 'Warteschlange',
+    'downloads.queue.add': 'In Warteschlange',
+    'downloads.queue.queued': 'In Warteschlange',
+    'downloads.queue.addAll': 'Alle in die Warteschlange',
+    'downloads.queue.remove': 'Aus Warteschlange entfernen',
+    'downloads.queue.clearDone': 'Fertige entfernen',
+    'downloads.queue.clearAll': 'Alle entfernen',
+    'downloads.queue.empty.title': 'Warteschlange ist leer',
+    'downloads.queue.empty.text': 'Füge Titel im Tab „Parsen" hinzu — sie werden nacheinander heruntergeladen.',
+    'downloads.queue.status.queued': 'Wartet',
+    'downloads.queue.status.downloading': 'Lädt',
+    'downloads.queue.status.done': 'Fertig',
+    'downloads.queue.status.error': 'Fehler',
+    'downloads.queue.stats.downloading': 'lädt: {n}',
+    'downloads.queue.stats.queued': 'wartet: {n}',
+    'downloads.queue.stats.done': 'fertig: {n}',
+    'downloads.queue.stats.error': 'Fehler: {n}',
+    'downloads.queue.stats.paused': 'pausiert',
+    'downloads.queue.pause': 'Pause',
+    'downloads.queue.resume': 'Fortsetzen',
   },
   fr: {
     'nav.library': 'Bibliothèque',
@@ -842,6 +905,26 @@ const I18N = {
     'label.tracksShort': 'p.',
     'error.deleteFile': "Impossible de supprimer le fichier du disque : ",
     'error.unknown': 'erreur inconnue',
+    'downloads.tab.queue': 'File d\'attente',
+    'downloads.queue.add': 'À la file',
+    'downloads.queue.queued': 'En file',
+    'downloads.queue.addAll': 'Tout mettre en file',
+    'downloads.queue.remove': 'Retirer de la file',
+    'downloads.queue.clearDone': 'Effacer les terminés',
+    'downloads.queue.clearAll': 'Tout effacer',
+    'downloads.queue.empty.title': 'File d\'attente vide',
+    'downloads.queue.empty.text': 'Ajoutez des pistes depuis l\'onglet « Analyse » — elles seront téléchargées les unes après les autres.',
+    'downloads.queue.status.queued': 'En attente',
+    'downloads.queue.status.downloading': 'Téléchargement',
+    'downloads.queue.status.done': 'Terminé',
+    'downloads.queue.status.error': 'Échec',
+    'downloads.queue.stats.downloading': 'téléchargement : {n}',
+    'downloads.queue.stats.queued': 'en file : {n}',
+    'downloads.queue.stats.done': 'terminés : {n}',
+    'downloads.queue.stats.error': 'erreurs : {n}',
+    'downloads.queue.stats.paused': 'en pause',
+    'downloads.queue.pause': 'Pause',
+    'downloads.queue.resume': 'Reprendre',
   },
   uk: {
     'nav.library': 'Бібліотека',
@@ -1030,6 +1113,26 @@ const I18N = {
     'label.tracksShort': 'тр.',
     'error.deleteFile': 'Не вдалося видалити файл з диска: ',
     'error.unknown': 'невідома помилка',
+    'downloads.tab.queue': 'Черга',
+    'downloads.queue.add': 'В чергу',
+    'downloads.queue.queued': 'В черзі',
+    'downloads.queue.addAll': 'Усі треки в чергу',
+    'downloads.queue.remove': 'Прибрати з черги',
+    'downloads.queue.clearDone': 'Очистити завершені',
+    'downloads.queue.clearAll': 'Очистити все',
+    'downloads.queue.empty.title': 'Черга порожня',
+    'downloads.queue.empty.text': 'Додайте треки з вкладки «Парсинг», і вони почнуть завантажуватися один за одним.',
+    'downloads.queue.status.queued': 'Очікує',
+    'downloads.queue.status.downloading': 'Завантаження',
+    'downloads.queue.status.done': 'Готово',
+    'downloads.queue.status.error': 'Помилка',
+    'downloads.queue.stats.downloading': 'завантажується: {n}',
+    'downloads.queue.stats.queued': 'у черзі: {n}',
+    'downloads.queue.stats.done': 'готово: {n}',
+    'downloads.queue.stats.error': 'помилок: {n}',
+    'downloads.queue.stats.paused': 'на паузі',
+    'downloads.queue.pause': 'Пауза',
+    'downloads.queue.resume': 'Продовжити',
   },
 };
 
@@ -1346,15 +1449,7 @@ document.querySelectorAll('.crumb-item.link').forEach(el => {
 // ── Downloads tabs ──
 document.querySelectorAll('.dl-tabs .dl-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    const target = btn.dataset.dlTab;
-    document.querySelectorAll('.dl-tabs .dl-tab').forEach(t => {
-      const on = t.dataset.dlTab === target;
-      t.classList.toggle('is-active', on);
-      t.setAttribute('aria-selected', on ? 'true' : 'false');
-    });
-    document.querySelectorAll('.dl-pane').forEach(p => {
-      p.hidden = p.dataset.dlPane !== target;
-    });
+    activateDlTab(btn.dataset.dlTab);
   });
 });
 
@@ -1396,40 +1491,72 @@ function setYtStatus(text, kind) {
   el.textContent = text;
 }
 
+function saveYtState() {
+  try {
+    const q = $('dl-yt-query');
+    localStorage.setItem(LS.ytState, JSON.stringify({
+      query: q ? q.value : '',
+      results: ytLastResults,
+    }));
+  } catch (_) { /* ignore */ }
+}
+
 function renderYtResults(results) {
   ytLastResults = results || [];
+  // Save before any DOM checks — persistence shouldn't depend on the YT pane
+  // being currently mounted/visible.
+  saveYtState();
   const wrap = $('dl-yt-results');
   const rows = $('dl-yt-rows');
   const empty = $('dl-yt-empty');
   const note = $('dl-yt-tag-note');
+  const queueAllBtn = $('dl-yt-queue-all');
   if (!wrap || !rows) return;
   if (!ytLastResults.length) {
     wrap.hidden = true;
     if (note) note.hidden = true;
     if (empty) empty.classList.add('show');
+    if (queueAllBtn) queueAllBtn.hidden = true;
     return;
   }
   if (empty) empty.classList.remove('show');
   if (note) note.hidden = false;
-  rows.innerHTML = ytLastResults.map((r, i) => `
-    <div class="dl-row" data-yt-row="${i}">
-      <div class="thumb" style="background-image: url('${escapeHtml(r.thumbnail || '')}')"></div>
-      <div class="title" title="${escapeHtml(r.title)}">${escapeHtml(r.title || '')}</div>
-      <div class="channel" title="${escapeHtml(r.channel || '')}">${escapeHtml(r.channel || '')}</div>
-      <div class="duration">${escapeHtml(r.durationStr || '')}</div>
-      <div class="action">
-        <button type="button" class="dl-download-btn" data-yt-dl="${i}">
-          <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
-          <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
-        </button>
+  if (queueAllBtn) queueAllBtn.hidden = false;
+  rows.innerHTML = ytLastResults.map((r, i) => {
+    const queued = isYtResultInQueue(r);
+    const queuedCls = queued ? ' is-done' : '';
+    const queueDis = queued ? ' disabled' : '';
+    const queueLabel = queued ? tr('downloads.queue.queued') : tr('downloads.queue.add');
+    return `
+      <div class="dl-row" data-yt-row="${i}">
+        <div class="thumb" style="background-image: url('${escapeHtml(r.thumbnail || '')}')"></div>
+        <div class="title" title="${escapeHtml(r.title)}">${escapeHtml(r.title || '')}</div>
+        <div class="channel" title="${escapeHtml(r.channel || '')}">${escapeHtml(r.channel || '')}</div>
+        <div class="duration">${escapeHtml(r.durationStr || '')}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn dl-queue-btn${queuedCls}" data-yt-queue="${i}"${queueDis} title="${escapeHtml(queueLabel)}">
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span>${escapeHtml(queueLabel)}</span>
+          </button>
+          <button type="button" class="dl-download-btn" data-yt-dl="${i}">
+            <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+            <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+          </button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   wrap.hidden = false;
   rows.querySelectorAll('[data-yt-dl]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.getAttribute('data-yt-dl'), 10);
       if (!isNaN(idx)) downloadYtResult(idx, btn);
+    });
+  });
+  rows.querySelectorAll('[data-yt-queue]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-yt-queue'), 10);
+      if (!isNaN(idx)) enqueueYtResult(idx);
     });
   });
 }
@@ -1526,12 +1653,18 @@ async function downloadYtResult(idx, btn) {
 (function wireYtSearchControls() {
   const btn = $('dl-yt-search-btn');
   const input = $('dl-yt-query');
+  const queueAll = $('dl-yt-queue-all');
   if (btn) btn.addEventListener('click', runYtSearch);
   if (input) {
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); runYtSearch(); }
     });
+    // Persist the typed query as the user types so a reload before pressing
+    // Enter doesn't drop their input. Light-touch: just rewrites the same
+    // JSON blob, no debouncing needed at human typing speed.
+    input.addEventListener('input', saveYtState);
   }
+  if (queueAll) queueAll.addEventListener('click', enqueueAllYtResults);
 })();
 
 // ── Downloads: Parsing sub-tabs ──
@@ -1566,41 +1699,74 @@ function setYmStatus(text, kind) {
   el.textContent = text;
 }
 
+function saveYmState() {
+  try {
+    const u = $('dl-ym-url');
+    localStorage.setItem(LS.ymState, JSON.stringify({
+      url: u ? u.value : '',
+      tracks: ymTracks,
+    }));
+  } catch (_) { /* ignore */ }
+}
+
 function renderYmResults(tracks) {
   ymTracks = tracks || [];
+  saveYmState();
   const wrap = $('dl-ym-results');
   const rows = $('dl-ym-rows');
   const empty = $('dl-ym-empty');
   const note = $('dl-ym-tag-note');
+  const queueAllBtn = $('dl-ym-queue-all');
   if (!wrap || !rows) return;
   if (!ymTracks.length) {
     wrap.hidden = true;
     if (note) note.hidden = true;
     if (empty) empty.classList.add('show');
+    if (queueAllBtn) queueAllBtn.hidden = true;
     return;
   }
   if (empty) empty.classList.remove('show');
   if (note) note.hidden = false;
+  if (queueAllBtn) {
+    queueAllBtn.hidden = false;
+    queueAllBtn.disabled = ymParseActive;
+  }
   const disabledAttr = ymParseActive ? ' disabled' : '';
-  rows.innerHTML = ymTracks.map((t, i) => `
-    <div class="dl-row-ym" data-ym-row="${i}">
-      <div class="num">${i + 1}</div>
-      <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
-      <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
-      <div class="duration">${escapeHtml(t.duration || '')}</div>
-      <div class="action">
-        <button type="button" class="dl-download-btn" data-ym-dl="${i}"${disabledAttr}>
-          <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
-          <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
-        </button>
+  rows.innerHTML = ymTracks.map((t, i) => {
+    const queued = isYmTrackInQueue(t);
+    const queuedCls = queued ? ' is-done' : '';
+    const queueDis = ymParseActive || queued ? ' disabled' : '';
+    const queueLabel = queued ? tr('downloads.queue.queued') : tr('downloads.queue.add');
+    return `
+      <div class="dl-row-ym" data-ym-row="${i}">
+        <div class="num">${i + 1}</div>
+        <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+        <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
+        <div class="duration">${escapeHtml(t.duration || '')}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn dl-queue-btn${queuedCls}" data-ym-queue="${i}"${queueDis} title="${escapeHtml(queueLabel)}">
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span>${escapeHtml(queueLabel)}</span>
+          </button>
+          <button type="button" class="dl-download-btn" data-ym-dl="${i}"${disabledAttr}>
+            <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+            <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+          </button>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   wrap.hidden = false;
   rows.querySelectorAll('[data-ym-dl]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.getAttribute('data-ym-dl'), 10);
       if (!isNaN(idx)) downloadYmTrack(idx, btn);
+    });
+  });
+  rows.querySelectorAll('[data-ym-queue]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-ym-queue'), 10);
+      if (!isNaN(idx)) enqueueYmTrack(idx);
     });
   });
 }
@@ -1733,8 +1899,534 @@ async function runYmParse() {
     url.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); runYmParse(); }
     });
+    url.addEventListener('input', saveYmState);
   }
 })();
+
+// ── Downloads: Queue ──
+// In-memory queue (per session). Items move queued → downloading → done|error.
+// One concurrent download keeps things simple and predictable.
+const downloadQueue = [];
+const queueByRequestId = new Map(); // requestId → item.id (for progress routing)
+let queueWorkerRunning = false;
+let queueIdSeq = 0;
+let queuePaused = false;
+
+function ymTrackKey(t) {
+  return `${(t.artist || '').trim().toLowerCase()}|${(t.title || '').trim().toLowerCase()}`;
+}
+
+function ytTrackKey(r) {
+  return r && r.id ? `yt:${r.id}` : `yt:${(r && r.url) || ''}`;
+}
+
+function isYmTrackInQueue(t) {
+  if (!t) return false;
+  const key = ymTrackKey(t);
+  return downloadQueue.some(it => it.source === 'yandex' && it.key === key && it.status !== 'error');
+}
+
+function isYtResultInQueue(r) {
+  if (!r) return false;
+  const key = ytTrackKey(r);
+  return downloadQueue.some(it => it.source === 'youtube' && it.key === key && it.status !== 'error');
+}
+
+function buildQueueItemFromYm(t) {
+  return {
+    id: 'q-' + (++queueIdSeq),
+    source: 'yandex',
+    key: ymTrackKey(t),
+    artist: t.artist || '',
+    title: t.title || '',
+    duration: t.duration || '',
+    query: `${t.artist || ''} ${t.title || ''}`.replace(/—/g, '').trim(),
+    suggestedName: `${t.artist || ''} - ${t.title || ''}`,
+    videoId: '',
+    url: '',
+    status: 'queued',          // 'queued' | 'downloading' | 'done' | 'error'
+    percent: 0,
+    indeterminate: false,
+    filePath: '',
+    error: '',
+    requestId: '',
+  };
+}
+
+function buildQueueItemFromYt(r) {
+  return {
+    id: 'q-' + (++queueIdSeq),
+    source: 'youtube',
+    key: ytTrackKey(r),
+    artist: r.channel || '',
+    title: r.title || '',
+    duration: r.durationStr || '',
+    query: r.title || '',
+    suggestedName: r.title || '',
+    videoId: r.id || '',
+    url: r.url || '',
+    status: 'queued',
+    percent: 0,
+    indeterminate: false,
+    filePath: '',
+    error: '',
+    requestId: '',
+  };
+}
+
+function enqueueYmTrack(idx) {
+  const t = ymTracks[idx];
+  if (!t || isYmTrackInQueue(t)) return;
+  downloadQueue.push(buildQueueItemFromYm(t));
+  renderQueue();
+  renderYmResults(ymTracks);
+  updateQueueTabBadge();
+  startQueueWorker();
+}
+
+function enqueueAllYmTracks() {
+  if (!ymTracks || !ymTracks.length) return;
+  let added = 0;
+  for (const t of ymTracks) {
+    if (isYmTrackInQueue(t)) continue;
+    downloadQueue.push(buildQueueItemFromYm(t));
+    added++;
+  }
+  if (added > 0) {
+    renderQueue();
+    renderYmResults(ymTracks);
+    updateQueueTabBadge();
+    startQueueWorker();
+    activateDlTab('queue');
+  }
+}
+
+function enqueueYtResult(idx) {
+  const r = ytLastResults[idx];
+  if (!r || isYtResultInQueue(r)) return;
+  downloadQueue.push(buildQueueItemFromYt(r));
+  renderQueue();
+  renderYtResults(ytLastResults);
+  updateQueueTabBadge();
+  startQueueWorker();
+}
+
+function enqueueAllYtResults() {
+  if (!ytLastResults || !ytLastResults.length) return;
+  let added = 0;
+  for (const r of ytLastResults) {
+    if (isYtResultInQueue(r)) continue;
+    downloadQueue.push(buildQueueItemFromYt(r));
+    added++;
+  }
+  if (added > 0) {
+    renderQueue();
+    renderYtResults(ytLastResults);
+    updateQueueTabBadge();
+    startQueueWorker();
+    activateDlTab('queue');
+  }
+}
+
+function nextQueuedItem() {
+  if (queuePaused) return null;
+  return downloadQueue.find(it => it.status === 'queued');
+}
+
+async function startQueueWorker() {
+  if (queueWorkerRunning) return;
+  queueWorkerRunning = true;
+  try {
+    while (true) {
+      const item = nextQueuedItem();
+      if (!item) break;
+      await processQueueItem(item);
+    }
+  } finally {
+    queueWorkerRunning = false;
+  }
+}
+
+function setQueuePaused(paused) {
+  queuePaused = !!paused;
+  saveQueueState();
+  renderQueue();
+  updateQueueTabBadge();
+  if (!queuePaused) startQueueWorker();
+}
+
+async function processQueueItem(item) {
+  item.status = 'downloading';
+  item.percent = 0;
+  item.indeterminate = false;
+  item.requestId = item.id; // reuse our item id as requestId for progress routing
+  queueByRequestId.set(item.requestId, item.id);
+  renderQueue();
+  try {
+    let res;
+    if (item.source === 'youtube' && (item.videoId || item.url)) {
+      // YouTube items have a concrete video id — download that exact video.
+      res = await window.electronAPI.ytDownload({
+        videoId: item.videoId,
+        url: item.url,
+        suggestedName: item.suggestedName,
+        requestId: item.requestId,
+        targetDir: settings.defaultFolder || '',
+      });
+    } else {
+      // Yandex (and any text-only source) goes through ytsearch1: by query.
+      res = await window.electronAPI.ytDownloadByQuery({
+        query: item.query,
+        suggestedName: item.suggestedName,
+        requestId: item.requestId,
+        targetDir: settings.defaultFolder || '',
+      });
+    }
+    queueByRequestId.delete(item.requestId);
+    if (!res || !res.success) {
+      item.status = 'error';
+      item.error = (res && res.error) || tr('error.unknown');
+    } else {
+      item.status = 'done';
+      item.percent = 100;
+      item.filePath = res.filePath;
+      try { await importPaths([res.filePath]); } catch (_) { /* ignore */ }
+    }
+  } catch (err) {
+    queueByRequestId.delete(item.requestId);
+    item.status = 'error';
+    item.error = String(err);
+  }
+  renderQueue();
+  renderYmResults(ymTracks);
+  renderYtResults(ytLastResults);
+  updateQueueTabBadge();
+}
+
+function handleQueueProgress(requestId, phase, percent) {
+  const itemId = queueByRequestId.get(requestId);
+  if (!itemId) return false;
+  const item = downloadQueue.find(it => it.id === itemId);
+  if (!item || item.status !== 'downloading') return true;
+  if (phase === 'postprocess') {
+    item.indeterminate = true;
+  } else if (typeof percent === 'number' && !isNaN(percent)) {
+    item.indeterminate = false;
+    item.percent = percent;
+  }
+  // Patch the visible row in place rather than re-rendering the whole list.
+  patchQueueRowProgress(item);
+  return true;
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  // Layer queue routing on top of the existing YT/YM progress listeners.
+  // The earlier listeners only act if they recognise the requestId, so this
+  // additional handler simply claims queue-owned ids without conflict.
+  window.electronAPI.onYtDownloadProgress(({ requestId, phase, percent }) => {
+    if (!requestId) return;
+    handleQueueProgress(requestId, phase, percent);
+  });
+}
+
+function queueStatusLabel(item) {
+  switch (item.status) {
+    case 'queued': return tr('downloads.queue.status.queued');
+    case 'downloading': return tr('downloads.queue.status.downloading');
+    case 'done': return tr('downloads.queue.status.done');
+    case 'error': return tr('downloads.queue.status.error');
+    default: return '';
+  }
+}
+
+function saveQueueState() {
+  try {
+    // Persist a normalised snapshot. An in-flight item is recorded as 'queued' so
+    // a reload re-attempts the download rather than leaving an orphaned row that
+    // never finishes (the actual yt-dlp spawn dies with the renderer anyway).
+    const items = downloadQueue.map(it => ({
+      id: it.id,
+      source: it.source,
+      key: it.key,
+      artist: it.artist,
+      title: it.title,
+      duration: it.duration,
+      query: it.query,
+      suggestedName: it.suggestedName,
+      videoId: it.videoId || '',
+      url: it.url || '',
+      status: it.status === 'downloading' ? 'queued' : it.status,
+      filePath: it.filePath || '',
+      error: it.error || '',
+    }));
+    localStorage.setItem(LS.queue, JSON.stringify({ paused: queuePaused, items }));
+  } catch (_) { /* ignore */ }
+}
+
+function renderQueue() {
+  saveQueueState();
+  const list = $('dl-queue-list');
+  const empty = $('dl-queue-empty');
+  const stats = $('dl-queue-stats');
+  const clearBtn = $('dl-queue-clear-done');
+  const clearAllBtn = $('dl-queue-clear-all');
+  const pauseBtn = $('dl-queue-pause');
+  const pauseLabel = $('dl-queue-pause-label');
+  if (!list) return;
+
+  // Pause button: shown whenever there are queued/downloading items; otherwise
+  // pausing has no effect and just adds noise.
+  const hasActive = downloadQueue.some(it => it.status === 'queued' || it.status === 'downloading');
+  if (pauseBtn) {
+    pauseBtn.hidden = !hasActive;
+    pauseBtn.classList.toggle('is-paused', queuePaused);
+    const useEl = pauseBtn.querySelector('use');
+    if (useEl) useEl.setAttribute('href', queuePaused ? '#i-play' : '#i-pause');
+  }
+  if (pauseLabel) pauseLabel.textContent = queuePaused ? tr('downloads.queue.resume') : tr('downloads.queue.pause');
+
+  if (!downloadQueue.length) {
+    list.innerHTML = '';
+    if (empty) empty.classList.add('show');
+    if (stats) stats.textContent = '';
+    if (clearBtn) clearBtn.hidden = true;
+    if (clearAllBtn) clearAllBtn.hidden = true;
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+
+  const counts = { queued: 0, downloading: 0, done: 0, error: 0 };
+  for (const it of downloadQueue) counts[it.status]++;
+  if (stats) {
+    const parts = [];
+    if (queuePaused) parts.push(tr('downloads.queue.stats.paused'));
+    if (counts.downloading) parts.push(tr('downloads.queue.stats.downloading', { n: counts.downloading }));
+    if (counts.queued) parts.push(tr('downloads.queue.stats.queued', { n: counts.queued }));
+    if (counts.done) parts.push(tr('downloads.queue.stats.done', { n: counts.done }));
+    if (counts.error) parts.push(tr('downloads.queue.stats.error', { n: counts.error }));
+    stats.textContent = parts.join(' · ');
+  }
+  if (clearBtn) clearBtn.hidden = !(counts.done || counts.error);
+  if (clearAllBtn) clearAllBtn.hidden = false;
+
+  list.innerHTML = downloadQueue.map(it => renderQueueRow(it)).join('');
+  list.querySelectorAll('[data-q-retry]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-q-retry');
+      const item = downloadQueue.find(x => x.id === id);
+      if (!item) return;
+      item.status = 'queued';
+      item.error = '';
+      item.percent = 0;
+      renderQueue();
+      updateQueueTabBadge();
+      startQueueWorker();
+    });
+  });
+  list.querySelectorAll('[data-q-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-q-remove');
+      const idx = downloadQueue.findIndex(x => x.id === id);
+      if (idx < 0) return;
+      const item = downloadQueue[idx];
+      // Don't allow removing an active download mid-flight; cancellation isn't wired.
+      if (item.status === 'downloading') return;
+      downloadQueue.splice(idx, 1);
+      renderQueue();
+      renderYmResults(ymTracks);
+      updateQueueTabBadge();
+    });
+  });
+}
+
+function renderQueueRow(item) {
+  const showProgress = item.status === 'downloading';
+  const indetCls = item.indeterminate ? ' is-indeterminate' : '';
+  const pctText = item.indeterminate ? '…' : (Math.round(item.percent) + '%');
+  const removeDis = item.status === 'downloading' ? ' disabled' : '';
+  const errorLine = item.status === 'error' && item.error
+    ? `<div class="dl-queue-error" title="${escapeHtml(item.error)}">${escapeHtml(item.error)}</div>`
+    : '';
+  const retryBtn = item.status === 'error'
+    ? `<button type="button" class="dl-download-btn" data-q-retry="${item.id}" title="${escapeHtml(tr('downloads.yt.action.retry'))}">
+         <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+         <span>${escapeHtml(tr('downloads.yt.action.retry'))}</span>
+       </button>`
+    : '';
+  const progressBlock = showProgress
+    ? `<div class="dl-queue-progress" data-q-row-progress="${item.id}">
+         <div class="dl-progress${indetCls}">
+           <div class="dl-progress-bar"><div class="dl-progress-fill" style="width:${item.indeterminate ? 40 : item.percent.toFixed(1)}%"></div></div>
+           <div class="dl-progress-pct">${escapeHtml(pctText)}</div>
+         </div>
+       </div>`
+    : '';
+  return `
+    <div class="dl-queue-row dl-queue-${item.status}" data-q-row="${item.id}">
+      <div class="dl-queue-info">
+        <div class="dl-queue-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title || '—')}</div>
+        <div class="dl-queue-artist" title="${escapeHtml(item.artist)}">${escapeHtml(item.artist || '—')}</div>
+        ${errorLine}
+      </div>
+      <div class="dl-queue-mid">
+        <span class="dl-queue-badge dl-queue-badge-${item.status}">${escapeHtml(queueStatusLabel(item))}</span>
+        ${progressBlock}
+      </div>
+      <div class="dl-queue-actions">
+        ${retryBtn}
+        <button type="button" class="dl-icon-btn" data-q-remove="${item.id}"${removeDis} title="${escapeHtml(tr('downloads.queue.remove'))}">
+          <svg class="i" width="12" height="12"><use href="#i-close"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function patchQueueRowProgress(item) {
+  const list = $('dl-queue-list');
+  if (!list) return;
+  const row = list.querySelector(`[data-q-row="${item.id}"]`);
+  if (!row) {
+    // Row not on screen — full re-render handles transitions.
+    renderQueue();
+    return;
+  }
+  const wrap = row.querySelector('.dl-progress');
+  if (!wrap) { renderQueue(); return; }
+  const fill = wrap.querySelector('.dl-progress-fill');
+  const pct = wrap.querySelector('.dl-progress-pct');
+  if (item.indeterminate) {
+    wrap.classList.add('is-indeterminate');
+    if (pct) pct.textContent = '…';
+  } else {
+    wrap.classList.remove('is-indeterminate');
+    if (fill) fill.style.width = item.percent.toFixed(1) + '%';
+    if (pct) pct.textContent = Math.round(item.percent) + '%';
+  }
+}
+
+function updateQueueTabBadge() {
+  const badge = $('dl-queue-tab-count');
+  if (!badge) return;
+  const active = downloadQueue.filter(it => it.status === 'queued' || it.status === 'downloading').length;
+  if (active > 0) {
+    badge.hidden = false;
+    badge.textContent = String(active);
+  } else {
+    badge.hidden = true;
+  }
+}
+
+function clearFinishedFromQueue() {
+  for (let i = downloadQueue.length - 1; i >= 0; i--) {
+    if (downloadQueue[i].status === 'done' || downloadQueue[i].status === 'error') {
+      downloadQueue.splice(i, 1);
+    }
+  }
+  renderQueue();
+  renderYmResults(ymTracks);
+  updateQueueTabBadge();
+}
+
+function clearAllFromQueue() {
+  // Keep the in-flight download alive — cancellation isn't wired through yt-dlp.
+  // Removing the active row would orphan its progress events and leave the file
+  // half-downloaded on disk.
+  for (let i = downloadQueue.length - 1; i >= 0; i--) {
+    if (downloadQueue[i].status !== 'downloading') {
+      downloadQueue.splice(i, 1);
+    }
+  }
+  renderQueue();
+  renderYmResults(ymTracks);
+  updateQueueTabBadge();
+}
+
+function activateDlTab(target) {
+  document.querySelectorAll('.dl-tabs .dl-tab').forEach(t => {
+    const on = t.dataset.dlTab === target;
+    t.classList.toggle('is-active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.dl-pane').forEach(p => {
+    p.hidden = p.dataset.dlPane !== target;
+  });
+  if (target === 'queue') renderQueue();
+}
+
+(function wireQueueControls() {
+  const queueAll = $('dl-ym-queue-all');
+  if (queueAll) queueAll.addEventListener('click', enqueueAllYmTracks);
+  const clearBtn = $('dl-queue-clear-done');
+  if (clearBtn) clearBtn.addEventListener('click', clearFinishedFromQueue);
+  const clearAllBtn = $('dl-queue-clear-all');
+  if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllFromQueue);
+  const pauseBtn = $('dl-queue-pause');
+  if (pauseBtn) pauseBtn.addEventListener('click', () => setQueuePaused(!queuePaused));
+})();
+
+// ── Downloads: session restore ──
+// Restores YT search results, YM parsed tracks, and the download queue from
+// localStorage. Items that were mid-download when the session ended are reset
+// to 'queued' so the worker re-attempts them.
+function restoreDownloadsState() {
+  try {
+    const raw = localStorage.getItem(LS.ytState);
+    if (raw) {
+      const yt = JSON.parse(raw);
+      const queryEl = $('dl-yt-query');
+      if (queryEl && typeof yt.query === 'string') queryEl.value = yt.query;
+      if (Array.isArray(yt.results) && yt.results.length) renderYtResults(yt.results);
+    }
+  } catch (_) { /* ignore */ }
+  try {
+    const raw = localStorage.getItem(LS.ymState);
+    if (raw) {
+      const ym = JSON.parse(raw);
+      const urlEl = $('dl-ym-url');
+      if (urlEl && typeof ym.url === 'string') urlEl.value = ym.url;
+      if (Array.isArray(ym.tracks) && ym.tracks.length) renderYmResults(ym.tracks);
+    }
+  } catch (_) { /* ignore */ }
+  try {
+    const raw = localStorage.getItem(LS.queue);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    // Accept both the legacy plain-array shape and the new {paused, items} shape.
+    const items = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.items) ? parsed.items : []);
+    if (parsed && !Array.isArray(parsed)) queuePaused = !!parsed.paused;
+    if (!items.length) return;
+    for (const it of items) {
+      const id = typeof it.id === 'string' ? it.id : ('q-' + (++queueIdSeq));
+      const m = id.match(/^q-(\d+)$/);
+      if (m) queueIdSeq = Math.max(queueIdSeq, parseInt(m[1], 10));
+      downloadQueue.push({
+        id,
+        source: it.source || 'yandex',
+        key: it.key || '',
+        artist: it.artist || '',
+        title: it.title || '',
+        duration: it.duration || '',
+        query: it.query || '',
+        suggestedName: it.suggestedName || '',
+        videoId: it.videoId || '',
+        url: it.url || '',
+        status: it.status === 'downloading' ? 'queued' : (it.status || 'queued'),
+        percent: 0,
+        indeterminate: false,
+        filePath: it.filePath || '',
+        error: it.error || '',
+        requestId: '',
+      });
+    }
+    renderQueue();
+    // Re-render result rows so any "В очереди" badges reflect the restored queue.
+    if (ymTracks && ymTracks.length) renderYmResults(ymTracks);
+    if (ytLastResults && ytLastResults.length) renderYtResults(ytLastResults);
+    updateQueueTabBadge();
+    startQueueWorker();
+  } catch (_) { /* ignore */ }
+}
 
 // ── Render: sidebar counts + recents ──
 function renderCounts() {
@@ -3426,4 +4118,5 @@ updateShuffleUI();
 updateRepeatUI();
 loadLastTrack();
 restoreCovers();
+restoreDownloadsState();
 rescanOnBoot();

@@ -373,6 +373,10 @@
         <div class="dl-tabs" role="tablist">
           <button type="button" class="dl-tab is-active" data-dl-tab="internet" role="tab" aria-selected="true" data-i18n="downloads.tab.internet">Из интернета</button>
           <button type="button" class="dl-tab" data-dl-tab="parsing" role="tab" aria-selected="false" data-i18n="downloads.tab.parsing">Парсинг</button>
+          <button type="button" class="dl-tab" data-dl-tab="queue" role="tab" aria-selected="false">
+            <span data-i18n="downloads.tab.queue">Очередь</span>
+            <span class="dl-tab-count" id="dl-queue-tab-count" hidden>0</span>
+          </button>
         </div>
 
         <div class="dl-pane" data-dl-pane="internet">
@@ -391,6 +395,11 @@
           </div>
 
           <div id="dl-yt-status" class="dl-status" hidden></div>
+
+          <button type="button" id="dl-yt-queue-all" class="dl-search-btn dl-search-btn-secondary dl-ym-queue-all" hidden>
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span data-i18n="downloads.queue.addAll">Все треки в очередь</span>
+          </button>
 
           <div id="dl-yt-results" class="dl-results" hidden>
             <div class="dl-results-head">
@@ -434,6 +443,11 @@
 
             <div id="dl-ym-status" class="dl-status" hidden></div>
 
+            <button type="button" id="dl-ym-queue-all" class="dl-search-btn dl-search-btn-secondary dl-ym-queue-all" hidden>
+              <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+              <span data-i18n="downloads.queue.addAll">Все треки в очередь</span>
+            </button>
+
             <div id="dl-ym-results" class="dl-results" hidden>
               <div class="dl-results-head dl-results-head-ym">
                 <div class="dl-col-num">#</div>
@@ -454,6 +468,34 @@
             </div>
           </div>
         </div>
+
+        <div class="dl-pane" data-dl-pane="queue" hidden>
+          <div class="dl-queue-head">
+            <div class="dl-queue-stats" id="dl-queue-stats"></div>
+            <div class="dl-queue-actions">
+              <button type="button" class="dl-search-btn dl-search-btn-secondary" id="dl-queue-pause" hidden>
+                <svg class="i" width="12" height="12"><use href="#i-pause"/></svg>
+                <span id="dl-queue-pause-label" data-i18n="downloads.queue.pause">Пауза</span>
+              </button>
+              <button type="button" class="dl-search-btn dl-search-btn-secondary" id="dl-queue-clear-done" hidden>
+                <svg class="i" width="12" height="12"><use href="#i-trash"/></svg>
+                <span data-i18n="downloads.queue.clearDone">Очистить завершённые</span>
+              </button>
+              <button type="button" class="dl-search-btn dl-search-btn-secondary" id="dl-queue-clear-all" hidden>
+                <svg class="i" width="12" height="12"><use href="#i-trash"/></svg>
+                <span data-i18n="downloads.queue.clearAll">Очистить всё</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="dl-queue-list" class="dl-queue-list"></div>
+
+          <div id="dl-queue-empty" class="empty-block show">
+            <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
+            <div class="empty-title-lg" data-i18n="downloads.queue.empty.title">Очередь пуста</div>
+            <div class="empty-text" data-i18n="downloads.queue.empty.text">Добавьте треки в очередь со вкладки «Парсинг», и они начнут скачиваться один за другим.</div>
+          </div>
+        </div>
       </section>
 
       <!-- Settings -->
@@ -462,7 +504,7 @@
           <div class="crumb">
             <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
           </div>
-          <div class="version-tag">Audex 1.0.0</div>
+          <div class="version-tag">Audex 1.1.0</div>
         </header>
 
         <div class="settings-page">
@@ -600,7 +642,7 @@
               <div class="setting-row">
                 <div class="setting-text">
                   <div class="setting-label" data-i18n="setting.version">Версия</div>
-                  <div class="setting-desc">1.0.0 · Electron · Linux</div>
+                  <div class="setting-desc">1.1.0 · Electron · Linux</div>
                 </div>
               </div>
             </div>
