@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -61,23 +61,42 @@ app.on('window-all-closed', function () {
 
 // Portrait ("mobile player") mode: shrinks the window to a tall narrow size and
 // remembers the previous bounds + minimum size so we can restore them on exit.
+// We resize synchronously here rather than interpolating frame-by-frame because
+// the renderer drives a FLIP-based cover animation that needs the *final*
+// layout to be in effect at measurement time. A staggered window resize would
+// give the renderer a moving target and the cover would snap at the end.
 let portraitSavedBounds = null;
 let portraitSavedMinSize = null;
 ipcMain.handle('window:setPortrait', async (event, payload) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return { success: false };
   const on = !!(payload && payload.on);
+  const portraitW = 420;
+  const portraitH = 780;
+
+  // If the OS window is in fullscreen, don't resize — that would forcibly exit
+  // fullscreen. The CSS in `.is-portrait` already adapts the layout to any width,
+  // so a centered mobile column will render inside the fullscreen viewport.
+  if (win.isFullScreen()) {
+    return { success: true, fullscreen: true };
+  }
+
   if (on) {
     if (!portraitSavedBounds) {
       portraitSavedBounds = win.getBounds();
       portraitSavedMinSize = win.getMinimumSize();
     }
     win.setMinimumSize(320, 560);
-    win.setSize(420, 780, true);
-    win.center();
+    const display = screen.getDisplayMatching(win.getBounds());
+    win.setBounds({
+      width: portraitW,
+      height: portraitH,
+      x: Math.round(display.workArea.x + (display.workArea.width - portraitW) / 2),
+      y: Math.round(display.workArea.y + (display.workArea.height - portraitH) / 2),
+    }, false);
   } else {
     if (portraitSavedMinSize) win.setMinimumSize(portraitSavedMinSize[0], portraitSavedMinSize[1]);
-    if (portraitSavedBounds) win.setBounds(portraitSavedBounds, true);
+    if (portraitSavedBounds) win.setBounds(portraitSavedBounds, false);
     portraitSavedBounds = null;
     portraitSavedMinSize = null;
   }
@@ -191,6 +210,17 @@ ipcMain.handle('shell:revealInFolder', async (event, filePath) => {
     return true;
   }
   return false;
+});
+
+ipcMain.handle('shell:openExternal', async (event, url) => {
+  if (typeof url !== 'string') return { success: false, error: 'No url' };
+  if (!/^https?:\/\//i.test(url)) return { success: false, error: 'Only http(s) URLs are allowed' };
+  try {
+    await shell.openExternal(url);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: String(err) };
+  }
 });
 
 ipcMain.handle('shell:deleteFile', async (event, filePath) => {

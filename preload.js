@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeMetadata: (filePath, tags) => ipcRenderer.invoke('music:writeMetadata', { filePath, tags }),
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),
+  openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
   ytSearch: (query, count) => ipcRenderer.invoke('downloads:ytSearch', query, count),
   ytDownload: (payload) => ipcRenderer.invoke('downloads:ytDownload', payload),
   ytDownloadByQuery: (payload) => ipcRenderer.invoke('downloads:ytDownloadByQuery', payload),

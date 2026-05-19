@@ -159,6 +159,94 @@ input { font-family: inherit; color: inherit; }
   font-family: ui-monospace, monospace;
 }
 
+/* ── Search nav button animations ──
+   The search item gets a bit more personality than the other nav links:
+   the magnifying glass tilts and lifts on hover, a soft glow sweeps across
+   the row, and the ⌘K chip lights up like a key. */
+.nav-search {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.nav-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  transform-origin: 60% 60%;
+  transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), color 160ms ease;
+}
+.nav-search-shortcut {
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-faint);
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* A diagonal sheen that sweeps across the row on hover. Sits behind the
+   content via z-index so the text stays readable. */
+.nav-search::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    color-mix(in srgb, var(--text-strong) 14%, transparent) 50%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 220ms ease;
+}
+.nav-search:hover::before {
+  transform: translateX(110%);
+  opacity: 1;
+}
+.nav-search:hover .nav-search-icon {
+  transform: rotate(-12deg) scale(1.18);
+  color: var(--text-strong);
+}
+.nav-search:hover .nav-search-shortcut {
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--text-strong) 10%, transparent);
+  border-color: var(--border);
+  transform: translateY(-1px);
+}
+.nav-search:active .nav-search-icon {
+  transform: rotate(-4deg) scale(0.94);
+  transition-duration: 120ms;
+}
+.nav-search:active .nav-search-shortcut {
+  transform: translateY(0);
+  transition-duration: 80ms;
+}
+
+/* Brief celebratory pulse when the user actually triggers the palette —
+   the JS toggles .is-pinging on the search item for one animation cycle. */
+@keyframes nav-search-ping {
+  0%   { transform: rotate(0)    scale(1); }
+  25%  { transform: rotate(-18deg) scale(1.25); }
+  55%  { transform: rotate(10deg)  scale(0.92); }
+  100% { transform: rotate(0)    scale(1); }
+}
+.nav-search.is-pinging .nav-search-icon {
+  animation: nav-search-ping 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-search::before,
+  .nav-search-icon,
+  .nav-search-shortcut { transition: none; }
+  .nav-search:hover::before { opacity: 0; transform: none; }
+  .nav-search:hover .nav-search-icon { transform: none; }
+  .nav-search.is-pinging .nav-search-icon { animation: none; }
+}
+
 .nav-section {
   margin-bottom: 22px;
 }
@@ -1950,7 +2038,11 @@ input { font-family: inherit; color: inherit; }
   border-color: var(--border-strong);
 }
 
-/* ── Portrait ("mobile player") layout ── */
+/* ── Portrait ("mobile player") layout ──
+   Adapts from a 420×780 phone-sized window all the way up to a fullscreen
+   1920×1080 viewport. Sizes scale with the smaller viewport dimension (vmin)
+   but are capped so the layout reads as a centered mobile column on big
+   screens instead of stretching everything. */
 .fs-overlay.is-portrait .fs-topbar {
   height: 48px;
   padding: 0 16px;
@@ -1962,22 +2054,28 @@ input { font-family: inherit; color: inherit; }
 .fs-overlay.is-portrait .fs-body {
   grid-template-columns: 1fr;
   gap: 16px;
-  padding: 16px 20px 28px;
+  padding: clamp(12px, 3vmin, 32px) clamp(16px, 4vmin, 40px) clamp(20px, 5vmin, 48px);
   overflow-y: auto;
+  /* Center the mobile column horizontally on wider/fullscreen windows. */
+  place-items: start center;
 }
 .fs-overlay.is-portrait .fs-main {
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: clamp(16px, 3.2vmin, 32px);
   width: 100%;
+  max-width: min(92vw, 460px);
 }
 .fs-overlay.is-portrait .fs-cover {
-  width: min(78vw, 340px);
-  height: min(78vw, 340px);
-  padding: 16px;
+  /* Scales with the smaller viewport dimension so it stays square-friendly on
+     both tall narrow and wide-fullscreen windows. Capped at 420px so it doesn't
+     dominate on a giant screen. */
+  width: min(78vw, 62vh, 420px);
+  height: min(78vw, 62vh, 420px);
+  padding: clamp(12px, 2.4vmin, 22px);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3);
 }
-.fs-overlay.is-portrait .fs-cover-letter { font-size: 72px; }
+.fs-overlay.is-portrait .fs-cover-letter { font-size: clamp(54px, 9vmin, 96px); }
 .fs-overlay.is-portrait .fs-info {
   max-width: 100%;
   min-width: 0;
@@ -1987,37 +2085,116 @@ input { font-family: inherit; color: inherit; }
 }
 .fs-overlay.is-portrait .eq-line { justify-content: center; margin-bottom: 8px; }
 .fs-overlay.is-portrait .fs-title {
-  font-size: 30px;
+  font-size: clamp(24px, 4.2vmin, 44px);
   margin-bottom: 6px;
   letter-spacing: -0.3px;
   /* Long titles wrap rather than overflow the narrow window. */
   white-space: normal;
   word-wrap: break-word;
+  line-height: 1.05;
 }
 .fs-overlay.is-portrait .fs-artist {
-  font-size: 15px;
+  font-size: clamp(13px, 1.8vmin, 18px);
   margin-bottom: 2px;
 }
 .fs-overlay.is-portrait .fs-album {
-  font-size: 12px;
+  font-size: clamp(11px, 1.5vmin, 14px);
   margin-bottom: 18px;
 }
 .fs-overlay.is-portrait .fs-progress { margin-bottom: 16px; }
 .fs-overlay.is-portrait .fs-ctrls {
   justify-content: center;
-  gap: 18px;
+  gap: clamp(14px, 2.4vmin, 26px);
   margin-bottom: 14px;
 }
 .fs-overlay.is-portrait .fs-secondary {
   justify-content: center;
   flex-wrap: wrap;
+  gap: 10px;
 }
 .fs-overlay.is-portrait .fs-queue { display: none; }
 
-/* Volume slider mirrored from the bottom playbar — desktop layout already
-   exposes it down there, so only show this copy in portrait mode. */
+/* In portrait the .fs-info column stacks all the now-playing widgets in DOM
+   order, which puts the volume slider dead last — often below the fold on a
+   780px-tall window. Promote it to sit right after the play controls (still
+   above the favourite/playlist buttons) so it's visible without scrolling. */
+.fs-overlay.is-portrait .fs-ctrls    { order: 1; }
+.fs-overlay.is-portrait .fs-volume   { order: 2; }
+.fs-overlay.is-portrait .fs-secondary { order: 3; }
+
+/* The default slider is 140×4px with an ~8% white fill — fine on the desktop
+   overlay but barely readable on a phone-sized layout. In portrait give it
+   more height and width so it actually looks like a control you can grab. */
+.fs-overlay.is-portrait .fs-volume {
+  margin-top: 10px;
+  /* Wider centre column so the slider gets the room it needs. */
+  grid-template-columns: auto 1fr auto;
+}
+.fs-overlay.is-portrait .fs-vol-track {
+  width: 100%;
+  max-width: 340px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.16);
+}
+[data-theme="light"] .fs-overlay.is-portrait .fs-vol-track {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+/* Very short windows (height-constrained, e.g. landscape phone aspect or a
+   short fullscreen): shrink the cover further so controls stay visible without
+   scrolling. */
+@media (max-height: 620px) {
+  .fs-overlay.is-portrait .fs-cover {
+    width: min(38vh, 220px);
+    height: min(38vh, 220px);
+  }
+  .fs-overlay.is-portrait .fs-main { gap: 14px; }
+  .fs-overlay.is-portrait .fs-album { margin-bottom: 10px; }
+}
+
+/* Very narrow windows (sub-360 phone-sized): tighten the side padding so the
+   cover can use more of the viewport width. */
+@media (max-width: 360px) {
+  .fs-overlay.is-portrait .fs-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .fs-overlay.is-portrait .fs-cover {
+    width: min(84vw, 300px);
+    height: min(84vw, 300px);
+  }
+}
+
+/* ── Morph transition: portrait toggle ── */
+/* The fs-title etc. already have a transition for the open/close stagger
+   (380ms). We reuse it: just toggle opacity + translateY via .is-morphing and
+   the existing transition handles the fade in both directions. fs-info and
+   fs-volume aren't in the stagger list, so define their own here. */
+.fs-overlay .fs-info,
+.fs-overlay .fs-volume {
+  transition: opacity 240ms ease, transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fs-overlay.is-morphing .fs-info,
+.fs-overlay.is-morphing .fs-queue,
+.fs-overlay.is-morphing .fs-volume,
+.fs-overlay.is-morphing .fs-title,
+.fs-overlay.is-morphing .fs-artist,
+.fs-overlay.is-morphing .fs-album,
+.fs-overlay.is-morphing .fs-progress,
+.fs-overlay.is-morphing .fs-ctrls,
+.fs-overlay.is-morphing .fs-secondary,
+.fs-overlay.is-morphing .eq-line {
+  opacity: 0;
+  transform: translateY(6px);
+  /* No transition-delay during morph — the staggered open delays would make
+     things reappear after the cover has already settled. */
+  transition-delay: 0ms;
+}
+
+/* Volume slider inside the fullscreen now-playing view. Mirrors the bottom
+   playbar's slider so the user can adjust volume without leaving the overlay. */
 .fs-volume {
-  display: none;
+  display: grid;
   align-items: center;
   /* 3-column grid keeps the slider dead-centered on the row while still leaving
      room for the mute button on the left. */
@@ -2025,7 +2202,6 @@ input { font-family: inherit; color: inherit; }
   gap: 10px;
   margin-top: 16px;
 }
-.fs-overlay.is-portrait .fs-volume { display: grid; }
 .fs-volume #fs-btn-mute { justify-self: end; }
 .fs-volume .fs-vol-track { justify-self: center; }
 .fs-vol-track {
@@ -2659,3 +2835,68 @@ input { font-family: inherit; color: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* ─── Responsive: narrow desktop windows ───
+   Min window is 1024×700 (main.js). Everything below kicks in at ≤1100px so
+   the cramped 1024–1100 range stays usable. All rules are inside the media
+   query — when the window grows back, the defaults take over unchanged. */
+@media (max-width: 1100px) {
+  /* Sidebar — shrink width and tighten padding. Returns to 248px above 1100. */
+  .sidebar {
+    width: 200px;
+    padding: 16px 12px 12px;
+  }
+  .brand { padding: 2px 2px 18px; }
+  /* The ⌘K hint eats horizontal room in a 200px sidebar — drop it; the
+     shortcut still works, the search-nav button keeps its label and icon. */
+  .nav-shortcut { display: none; }
+
+  /* Topbar — let the searchbox flex inside the available room instead of
+     stealing 280px. Drop the version tag (cosmetic, not load-bearing). */
+  .searchbox {
+    width: auto;
+    flex: 1 1 auto;
+    max-width: 260px;
+    min-width: 140px;
+  }
+  .version-tag { display: none; }
+
+  /* Track table — hide the Album column (4th cell of .thead and .trow). The
+     grid template loses its 0.7fr slot, gap shrinks slightly to give the
+     remaining columns more breathing room. */
+  .thead, .trow {
+    grid-template-columns: 28px 1fr 0.9fr 60px 28px;
+    gap: 12px;
+  }
+  .thead > div:nth-child(4),
+  .trow > div:nth-child(4) {
+    display: none;
+  }
+
+  /* Playbar — drop the volume slider (mute button stays; scroll-wheel still
+     adjusts volume in the renderer). Progress can use the full center column. */
+  .playbar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
+    padding: 0 14px;
+    gap: 14px;
+  }
+  .vol-track { display: none; }
+  .progress-row { max-width: none; }
+
+  /* Fullscreen overlay — slimmer queue column and a smaller cover so the
+     2-column layout fits within ~820px of content room. */
+  .fs-body {
+    grid-template-columns: 1fr 260px;
+    gap: 24px;
+    padding: 24px 24px 48px;
+  }
+  .fs-main { gap: 36px; }
+  .fs-cover { width: 280px; height: 280px; }
+  .fs-cover-letter { font-size: 80px; }
+  .fs-title { font-size: 44px; }
+
+  /* Settings — theme cards reflow into 2 columns if needed instead of always
+     squeezing 3 across. */
+  .theme-cards { flex-wrap: wrap; }
+  .theme-card { flex: 1 1 calc(50% - 5px); min-width: 140px; }
+}

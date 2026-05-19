@@ -234,6 +234,11 @@ const I18N = {
     'section.downloads': 'Скачивание из интернета',
     'section.language': 'Язык',
     'section.about': 'О приложении',
+    'section.contacts': 'Контакты',
+    'setting.github': 'GitHub',
+    'setting.githubDesc': 'Исходный код проекта на GitHub.',
+    'setting.telegram': 'Telegram',
+    'setting.telegramDesc': 'Нашли баг или есть предложение — пишите в Telegram.',
     'theme.dark': 'Тёмная',
     'theme.light': 'Светлая',
     'theme.system': 'Системная',
@@ -446,6 +451,11 @@ const I18N = {
     'section.downloads': 'Download from the internet',
     'section.language': 'Language',
     'section.about': 'About',
+    'section.contacts': 'Contacts',
+    'setting.github': 'GitHub',
+    'setting.githubDesc': 'Project source code on GitHub.',
+    'setting.telegram': 'Telegram',
+    'setting.telegramDesc': 'Found a bug or have a suggestion — write on Telegram.',
     'theme.dark': 'Dark',
     'theme.light': 'Light',
     'theme.system': 'System',
@@ -658,6 +668,11 @@ const I18N = {
     'section.downloads': 'Aus dem Internet herunterladen',
     'section.language': 'Sprache',
     'section.about': 'Über die App',
+    'section.contacts': 'Kontakte',
+    'setting.github': 'GitHub',
+    'setting.githubDesc': 'Quellcode des Projekts auf GitHub.',
+    'setting.telegram': 'Telegram',
+    'setting.telegramDesc': 'Bug gefunden oder Vorschlag — schreib auf Telegram.',
     'theme.dark': 'Dunkel',
     'theme.light': 'Hell',
     'theme.system': 'System',
@@ -870,6 +885,11 @@ const I18N = {
     'section.downloads': "Téléchargement depuis Internet",
     'section.language': 'Langue',
     'section.about': "À propos",
+    'section.contacts': 'Contacts',
+    'setting.github': 'GitHub',
+    'setting.githubDesc': 'Code source du projet sur GitHub.',
+    'setting.telegram': 'Telegram',
+    'setting.telegramDesc': "Trouvé un bug ou une suggestion — écrivez sur Telegram.",
     'theme.dark': 'Sombre',
     'theme.light': 'Clair',
     'theme.system': 'Système',
@@ -1082,6 +1102,11 @@ const I18N = {
     'section.downloads': 'Завантаження з інтернету',
     'section.language': 'Мова',
     'section.about': 'Про застосунок',
+    'section.contacts': 'Контакти',
+    'setting.github': 'GitHub',
+    'setting.githubDesc': 'Вихідний код проєкту на GitHub.',
+    'setting.telegram': 'Telegram',
+    'setting.telegramDesc': 'Знайшли баг або є пропозиція — пишіть у Telegram.',
     'theme.dark': 'Темна',
     'theme.light': 'Світла',
     'theme.system': 'Системна',
@@ -1477,7 +1502,14 @@ function setView(view) {
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', e => {
     e.preventDefault();
-    if (item.dataset.action === 'open-palette') return openPalette();
+    if (item.dataset.action === 'open-palette') {
+      // Replay the icon-ping animation by toggling the class off and back on.
+      item.classList.remove('is-pinging');
+      void item.offsetWidth;
+      item.classList.add('is-pinging');
+      setTimeout(() => item.classList.remove('is-pinging'), 600);
+      return openPalette();
+    }
     if (item.dataset.view) setView(item.dataset.view);
   });
 });
@@ -3555,15 +3587,81 @@ function closeFullscreen() {
 }
 
 let portraitMode = false;
-function setPortraitMode(on) {
-  portraitMode = !!on;
+let portraitAnimating = false;
+
+// FLIP morph between desktop and portrait layouts.
+//   1. Capture cover rect (FIRST). Hide cover so the user never sees it snap.
+//   2. Swap .is-portrait + ask main to resize the window. Wait for the IPC and
+//      one frame so the new layout is settled.
+//   3. Measure cover rect (LAST), compute the inverse translate+scale, apply
+//      it as a transform, reveal the cover — it's now visually back where it
+//      started but ready to glide to its new spot.
+//   4. Animate the transform to identity. The surrounding content fades out
+//      via .is-morphing and back in 140ms later, hiding the layout shift.
+async function setPortraitMode(on) {
+  on = !!on;
+  if (portraitAnimating || on === portraitMode) return;
+  portraitAnimating = true;
+  portraitMode = on;
+
   const overlay = $('fullscreen-overlay');
-  overlay.classList.toggle('is-portrait', portraitMode);
+  const cover = $('fs-cover');
   const btn = $('btn-fs-portrait');
-  if (btn) btn.classList.toggle('is-active', portraitMode);
-  if (window.electronAPI && window.electronAPI.setPortrait) {
-    window.electronAPI.setPortrait(portraitMode);
-  }
+
+  const first = cover.getBoundingClientRect();
+
+  // Hide the cover before any layout change so the user doesn't see it snap
+  // to its new position while we wait for the window to resize. We'll re-show
+  // it once the FLIP transform has been applied.
+  cover.style.visibility = 'hidden';
+
+  overlay.classList.add('is-morphing');
+  overlay.classList.toggle('is-portrait', on);
+  if (btn) btn.classList.toggle('is-active', on);
+
+  try {
+    if (window.electronAPI && window.electronAPI.setPortrait) {
+      await window.electronAPI.setPortrait(on);
+    }
+  } catch (_) { /* ignore */ }
+  // One frame so Chromium picks up the new window size and reflows.
+  await new Promise(r => requestAnimationFrame(r));
+
+  // Force a layout pass so the new rect is measurable on this frame.
+  void overlay.offsetHeight;
+  const last = cover.getBoundingClientRect();
+
+  const sx = first.width / Math.max(1, last.width);
+  const sy = first.height / Math.max(1, last.height);
+  const dx = first.left - last.left;
+  const dy = first.top - last.top;
+
+  const startTransform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+
+  // Pre-apply the FLIP transform via inline style BEFORE revealing the cover —
+  // it's visually back at its starting position when the user sees it again.
+  cover.style.transformOrigin = 'top left';
+  cover.style.transform = startTransform;
+  cover.style.visibility = '';
+  void cover.offsetHeight;
+
+  const dur = 420;
+  const ease = 'cubic-bezier(0.32, 0.72, 0.18, 1)';
+  const coverAnim = cover.animate([
+    { transform: startTransform, transformOrigin: 'top left' },
+    { transform: 'none', transformOrigin: 'top left' },
+  ], { duration: dur, easing: ease, fill: 'both' });
+
+  // Fade the surrounding content back in slightly after the cover starts
+  // moving so the new layout reveals smoothly rather than all at once.
+  setTimeout(() => overlay.classList.remove('is-morphing'), 140);
+
+  try { await coverAnim.finished; } catch (_) { /* ignore cancellations */ }
+  try { coverAnim.cancel(); } catch (_) {}
+  cover.style.transform = '';
+  cover.style.transformOrigin = '';
+  overlay.classList.remove('is-morphing');
+  portraitAnimating = false;
 }
 function togglePortraitMode() { setPortraitMode(!portraitMode); }
 
@@ -4108,6 +4206,13 @@ $('btn-choose-default-folder').addEventListener('click', async () => {
     saveSettings();
     renderSettings();
   }
+});
+
+document.querySelectorAll('[data-open-url]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const url = btn.dataset.openUrl;
+    if (url) window.electronAPI.openExternal(url);
+  });
 });
 
 function setUiScale(scale) {
