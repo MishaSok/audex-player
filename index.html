@@ -31,6 +31,7 @@
       <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
       <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
       <symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 9h18l-2 8a2 2 0 0 1-2 1.5H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
       <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></symbol>
       <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></symbol>
       <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
@@ -397,10 +398,45 @@
         </div>
 
         <div class="dl-pane" data-dl-pane="parsing" hidden>
-          <div class="empty-block show">
-            <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-download"/></svg></div>
-            <div class="empty-title-lg" data-i18n="downloads.parsing.title">Парсинг</div>
-            <div class="empty-text" data-i18n="downloads.parsing.subtitle">Здесь появится возможность собирать треки парсингом со страниц. Раздел в разработке.</div>
+          <div class="dl-subtabs" role="tablist">
+            <button type="button" class="dl-subtab is-active" data-dl-subtab="yandex" role="tab" aria-selected="true" data-i18n="downloads.parsing.subtab.yandex">Яндекс.Музыка</button>
+          </div>
+
+          <div class="dl-subpane" data-dl-subpane="yandex">
+            <div class="dl-search">
+              <div class="dl-search-row">
+                <label class="dl-search-field" for="dl-ym-url">
+                  <svg class="i" width="13" height="13"><use href="#i-link"/></svg>
+                  <input type="text" id="dl-ym-url" class="dl-search-input" data-i18n-placeholder="downloads.parsing.urlPlaceholder" placeholder="https://music.yandex.ru/playlists/…">
+                </label>
+                <button type="button" id="dl-ym-parse-btn" class="dl-search-btn">
+                  <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
+                  <span data-i18n="downloads.parsing.start">Парсить</span>
+                </button>
+              </div>
+              <div class="dl-search-hint" data-i18n="downloads.parsing.hint">Вставьте ссылку на плейлист или альбом. Парсер работает в фоне.</div>
+            </div>
+
+            <div id="dl-ym-status" class="dl-status" hidden></div>
+
+            <div id="dl-ym-results" class="dl-results" hidden>
+              <div class="dl-results-head dl-results-head-ym">
+                <div class="dl-col-num">#</div>
+                <div class="dl-col-artist" data-i18n="downloads.parsing.col.artist">Исполнитель</div>
+                <div class="dl-col-title" data-i18n="downloads.parsing.col.title">Название</div>
+                <div class="dl-col-duration" data-i18n="downloads.parsing.col.duration">Длит.</div>
+                <div class="dl-col-action"></div>
+              </div>
+              <div id="dl-ym-rows" class="dl-results-body"></div>
+            </div>
+
+            <div id="dl-ym-tag-note" class="dl-tag-note" hidden data-i18n="downloads.yt.tagNote">После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.</div>
+
+            <div id="dl-ym-empty" class="empty-block show">
+              <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-link"/></svg></div>
+              <div class="empty-title-lg" data-i18n="downloads.parsing.idle.title">Парсинг Яндекс.Музыки</div>
+              <div class="empty-text" data-i18n="downloads.parsing.idle.text">Вставьте ссылку на плейлист или альбом из «Яндекс.Музыки». Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -511,6 +547,13 @@
                   <div class="setting-desc" data-i18n="setting.showDownloadsDesc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
                 </div>
                 <button class="toggle" data-setting="downloads"><div class="toggle-knob"></div></button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-text">
+                  <div class="setting-label" data-i18n="setting.showParserBrowser">Показывать окно браузера при парсинге</div>
+                  <div class="setting-desc" data-i18n="setting.showParserBrowserDesc">Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.</div>
+                </div>
+                <button class="toggle" data-setting="show-parser-browser"><div class="toggle-knob"></div></button>
               </div>
             </div>
           </section>

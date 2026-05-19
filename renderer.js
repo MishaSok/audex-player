@@ -21,6 +21,7 @@ let settings = Object.assign({
   scanSubdirs: true,
   autoRescan: false,
   downloads: false,
+  showParserBrowser: true,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -174,7 +175,7 @@ const I18N = {
     'downloads.yt.col.channel': 'Канал',
     'downloads.yt.col.duration': 'Длит.',
     'downloads.yt.idle.title': 'Найдите трек на YouTube',
-    'downloads.yt.idle.text': 'Введите название — внизу появится список mp3, доступных для скачивания. Файлы сохраняются в папку «Audex Downloads» и автоматически добавляются в библиотеку.',
+    'downloads.yt.idle.text': 'Введите название — внизу появится список mp3, доступных для скачивания. Файлы сохраняются в папку по умолчанию (если она задана в настройках) или в «Audex Downloads», и автоматически добавляются в библиотеку.',
     'downloads.yt.searching': 'Ищу: «{q}»…',
     'downloads.yt.empty': 'Ничего не найдено по запросу «{q}».',
     'downloads.yt.error': 'Ошибка поиска: {e}',
@@ -185,6 +186,18 @@ const I18N = {
     'downloads.yt.downloadError': 'Не удалось: {e}',
     'downloads.yt.downloadOk': 'Скачано и добавлено в библиотеку: {t}',
     'downloads.yt.tagNote': 'После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.',
+    'downloads.parsing.subtab.yandex': 'Яндекс.Музыка',
+    'downloads.parsing.urlPlaceholder': 'https://music.yandex.ru/playlists/…',
+    'downloads.parsing.start': 'Парсить',
+    'downloads.parsing.hint': 'Вставьте ссылку на плейлист или альбом. Парсер работает в фоне.',
+    'downloads.parsing.col.artist': 'Исполнитель',
+    'downloads.parsing.col.title': 'Название',
+    'downloads.parsing.col.duration': 'Длит.',
+    'downloads.parsing.idle.title': 'Парсинг Яндекс.Музыки',
+    'downloads.parsing.idle.text': 'Вставьте ссылку на плейлист или альбом из «Яндекс.Музыки». Приложение соберёт список треков в фоне, и вы сможете скачать любой одним кликом.',
+    'downloads.parsing.starting': 'Запускаем парсер…',
+    'downloads.parsing.done': 'Готово — собрано треков: {n}',
+    'downloads.parsing.error': 'Ошибка парсинга: {e}',
     'settings.title': 'Настройки',
     'settings.subtitle': 'Внешний вид, источники музыки и поведение приложения.',
     'section.appearance': 'Внешний вид',
@@ -203,6 +216,8 @@ const I18N = {
     'setting.autoRescanDesc': 'Перепроверять папку при каждом запуске.',
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
+    'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
+    'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
     'setting.uiLanguage': 'Язык интерфейса',
     'setting.uiLanguageDesc': 'Применяется сразу.',
     'setting.version': 'Версия',
@@ -343,7 +358,7 @@ const I18N = {
     'downloads.yt.col.channel': 'Channel',
     'downloads.yt.col.duration': 'Dur.',
     'downloads.yt.idle.title': 'Find a track on YouTube',
-    'downloads.yt.idle.text': 'Enter a name — a list of downloadable mp3 files will appear below. Files are saved to the "Audex Downloads" folder and added to your library.',
+    'downloads.yt.idle.text': 'Enter a name — a list of downloadable mp3 files will appear below. Files are saved to your default folder (if set in Settings) or to "Audex Downloads", and added to your library.',
     'downloads.yt.searching': 'Searching: "{q}"…',
     'downloads.yt.empty': 'Nothing found for "{q}".',
     'downloads.yt.error': 'Search error: {e}',
@@ -354,6 +369,18 @@ const I18N = {
     'downloads.yt.downloadError': 'Failed: {e}',
     'downloads.yt.downloadOk': 'Downloaded and added to library: {t}',
     'downloads.yt.tagNote': 'After downloading, you may need to manually fix the MP3 tags (title, artist, cover) via the track context menu.',
+    'downloads.parsing.subtab.yandex': 'Yandex Music',
+    'downloads.parsing.urlPlaceholder': 'https://music.yandex.com/playlists/…',
+    'downloads.parsing.start': 'Parse',
+    'downloads.parsing.hint': 'Paste a playlist or album link. Parsing runs in the background.',
+    'downloads.parsing.col.artist': 'Artist',
+    'downloads.parsing.col.title': 'Title',
+    'downloads.parsing.col.duration': 'Dur.',
+    'downloads.parsing.idle.title': 'Parse Yandex Music',
+    'downloads.parsing.idle.text': 'Paste a playlist or album link from Yandex Music. The app will collect the track list in the background, and let you download any of them in one click.',
+    'downloads.parsing.starting': 'Starting parser…',
+    'downloads.parsing.done': 'Done — {n} tracks collected',
+    'downloads.parsing.error': 'Parsing error: {e}',
     'settings.title': 'Settings',
     'settings.subtitle': 'Appearance, music sources, and app behavior.',
     'section.appearance': 'Appearance',
@@ -372,6 +399,8 @@ const I18N = {
     'setting.autoRescanDesc': 'Re-check the folder each time the app starts.',
     'setting.showDownloads': 'Show the “Downloads” tab',
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
+    'setting.showParserBrowser': 'Show the browser window while parsing',
+    'setting.showParserBrowserDesc': 'Useful for signing in to Yandex on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
     'setting.uiLanguage': 'Interface language',
     'setting.uiLanguageDesc': 'Applied immediately.',
     'setting.version': 'Version',
@@ -512,7 +541,7 @@ const I18N = {
     'downloads.yt.col.channel': 'Kanal',
     'downloads.yt.col.duration': 'Dauer',
     'downloads.yt.idle.title': 'Titel auf YouTube finden',
-    'downloads.yt.idle.text': 'Gib einen Namen ein — unten erscheint eine Liste herunterladbarer mp3-Dateien. Dateien werden im Ordner „Audex Downloads" gespeichert und zur Bibliothek hinzugefügt.',
+    'downloads.yt.idle.text': 'Gib einen Namen ein — unten erscheint eine Liste herunterladbarer mp3-Dateien. Dateien werden im Standardordner (falls in den Einstellungen festgelegt) oder in „Audex Downloads" gespeichert und zur Bibliothek hinzugefügt.',
     'downloads.yt.searching': 'Suche: „{q}"…',
     'downloads.yt.empty': 'Nichts gefunden zu „{q}".',
     'downloads.yt.error': 'Suchfehler: {e}',
@@ -523,6 +552,18 @@ const I18N = {
     'downloads.yt.downloadError': 'Fehlgeschlagen: {e}',
     'downloads.yt.downloadOk': 'Heruntergeladen und zur Bibliothek hinzugefügt: {t}',
     'downloads.yt.tagNote': 'Nach dem Download müssen die MP3-Tags (Titel, Interpret, Cover) eventuell manuell über das Kontextmenü des Titels angepasst werden.',
+    'downloads.parsing.subtab.yandex': 'Yandex Music',
+    'downloads.parsing.urlPlaceholder': 'https://music.yandex.com/playlists/…',
+    'downloads.parsing.start': 'Parsen',
+    'downloads.parsing.hint': 'Fügen Sie einen Playlist- oder Albumlink ein. Der Parser läuft im Hintergrund.',
+    'downloads.parsing.col.artist': 'Interpret',
+    'downloads.parsing.col.title': 'Titel',
+    'downloads.parsing.col.duration': 'Dauer',
+    'downloads.parsing.idle.title': 'Yandex Music parsen',
+    'downloads.parsing.idle.text': 'Füge einen Playlist- oder Album-Link von Yandex Music ein. Die App sammelt die Titelliste im Hintergrund, und du kannst jeden mit einem Klick herunterladen.',
+    'downloads.parsing.starting': 'Parser wird gestartet…',
+    'downloads.parsing.done': 'Fertig — {n} Titel gesammelt',
+    'downloads.parsing.error': 'Parsing-Fehler: {e}',
     'settings.title': 'Einstellungen',
     'settings.subtitle': 'Aussehen, Musikquellen und App-Verhalten.',
     'section.appearance': 'Aussehen',
@@ -541,6 +582,8 @@ const I18N = {
     'setting.autoRescanDesc': 'Den Ordner bei jedem Start neu prüfen.',
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
+    'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
+    'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
     'setting.uiLanguage': 'Sprache der Oberfläche',
     'setting.uiLanguageDesc': 'Wird sofort angewendet.',
     'setting.version': 'Version',
@@ -681,7 +724,7 @@ const I18N = {
     'downloads.yt.col.channel': 'Chaîne',
     'downloads.yt.col.duration': 'Durée',
     'downloads.yt.idle.title': 'Trouvez une piste sur YouTube',
-    'downloads.yt.idle.text': "Entrez un nom — la liste des mp3 téléchargeables apparaîtra ci-dessous. Les fichiers sont enregistrés dans le dossier « Audex Downloads » et ajoutés à votre bibliothèque.",
+    'downloads.yt.idle.text': "Entrez un nom — la liste des mp3 téléchargeables apparaîtra ci-dessous. Les fichiers sont enregistrés dans votre dossier par défaut (s'il est défini dans les paramètres) ou dans « Audex Downloads », et ajoutés à votre bibliothèque.",
     'downloads.yt.searching': 'Recherche : « {q} »…',
     'downloads.yt.empty': 'Aucun résultat pour « {q} ».',
     'downloads.yt.error': 'Erreur de recherche : {e}',
@@ -692,6 +735,18 @@ const I18N = {
     'downloads.yt.downloadError': 'Échec : {e}',
     'downloads.yt.downloadOk': 'Téléchargé et ajouté à la bibliothèque : {t}',
     'downloads.yt.tagNote': "Après le téléchargement, il peut être nécessaire de corriger manuellement les tags MP3 (titre, artiste, pochette) via le menu contextuel de la piste.",
+    'downloads.parsing.subtab.yandex': 'Yandex Music',
+    'downloads.parsing.urlPlaceholder': 'https://music.yandex.com/playlists/…',
+    'downloads.parsing.start': 'Analyser',
+    'downloads.parsing.hint': "Collez un lien de playlist ou d'album. L'analyse s'exécute en arrière-plan.",
+    'downloads.parsing.col.artist': 'Artiste',
+    'downloads.parsing.col.title': 'Titre',
+    'downloads.parsing.col.duration': 'Durée',
+    'downloads.parsing.idle.title': 'Analyser Yandex Music',
+    'downloads.parsing.idle.text': "Collez un lien de playlist ou d'album depuis Yandex Music. L'app récupérera la liste des pistes en arrière-plan, et vous pourrez en télécharger n'importe laquelle en un clic.",
+    'downloads.parsing.starting': "Démarrage de l'analyseur…",
+    'downloads.parsing.done': 'Terminé — {n} pistes collectées',
+    'downloads.parsing.error': "Erreur d'analyse : {e}",
     'settings.title': 'Paramètres',
     'settings.subtitle': "Apparence, sources musicales et comportement de l'application.",
     'section.appearance': 'Apparence',
@@ -710,6 +765,8 @@ const I18N = {
     'setting.autoRescanDesc': "Revérifier le dossier à chaque lancement.",
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
+    'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
+    'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
     'setting.uiLanguage': "Langue de l'interface",
     'setting.uiLanguageDesc': 'Appliquée immédiatement.',
     'setting.version': 'Version',
@@ -850,7 +907,7 @@ const I18N = {
     'downloads.yt.col.channel': 'Канал',
     'downloads.yt.col.duration': 'Трив.',
     'downloads.yt.idle.title': 'Знайдіть трек на YouTube',
-    'downloads.yt.idle.text': 'Введіть назву — нижче з\'явиться список mp3, доступних для завантаження. Файли зберігаються у папку «Audex Downloads» і додаються до бібліотеки.',
+    'downloads.yt.idle.text': 'Введіть назву — нижче з\'явиться список mp3, доступних для завантаження. Файли зберігаються в теку за замовчуванням (якщо її задано в налаштуваннях) або в «Audex Downloads», і додаються до бібліотеки.',
     'downloads.yt.searching': 'Шукаю: «{q}»…',
     'downloads.yt.empty': 'Нічого не знайдено за запитом «{q}».',
     'downloads.yt.error': 'Помилка пошуку: {e}',
@@ -861,6 +918,18 @@ const I18N = {
     'downloads.yt.downloadError': 'Не вдалося: {e}',
     'downloads.yt.downloadOk': 'Завантажено і додано до бібліотеки: {t}',
     'downloads.yt.tagNote': 'Після завантаження, можливо, доведеться вручну виправити MP3-теги (назва, виконавець, обкладинка) через контекстне меню треку.',
+    'downloads.parsing.subtab.yandex': 'Яндекс.Музика',
+    'downloads.parsing.urlPlaceholder': 'https://music.yandex.ua/playlists/…',
+    'downloads.parsing.start': 'Парсити',
+    'downloads.parsing.hint': 'Вставте посилання на плейлист або альбом. Парсер працює у фоновому режимі.',
+    'downloads.parsing.col.artist': 'Виконавець',
+    'downloads.parsing.col.title': 'Назва',
+    'downloads.parsing.col.duration': 'Трив.',
+    'downloads.parsing.idle.title': 'Парсинг Яндекс.Музики',
+    'downloads.parsing.idle.text': 'Вставте посилання на плейлист або альбом з «Яндекс.Музики». Застосунок збере список треків у фоні, і ви зможете завантажити будь-який одним кліком.',
+    'downloads.parsing.starting': 'Запускаємо парсер…',
+    'downloads.parsing.done': 'Готово — зібрано треків: {n}',
+    'downloads.parsing.error': 'Помилка парсингу: {e}',
     'settings.title': 'Налаштування',
     'settings.subtitle': 'Зовнішній вигляд, джерела музики та поведінка застосунку.',
     'section.appearance': 'Зовнішній вигляд',
@@ -879,6 +948,8 @@ const I18N = {
     'setting.autoRescanDesc': 'Перевіряти теку під час кожного запуску.',
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
+    'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
+    'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
     'setting.uiLanguage': 'Мова інтерфейсу',
     'setting.uiLanguageDesc': 'Застосовується одразу.',
     'setting.version': 'Версія',
@@ -1391,6 +1462,7 @@ async function downloadYtResult(idx, btn) {
       videoId: r.id,
       url: r.url,
       suggestedName: r.title,
+      targetDir: settings.defaultFolder || '',
     });
     ytActiveDownloads.delete(r.id);
     if (!res || !res.success) {
@@ -1416,6 +1488,204 @@ async function downloadYtResult(idx, btn) {
   if (input) {
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); runYtSearch(); }
+    });
+  }
+})();
+
+// ── Downloads: Parsing sub-tabs ──
+document.querySelectorAll('.dl-subtabs .dl-subtab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.dlSubtab;
+    document.querySelectorAll('.dl-subtabs .dl-subtab').forEach(t => {
+      const on = t.dataset.dlSubtab === target;
+      t.classList.toggle('is-active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.dl-subpane').forEach(p => {
+      p.hidden = p.dataset.dlSubpane !== target;
+    });
+  });
+});
+
+// ── Downloads: Yandex Music parsing ──
+let ymParseActive = false;
+let ymTracks = [];
+let ymDownloadReqSeq = 0;
+const ymActiveDownloads = new Map(); // requestId -> rowEl
+
+function setYmStatus(text, kind) {
+  const el = $('dl-ym-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function renderYmResults(tracks) {
+  ymTracks = tracks || [];
+  const wrap = $('dl-ym-results');
+  const rows = $('dl-ym-rows');
+  const empty = $('dl-ym-empty');
+  const note = $('dl-ym-tag-note');
+  if (!wrap || !rows) return;
+  if (!ymTracks.length) {
+    wrap.hidden = true;
+    if (note) note.hidden = true;
+    if (empty) empty.classList.add('show');
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  if (note) note.hidden = false;
+  rows.innerHTML = ymTracks.map((t, i) => `
+    <div class="dl-row-ym" data-ym-row="${i}">
+      <div class="num">${i + 1}</div>
+      <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+      <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
+      <div class="duration">${escapeHtml(t.duration || '')}</div>
+      <div class="action">
+        <button type="button" class="dl-download-btn" data-ym-dl="${i}">
+          <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+          <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-ym-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-ym-dl'), 10);
+      if (!isNaN(idx)) downloadYmTrack(idx, btn);
+    });
+  });
+}
+
+function restoreYmDownloadButton(actionEl, idx, labelKey, cls) {
+  actionEl.innerHTML = `
+    <button type="button" class="dl-download-btn ${cls || ''}" data-ym-dl="${idx}">
+      <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+      <span>${escapeHtml(tr(labelKey))}</span>
+    </button>
+  `;
+  const newBtn = actionEl.querySelector('[data-ym-dl]');
+  if (newBtn) newBtn.addEventListener('click', () => downloadYmTrack(idx, newBtn));
+  return newBtn;
+}
+
+async function downloadYmTrack(idx, btn) {
+  const t = ymTracks[idx];
+  if (!t || !btn) return;
+  if (btn.classList.contains('is-done')) return;
+  const rowEl = btn.closest('.dl-row-ym');
+  if (!rowEl) return;
+  const actionEl = rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  const requestId = 'ym-' + (++ymDownloadReqSeq);
+  rowEl.dataset.requestId = requestId;
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>
+  `;
+  ymActiveDownloads.set(requestId, rowEl);
+
+  const query = `${t.artist} ${t.title}`.replace(/—/g, '').trim();
+  const suggestedName = `${t.artist} - ${t.title}`;
+
+  try {
+    const res = await window.electronAPI.ytDownloadByQuery({ query, suggestedName, requestId, targetDir: settings.defaultFolder || '' });
+    ymActiveDownloads.delete(requestId);
+    if (!res || !res.success) {
+      restoreYmDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+      setYmStatus(tr('downloads.yt.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    const doneBtn = restoreYmDownloadButton(actionEl, idx, 'downloads.yt.action.done', 'is-done');
+    if (doneBtn) doneBtn.disabled = true;
+    setYmStatus(tr('downloads.yt.downloadOk', { t: suggestedName }), 'ok');
+  } catch (err) {
+    ymActiveDownloads.delete(requestId);
+    restoreYmDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+    setYmStatus(tr('downloads.yt.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  // The YT handler is already wired by the YouTube tab; reuse for requestId-based progress too.
+  window.electronAPI.onYtDownloadProgress(({ requestId, phase, percent }) => {
+    if (!requestId) return;
+    const rowEl = ymActiveDownloads.get(requestId);
+    if (!rowEl) return;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      fill.style.width = percent.toFixed(1) + '%';
+      pct.textContent = Math.round(percent) + '%';
+    }
+  });
+}
+
+if (window.electronAPI && window.electronAPI.onYandexParseProgress) {
+  window.electronAPI.onYandexParseProgress((data) => {
+    if (!data) return;
+    if (data.message) {
+      const total = typeof data.total === 'number' ? ` · ${data.total}` : '';
+      setYmStatus(data.message + total, data.phase === 'error' ? 'error' : null);
+    }
+    if (Array.isArray(data.tracks)) {
+      renderYmResults(data.tracks);
+    }
+  });
+}
+
+async function runYmParse() {
+  if (ymParseActive) return;
+  const urlEl = $('dl-ym-url');
+  const startBtn = $('dl-ym-parse-btn');
+  if (!urlEl) return;
+  const url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  ymParseActive = true;
+  if (startBtn) startBtn.disabled = true;
+  renderYmResults([]);
+  setYmStatus(tr('downloads.parsing.starting'));
+  try {
+    const res = await window.electronAPI.yandexParse({ url, showBrowser: !!settings.showParserBrowser });
+    if (!res || !res.success) {
+      setYmStatus(tr('downloads.parsing.error', { e: (res && res.error) || 'unknown' }), 'error');
+      if (res && Array.isArray(res.tracks) && res.tracks.length) renderYmResults(res.tracks);
+    } else {
+      setYmStatus(tr('downloads.parsing.done', { n: res.tracks.length }), 'ok');
+      renderYmResults(res.tracks);
+    }
+  } catch (err) {
+    setYmStatus(tr('downloads.parsing.error', { e: String(err) }), 'error');
+  } finally {
+    ymParseActive = false;
+    if (startBtn) startBtn.disabled = false;
+  }
+}
+
+(function wireYmControls() {
+  const start = $('dl-ym-parse-btn');
+  const url = $('dl-ym-url');
+  if (start) start.addEventListener('click', runYmParse);
+  if (url) {
+    url.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); runYmParse(); }
     });
   }
 })();
@@ -2935,6 +3205,13 @@ $('artist-detail-search').addEventListener('input', () => {
 });
 
 // ── Settings UI ──
+const TOGGLE_KEY_MAP = {
+  'scan-subdirs': 'scanSubdirs',
+  'auto-rescan': 'autoRescan',
+  'downloads': 'downloads',
+  'show-parser-browser': 'showParserBrowser',
+};
+
 function renderSettings() {
   // Theme cards
   document.querySelectorAll('.theme-card').forEach(card => {
@@ -2942,9 +3219,8 @@ function renderSettings() {
   });
   // Toggles
   document.querySelectorAll('.toggle').forEach(t => {
-    const key = t.dataset.setting;
-    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan', 'downloads': 'downloads' };
-    if (settings[map[key]]) t.classList.add('on'); else t.classList.remove('on');
+    const key = TOGGLE_KEY_MAP[t.dataset.setting];
+    if (settings[key]) t.classList.add('on'); else t.classList.remove('on');
   });
   // Folder
   $('default-folder-path').textContent = settings.defaultFolder || tr('placeholder.noFolder');
@@ -2967,8 +3243,7 @@ document.querySelectorAll('.theme-card').forEach(card => {
 document.querySelectorAll('.toggle').forEach(t => {
   t.addEventListener('click', () => {
     if (t.classList.contains('is-disabled')) return;
-    const map = { 'scan-subdirs': 'scanSubdirs', 'auto-rescan': 'autoRescan', 'downloads': 'downloads' };
-    const key = map[t.dataset.setting];
+    const key = TOGGLE_KEY_MAP[t.dataset.setting];
     settings[key] = !settings[key];
     saveSettings();
     t.classList.toggle('on', settings[key]);

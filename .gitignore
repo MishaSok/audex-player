@@ -3,3 +3,4 @@ node_modules/
 *.log
 release/
 CLAUDE.md
+chromium-bundle/

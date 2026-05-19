@@ -10,10 +10,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),
   ytSearch: (query, count) => ipcRenderer.invoke('downloads:ytSearch', query, count),
   ytDownload: (payload) => ipcRenderer.invoke('downloads:ytDownload', payload),
+  ytDownloadByQuery: (payload) => ipcRenderer.invoke('downloads:ytDownloadByQuery', payload),
   onYtDownloadProgress: (cb) => {
     const listener = (_e, data) => cb(data);
     ipcRenderer.on('downloads:ytProgress', listener);
     return () => ipcRenderer.removeListener('downloads:ytProgress', listener);
   },
-  getDownloadsDir: () => ipcRenderer.invoke('downloads:getDir'),
+  getDownloadsDir: (targetDir) => ipcRenderer.invoke('downloads:getDir', { targetDir }),
+  yandexParse: (payload) => ipcRenderer.invoke('yandex:parsePlaylist', payload),
+  onYandexParseProgress: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('yandex:parseProgress', listener);
+    return () => ipcRenderer.removeListener('yandex:parseProgress', listener);
+  },
 });

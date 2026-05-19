@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify bundled Chromium
+        run: |
+          if [ ! -d chromium-bundle/chrome ]; then
+            echo "::error::chromium-bundle/chrome missing — puppeteer postinstall must have failed"
+            exit 1
+          fi
+          ls chromium-bundle/chrome
+
       - name: Build macOS artifacts
         env:
           # Build unsigned: users will need to bypass Gatekeeper manually
@@ -54,6 +62,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify bundled Chromium
+        shell: bash
+        run: |
+          if [ ! -d chromium-bundle/chrome ]; then
+            echo "::error::chromium-bundle/chrome missing — puppeteer postinstall must have failed"
+            exit 1
+          fi
+          ls chromium-bundle/chrome
 
       - name: Build Windows artifacts
         # Build unsigned: SmartScreen will warn on first launch until the binary

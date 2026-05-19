@@ -23,7 +23,12 @@
       "index.html",
       "style.css",
       "LICENSE",
-      "package.json"
+      "package.json",
+      ".puppeteerrc.cjs",
+      "chromium-bundle/**"
+    ],
+    "asarUnpack": [
+      "chromium-bundle/**"
     ],
     "linux": {
       "target": ["AppImage", "deb"],
@@ -34,8 +39,8 @@
     },
     "mac": {
       "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] },
-        { "target": "zip", "arch": ["x64", "arm64"] }
+        { "target": "dmg", "arch": ["arm64"] },
+        { "target": "zip", "arch": ["arm64"] }
       ],
       "category": "public.app-category.music",
       "identity": null
@@ -62,7 +67,8 @@
   "type": "commonjs",
   "dependencies": {
     "music-metadata": "^11.12.3",
-    "node-id3": "^0.2.9"
+    "node-id3": "^0.2.9",
+    "puppeteer": "^23.11.1"
   },
   "devDependencies": {
     "electron": "^42.1.0",
