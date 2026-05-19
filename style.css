@@ -1937,6 +1937,82 @@ input { font-family: inherit; color: inherit; }
   flex-shrink: 0;
 }
 .fs-queue-body { flex: 1; min-width: 0; }
+
+/* Topbar action cluster — keep both close + portrait buttons on the right. */
+.fs-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fs-chip.is-active {
+  background: color-mix(in srgb, var(--text-strong) 18%, var(--hover-bg));
+  color: var(--text-strong);
+  border-color: var(--border-strong);
+}
+
+/* ── Portrait ("mobile player") layout ── */
+.fs-overlay.is-portrait .fs-topbar {
+  height: 48px;
+  padding: 0 16px;
+}
+.fs-overlay.is-portrait .fs-eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.1px;
+}
+.fs-overlay.is-portrait .fs-body {
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 16px 20px 28px;
+  overflow-y: auto;
+}
+.fs-overlay.is-portrait .fs-main {
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+}
+.fs-overlay.is-portrait .fs-cover {
+  width: min(78vw, 340px);
+  height: min(78vw, 340px);
+  padding: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+.fs-overlay.is-portrait .fs-cover-letter { font-size: 72px; }
+.fs-overlay.is-portrait .fs-info {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  align-items: stretch;
+  text-align: center;
+}
+.fs-overlay.is-portrait .eq-line { justify-content: center; margin-bottom: 8px; }
+.fs-overlay.is-portrait .fs-title {
+  font-size: 30px;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+  /* Long titles wrap rather than overflow the narrow window. */
+  white-space: normal;
+  word-wrap: break-word;
+}
+.fs-overlay.is-portrait .fs-artist {
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+.fs-overlay.is-portrait .fs-album {
+  font-size: 12px;
+  margin-bottom: 18px;
+}
+.fs-overlay.is-portrait .fs-progress { margin-bottom: 16px; }
+.fs-overlay.is-portrait .fs-ctrls {
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+.fs-overlay.is-portrait .fs-secondary {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.fs-overlay.is-portrait .fs-queue { display: none; }
 .fs-queue-title {
   font-size: 12.5px;
   font-weight: 500;

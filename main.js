@@ -58,6 +58,31 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
 
+// Portrait ("mobile player") mode: shrinks the window to a tall narrow size and
+// remembers the previous bounds + minimum size so we can restore them on exit.
+let portraitSavedBounds = null;
+let portraitSavedMinSize = null;
+ipcMain.handle('window:setPortrait', async (event, payload) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return { success: false };
+  const on = !!(payload && payload.on);
+  if (on) {
+    if (!portraitSavedBounds) {
+      portraitSavedBounds = win.getBounds();
+      portraitSavedMinSize = win.getMinimumSize();
+    }
+    win.setMinimumSize(320, 560);
+    win.setSize(420, 780, true);
+    win.center();
+  } else {
+    if (portraitSavedMinSize) win.setMinimumSize(portraitSavedMinSize[0], portraitSavedMinSize[1]);
+    if (portraitSavedBounds) win.setBounds(portraitSavedBounds, true);
+    portraitSavedBounds = null;
+    portraitSavedMinSize = null;
+  }
+  return { success: true };
+});
+
 ipcMain.handle('dialog:openFiles', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ['openFile', 'multiSelections', 'openDirectory'],

@@ -46,6 +46,7 @@
       <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M9 21h6"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 9.5 L21 11 L13.5 12.5 L12 20 L10.5 12.5 L3 11 L10.5 9.5 Z"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 18v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></symbol>
+      <symbol id="i-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
       <!-- Audex logomark: geometric A with 3-bar equalizer -->
       <symbol id="audex-mark" viewBox="0 0 100 100">
         <g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
@@ -721,7 +722,12 @@
         <svg class="i" width="12" height="12" style="transform:rotate(180deg)"><use href="#i-expand"/></svg>
       </button>
       <div class="fs-eyebrow"><span data-i18n="fs.nowPlayingFrom">Сейчас играет · из</span> <span style="color:var(--text-strong)" data-i18n="fs.fromLibrary">Библиотеки</span></div>
-      <button class="fs-chip" id="btn-close-fullscreen-x" title="Закрыть" data-i18n-title="btn.close"><svg class="i" width="13" height="13"><use href="#i-close"/></svg></button>
+      <div class="fs-topbar-right">
+        <button class="fs-chip" id="btn-fs-portrait" title="Мобильный режим" data-i18n-title="btn.portrait">
+          <svg class="i" width="13" height="13"><use href="#i-smartphone"/></svg>
+        </button>
+        <button class="fs-chip" id="btn-close-fullscreen-x" title="Закрыть" data-i18n-title="btn.close"><svg class="i" width="13" height="13"><use href="#i-close"/></svg></button>
+      </div>
     </div>
 
     <div class="fs-body">

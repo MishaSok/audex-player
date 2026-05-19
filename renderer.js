@@ -165,6 +165,7 @@ const I18N = {
     'btn.close': 'Закрыть',
     'btn.save': 'Сохранить',
     'btn.minimize': 'Свернуть',
+    'btn.portrait': 'Мобильный режим',
     'btn.album': 'Альбом',
     'btn.favorite': 'В избранное',
     'btn.unfavorite': 'Убрать из избранного',
@@ -376,6 +377,7 @@ const I18N = {
     'btn.close': 'Close',
     'btn.save': 'Save',
     'btn.minimize': 'Minimize',
+    'btn.portrait': 'Mobile mode',
     'btn.album': 'Album',
     'btn.favorite': 'Favorite',
     'btn.unfavorite': 'Remove from favorites',
@@ -587,6 +589,7 @@ const I18N = {
     'btn.close': 'Schließen',
     'btn.save': 'Speichern',
     'btn.minimize': 'Minimieren',
+    'btn.portrait': 'Mobiler Modus',
     'btn.album': 'Album',
     'btn.favorite': 'Zu Favoriten',
     'btn.unfavorite': 'Aus Favoriten entfernen',
@@ -798,6 +801,7 @@ const I18N = {
     'btn.close': 'Fermer',
     'btn.save': 'Enregistrer',
     'btn.minimize': 'Réduire',
+    'btn.portrait': 'Mode mobile',
     'btn.album': 'Album',
     'btn.favorite': 'Ajouter aux favoris',
     'btn.unfavorite': 'Retirer des favoris',
@@ -1009,6 +1013,7 @@ const I18N = {
     'btn.close': 'Закрити',
     'btn.save': 'Зберегти',
     'btn.minimize': 'Згорнути',
+    'btn.portrait': 'Мобільний режим',
     'btn.album': 'Альбом',
     'btn.favorite': 'До улюбленого',
     'btn.unfavorite': 'Прибрати з улюбленого',
@@ -3522,6 +3527,9 @@ function openFullscreen() {
 function closeFullscreen() {
   const overlay = $('fullscreen-overlay');
   if (!overlay.classList.contains('active') || fsAnimating) return;
+  // Exiting fullscreen also exits portrait — the rest of the UI has min-width
+  // constraints (sidebar etc.) and looks broken in a phone-sized window.
+  if (portraitMode) setPortraitMode(false);
   fsAnimating = true;
   cancelCoverAnim();
   overlay.classList.remove('is-in');
@@ -3537,10 +3545,25 @@ function closeFullscreen() {
   else setTimeout(done, 320);
 }
 
+let portraitMode = false;
+function setPortraitMode(on) {
+  portraitMode = !!on;
+  const overlay = $('fullscreen-overlay');
+  overlay.classList.toggle('is-portrait', portraitMode);
+  const btn = $('btn-fs-portrait');
+  if (btn) btn.classList.toggle('is-active', portraitMode);
+  if (window.electronAPI && window.electronAPI.setPortrait) {
+    window.electronAPI.setPortrait(portraitMode);
+  }
+}
+function togglePortraitMode() { setPortraitMode(!portraitMode); }
+
 $('mini-cover-wrapper').addEventListener('click', openFullscreen);
 $('btn-fullscreen').addEventListener('click', openFullscreen);
 $('btn-close-fullscreen').addEventListener('click', closeFullscreen);
 $('btn-close-fullscreen-x').addEventListener('click', closeFullscreen);
+const fsPortraitBtn = $('btn-fs-portrait');
+if (fsPortraitBtn) fsPortraitBtn.addEventListener('click', togglePortraitMode);
 
 function updateFullscreenQueue() {
   const list = $('fs-queue-list');
