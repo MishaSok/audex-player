@@ -24,6 +24,7 @@ let settings = Object.assign({
   scanSubdirs: true,
   downloads: false,
   showParserBrowser: true,
+  uiScale: 1,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -66,6 +67,24 @@ applyTheme(settings.theme);
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
   if (settings.theme === 'system') applyTheme('system');
 });
+
+// ── UI scale ──
+const UI_SCALE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5];
+function clampUiScale(v) {
+  const n = Number(v);
+  if (!isFinite(n) || n <= 0) return 1;
+  return Math.min(UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1], Math.max(UI_SCALE_STEPS[0], n));
+}
+function applyUiScale(scale) {
+  const s = clampUiScale(scale);
+  if (window.electronAPI && typeof window.electronAPI.setZoomFactor === 'function') {
+    window.electronAPI.setZoomFactor(s);
+  } else {
+    // Fallback for older preloads: CSS zoom is Chromium-only but covers our target.
+    document.documentElement.style.zoom = String(s);
+  }
+}
+applyUiScale(settings.uiScale);
 
 // ── Persistence ──
 function saveLibrary() {
@@ -219,6 +238,9 @@ const I18N = {
     'theme.system': 'Системная',
     'setting.defaultFolder': 'Папка по умолчанию',
     'setting.defaultFolderDesc': 'Откуда загружать треки при запуске.',
+    'setting.uiScale': 'Масштаб интерфейса',
+    'setting.uiScaleDesc': 'Делает весь интерфейс крупнее или мельче. Применяется сразу.',
+    'setting.uiScaleReset': 'Сбросить',
     'setting.scanSubdirs': 'Сканировать подпапки',
     'setting.scanSubdirsDesc': 'Учитывать вложенные директории при индексации.',
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
@@ -427,6 +449,9 @@ const I18N = {
     'theme.system': 'System',
     'setting.defaultFolder': 'Default folder',
     'setting.defaultFolderDesc': 'Where to load tracks from on startup.',
+    'setting.uiScale': 'Interface scale',
+    'setting.uiScaleDesc': 'Makes the entire UI larger or smaller. Applies instantly.',
+    'setting.uiScaleReset': 'Reset',
     'setting.scanSubdirs': 'Scan subfolders',
     'setting.scanSubdirsDesc': 'Include nested directories during indexing.',
     'setting.showDownloads': 'Show the “Downloads” tab',
@@ -635,6 +660,9 @@ const I18N = {
     'theme.system': 'System',
     'setting.defaultFolder': 'Standardordner',
     'setting.defaultFolderDesc': 'Woher Titel beim Start geladen werden.',
+    'setting.uiScale': 'Oberflächenskalierung',
+    'setting.uiScaleDesc': 'Vergrößert oder verkleinert die gesamte Oberfläche. Wird sofort angewendet.',
+    'setting.uiScaleReset': 'Zurücksetzen',
     'setting.scanSubdirs': 'Unterordner durchsuchen',
     'setting.scanSubdirsDesc': 'Verschachtelte Verzeichnisse beim Indizieren einbeziehen.',
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
@@ -843,6 +871,9 @@ const I18N = {
     'theme.system': 'Système',
     'setting.defaultFolder': 'Dossier par défaut',
     'setting.defaultFolderDesc': "D'où charger les pistes au démarrage.",
+    'setting.uiScale': "Échelle de l'interface",
+    'setting.uiScaleDesc': "Agrandit ou réduit toute l'interface. Appliqué immédiatement.",
+    'setting.uiScaleReset': 'Réinitialiser',
     'setting.scanSubdirs': 'Analyser les sous-dossiers',
     'setting.scanSubdirsDesc': "Inclure les répertoires imbriqués lors de l'indexation.",
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
@@ -1051,6 +1082,9 @@ const I18N = {
     'theme.system': 'Системна',
     'setting.defaultFolder': 'Тека за замовчуванням',
     'setting.defaultFolderDesc': 'Звідки завантажувати треки під час запуску.',
+    'setting.uiScale': 'Масштаб інтерфейсу',
+    'setting.uiScaleDesc': 'Збільшує або зменшує весь інтерфейс. Застосовується одразу.',
+    'setting.uiScaleReset': 'Скинути',
     'setting.scanSubdirs': 'Сканувати підтеки',
     'setting.scanSubdirsDesc': 'Враховувати вкладені каталоги під час індексації.',
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
@@ -4005,9 +4039,16 @@ function renderSettings() {
   // Language — labels stay in their native language regardless of currentLang.
   const lblMap = { ru: 'Русский', en: 'English', de: 'Deutsch', fr: 'Français', uk: 'Українська' };
   $('lang-current').textContent = lblMap[settings.language] || lblMap.en;
-  document.querySelectorAll('.select-opt').forEach(o => {
+  document.querySelectorAll('#lang-select .select-opt').forEach(o => {
     o.classList.toggle('active', o.dataset.lang === settings.language);
   });
+  // UI scale stepper
+  const scaleEl = $('scale-current');
+  if (scaleEl) scaleEl.textContent = Math.round(settings.uiScale * 100) + '%';
+  const dec = $('scale-dec');
+  const inc = $('scale-inc');
+  if (dec) dec.disabled = settings.uiScale <= UI_SCALE_STEPS[0] + 1e-6;
+  if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
 }
 
 document.querySelectorAll('.theme-card').forEach(card => {
@@ -4036,6 +4077,31 @@ $('btn-choose-default-folder').addEventListener('click', async () => {
     renderSettings();
   }
 });
+
+function setUiScale(scale) {
+  settings.uiScale = clampUiScale(scale);
+  saveSettings();
+  applyUiScale(settings.uiScale);
+  renderSettings();
+}
+function nudgeUiScale(direction) {
+  // Snap to the nearest predefined step in the chosen direction so the stepper
+  // matches the labels users see in the dropdown.
+  const cur = settings.uiScale;
+  if (direction > 0) {
+    const next = UI_SCALE_STEPS.find(s => s > cur + 1e-6);
+    if (next != null) setUiScale(next);
+  } else {
+    const prev = [...UI_SCALE_STEPS].reverse().find(s => s < cur - 1e-6);
+    if (prev != null) setUiScale(prev);
+  }
+}
+const scaleDec = $('scale-dec');
+const scaleInc = $('scale-inc');
+const scaleReset = $('scale-reset');
+if (scaleDec) scaleDec.addEventListener('click', () => nudgeUiScale(-1));
+if (scaleInc) scaleInc.addEventListener('click', () => nudgeUiScale(1));
+if (scaleReset) scaleReset.addEventListener('click', () => setUiScale(1));
 const langSelect = $('lang-select');
 langSelect.querySelector('.select-btn').addEventListener('click', e => {
   e.stopPropagation();
@@ -4044,7 +4110,7 @@ langSelect.querySelector('.select-btn').addEventListener('click', e => {
 document.addEventListener('click', e => {
   if (!e.target.closest('#lang-select')) langSelect.classList.remove('open');
 });
-document.querySelectorAll('.select-opt').forEach(o => {
+document.querySelectorAll('#lang-select .select-opt').forEach(o => {
   o.addEventListener('click', () => {
     settings.language = o.dataset.lang;
     saveSettings();

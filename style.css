@@ -53,6 +53,16 @@ html, body {
   font-family: 'DM Sans', sans-serif;
   font-feature-settings: "cv01", "ss01";
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+/* Editable fields stay selectable so users can still type and edit. */
+input, textarea, [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
 body {
@@ -1247,6 +1257,53 @@ input { font-family: inherit; color: inherit; }
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+.setting-card-tight { margin-top: 12px; }
+
+.scale-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--active-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+}
+.scale-stepper .stepper-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-strong);
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.scale-stepper .stepper-btn:hover {
+  background: color-mix(in srgb, var(--text-strong) 10%, var(--active-bg));
+}
+.scale-stepper .stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.scale-stepper .stepper-btn:disabled:hover { background: transparent; }
+.scale-stepper .stepper-value {
+  min-width: 52px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+.scale-stepper .stepper-reset {
+  margin-left: 6px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  border-radius: 6px;
 }
 .setting-row {
   display: flex;

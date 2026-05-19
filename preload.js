@@ -1,6 +1,12 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  setZoomFactor: (factor) => {
+    try { webFrame.setZoomFactor(Number(factor) || 1); } catch (_) {}
+  },
+  getZoomFactor: () => {
+    try { return webFrame.getZoomFactor(); } catch (_) { return 1; }
+  },
   openFiles: () => ipcRenderer.invoke('dialog:openFiles'),
   chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder'),
   scanFolder: (folderPath) => ipcRenderer.invoke('music:scanFolder', folderPath),

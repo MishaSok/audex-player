@@ -553,6 +553,25 @@
                 </div>
               </button>
             </div>
+
+            <div class="setting-card setting-card-tight">
+              <div class="setting-row">
+                <div class="setting-text">
+                  <div class="setting-label" data-i18n="setting.uiScale">Масштаб интерфейса</div>
+                  <div class="setting-desc" data-i18n="setting.uiScaleDesc">Делает весь интерфейс крупнее или мельче. Применяется сразу.</div>
+                </div>
+                <div class="scale-stepper">
+                  <button type="button" class="stepper-btn" id="scale-dec" title="−" aria-label="−">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                  </button>
+                  <span class="stepper-value" id="scale-current">100%</span>
+                  <button type="button" class="stepper-btn" id="scale-inc" title="+" aria-label="+">
+                    <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+                  </button>
+                  <button type="button" class="btn-ghost stepper-reset" id="scale-reset" data-i18n="setting.uiScaleReset">Сбросить</button>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section class="setting-section">
