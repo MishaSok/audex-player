@@ -25,6 +25,8 @@
       "LICENSE",
       "package.json",
       ".puppeteerrc.cjs",
+      "build/icon.png",
+      "build/icon.svg",
       "chromium-bundle/**"
     ],
     "asarUnpack": [
@@ -32,6 +34,7 @@
     ],
     "linux": {
       "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
       "category": "AudioVideo;Audio;Player",
       "synopsis": "Minimal desktop music player",
       "description": "Audex is a minimal local music player built with Electron.",
@@ -42,6 +45,7 @@
         { "target": "dmg", "arch": ["arm64"] },
         { "target": "zip", "arch": ["arm64"] }
       ],
+      "icon": "build/icon.png",
       "category": "public.app-category.music",
       "identity": null
     },
@@ -49,7 +53,8 @@
       "target": [
         { "target": "nsis", "arch": ["x64"] },
         { "target": "zip", "arch": ["x64"] }
-      ]
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

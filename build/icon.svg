@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Audex app icon — light variant.
+  Source: design-system "IconMarkLight" (audex-app-icons.jsx).
+  Geometric "A" with a 3-bar equalizer interior, dark strokes on a white tile.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="229" fill="#ffffff"/>
+  <g fill="none" stroke="#0a0a0b" stroke-width="64" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 230 820 L 512 200 L 794 820"/>
+    <line x1="410" y1="610" x2="410" y2="700"/>
+    <line x1="512" y1="500" x2="512" y2="700"/>
+    <line x1="614" y1="560" x2="614" y2="700"/>
+  </g>
+</svg>
