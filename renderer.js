@@ -19,7 +19,6 @@ let settings = Object.assign({
   language: 'en',
   defaultFolder: '',
   scanSubdirs: true,
-  autoRescan: false,
   downloads: false,
   showParserBrowser: true,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
@@ -111,6 +110,13 @@ const I18N = {
     'filter.favorites': 'Только избранное',
     'sort.label': 'Сортировка:',
     'sort.dateDesc': 'Дата добавления ↓',
+    'sort.dateAsc': 'Дата добавления ↑',
+    'sort.titleAsc': 'Название А→Я',
+    'sort.titleDesc': 'Название Я→А',
+    'sort.artistAsc': 'Исполнитель А→Я',
+    'sort.artistDesc': 'Исполнитель Я→А',
+    'sort.durationAsc': 'Длительность ↑',
+    'sort.durationDesc': 'Длительность ↓',
     'sort.alpha': 'По алфавиту',
     'sort.byTracks': 'По числу треков',
     'sort.recent': 'Недавно добавленные',
@@ -212,8 +218,6 @@ const I18N = {
     'setting.defaultFolderDesc': 'Откуда загружать треки при запуске.',
     'setting.scanSubdirs': 'Сканировать подпапки',
     'setting.scanSubdirsDesc': 'Учитывать вложенные директории при индексации.',
-    'setting.autoRescan': 'Авто-обновление при старте',
-    'setting.autoRescanDesc': 'Перепроверять папку при каждом запуске.',
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
@@ -294,6 +298,13 @@ const I18N = {
     'filter.favorites': 'Favorites only',
     'sort.label': 'Sort:',
     'sort.dateDesc': 'Date added ↓',
+    'sort.dateAsc': 'Date added ↑',
+    'sort.titleAsc': 'Title A→Z',
+    'sort.titleDesc': 'Title Z→A',
+    'sort.artistAsc': 'Artist A→Z',
+    'sort.artistDesc': 'Artist Z→A',
+    'sort.durationAsc': 'Duration ↑',
+    'sort.durationDesc': 'Duration ↓',
     'sort.alpha': 'Alphabetical',
     'sort.byTracks': 'By track count',
     'sort.recent': 'Recently added',
@@ -395,8 +406,6 @@ const I18N = {
     'setting.defaultFolderDesc': 'Where to load tracks from on startup.',
     'setting.scanSubdirs': 'Scan subfolders',
     'setting.scanSubdirsDesc': 'Include nested directories during indexing.',
-    'setting.autoRescan': 'Auto-refresh on startup',
-    'setting.autoRescanDesc': 'Re-check the folder each time the app starts.',
     'setting.showDownloads': 'Show the “Downloads” tab',
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
@@ -477,6 +486,13 @@ const I18N = {
     'filter.favorites': 'Nur Favoriten',
     'sort.label': 'Sortierung:',
     'sort.dateDesc': 'Hinzugefügt ↓',
+    'sort.dateAsc': 'Hinzugefügt ↑',
+    'sort.titleAsc': 'Titel A→Z',
+    'sort.titleDesc': 'Titel Z→A',
+    'sort.artistAsc': 'Interpret A→Z',
+    'sort.artistDesc': 'Interpret Z→A',
+    'sort.durationAsc': 'Dauer ↑',
+    'sort.durationDesc': 'Dauer ↓',
     'sort.alpha': 'Alphabetisch',
     'sort.byTracks': 'Nach Titelanzahl',
     'sort.recent': 'Kürzlich hinzugefügt',
@@ -578,8 +594,6 @@ const I18N = {
     'setting.defaultFolderDesc': 'Woher Titel beim Start geladen werden.',
     'setting.scanSubdirs': 'Unterordner durchsuchen',
     'setting.scanSubdirsDesc': 'Verschachtelte Verzeichnisse beim Indizieren einbeziehen.',
-    'setting.autoRescan': 'Beim Start automatisch aktualisieren',
-    'setting.autoRescanDesc': 'Den Ordner bei jedem Start neu prüfen.',
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
@@ -660,6 +674,13 @@ const I18N = {
     'filter.favorites': 'Favoris uniquement',
     'sort.label': 'Tri :',
     'sort.dateDesc': "Date d'ajout ↓",
+    'sort.dateAsc': "Date d'ajout ↑",
+    'sort.titleAsc': 'Titre A→Z',
+    'sort.titleDesc': 'Titre Z→A',
+    'sort.artistAsc': 'Artiste A→Z',
+    'sort.artistDesc': 'Artiste Z→A',
+    'sort.durationAsc': 'Durée ↑',
+    'sort.durationDesc': 'Durée ↓',
     'sort.alpha': 'Alphabétique',
     'sort.byTracks': 'Par nombre de pistes',
     'sort.recent': 'Récemment ajoutés',
@@ -761,8 +782,6 @@ const I18N = {
     'setting.defaultFolderDesc': "D'où charger les pistes au démarrage.",
     'setting.scanSubdirs': 'Analyser les sous-dossiers',
     'setting.scanSubdirsDesc': "Inclure les répertoires imbriqués lors de l'indexation.",
-    'setting.autoRescan': 'Mise à jour automatique au démarrage',
-    'setting.autoRescanDesc': "Revérifier le dossier à chaque lancement.",
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
@@ -843,6 +862,13 @@ const I18N = {
     'filter.favorites': 'Тільки улюблене',
     'sort.label': 'Сортування:',
     'sort.dateDesc': 'Дата додавання ↓',
+    'sort.dateAsc': 'Дата додавання ↑',
+    'sort.titleAsc': 'Назва А→Я',
+    'sort.titleDesc': 'Назва Я→А',
+    'sort.artistAsc': 'Виконавець А→Я',
+    'sort.artistDesc': 'Виконавець Я→А',
+    'sort.durationAsc': 'Тривалість ↑',
+    'sort.durationDesc': 'Тривалість ↓',
     'sort.alpha': 'За алфавітом',
     'sort.byTracks': 'За кількістю треків',
     'sort.recent': 'Нещодавно додані',
@@ -944,8 +970,6 @@ const I18N = {
     'setting.defaultFolderDesc': 'Звідки завантажувати треки під час запуску.',
     'setting.scanSubdirs': 'Сканувати підтеки',
     'setting.scanSubdirsDesc': 'Враховувати вкладені каталоги під час індексації.',
-    'setting.autoRescan': 'Авто-оновлення під час старту',
-    'setting.autoRescanDesc': 'Перевіряти теку під час кожного запуску.',
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
@@ -1257,6 +1281,9 @@ async function ensureCoverFor(track) {
 function trackByPath(path) { return library.find(t => t.path === path); }
 function trackIndexByPath(path) { return library.findIndex(t => t.path === path); }
 
+// activeSort values: date-desc | date-asc | title-asc | title-desc |
+//                    artist-asc | artist-desc | duration-asc | duration-desc
+// "date" uses library insertion order as a proxy for "added on".
 function sortedFilteredLibrary() {
   let arr = library.slice();
   if (activeFilter === 'recent') {
@@ -1264,11 +1291,26 @@ function sortedFilteredLibrary() {
   } else if (activeFilter === 'favorites') {
     arr = arr.filter(t => favorites.includes(t.path));
   }
-  // Sort
-  if (activeSort === 'title-asc') arr.sort((a, b) => a.title.localeCompare(b.title));
-  else if (activeSort === 'artist-asc') arr.sort((a, b) => a.artist.localeCompare(b.artist));
-  // date-desc is default insertion order reversed
-  else if (activeSort === 'date-desc' && activeFilter === 'all') arr = arr.slice().reverse();
+  const byTitle = (a, b) => (a.title || '').localeCompare(b.title || '');
+  const byArtist = (a, b) => (a.artist || '').localeCompare(b.artist || '') || byTitle(a, b);
+  const byDuration = (a, b) => (a.duration || 0) - (b.duration || 0);
+  switch (activeSort) {
+    case 'title-asc': arr.sort(byTitle); break;
+    case 'title-desc': arr.sort((a, b) => -byTitle(a, b)); break;
+    case 'artist-asc': arr.sort(byArtist); break;
+    case 'artist-desc': arr.sort((a, b) => -byArtist(a, b)); break;
+    case 'duration-asc': arr.sort(byDuration); break;
+    case 'duration-desc': arr.sort((a, b) => -byDuration(a, b)); break;
+    case 'date-asc':
+      // 'recent' is already date-desc from the slice; reverse it for ascending.
+      if (activeFilter === 'recent') arr = arr.slice().reverse();
+      // For 'all' and 'favorites' the underlying order is already insertion-asc.
+      break;
+    case 'date-desc':
+    default:
+      if (activeFilter !== 'recent') arr = arr.slice().reverse();
+      break;
+  }
   return arr;
 }
 
@@ -1539,6 +1581,7 @@ function renderYmResults(tracks) {
   }
   if (empty) empty.classList.remove('show');
   if (note) note.hidden = false;
+  const disabledAttr = ymParseActive ? ' disabled' : '';
   rows.innerHTML = ymTracks.map((t, i) => `
     <div class="dl-row-ym" data-ym-row="${i}">
       <div class="num">${i + 1}</div>
@@ -1546,7 +1589,7 @@ function renderYmResults(tracks) {
       <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
       <div class="duration">${escapeHtml(t.duration || '')}</div>
       <div class="action">
-        <button type="button" class="dl-download-btn" data-ym-dl="${i}">
+        <button type="button" class="dl-download-btn" data-ym-dl="${i}"${disabledAttr}>
           <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
           <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
         </button>
@@ -1676,6 +1719,9 @@ async function runYmParse() {
   } finally {
     ymParseActive = false;
     if (startBtn) startBtn.disabled = false;
+    // Re-render rows so disabled download buttons become clickable now that the
+    // parser is done. ymTracks holds whatever the last progress/result update saw.
+    if (ymTracks && ymTracks.length) renderYmResults(ymTracks);
   }
 }
 
@@ -3185,6 +3231,47 @@ document.querySelectorAll('#view-library .chip').forEach(chip => {
   });
 });
 
+const SORT_I18N = {
+  'date-desc': 'sort.dateDesc',
+  'date-asc': 'sort.dateAsc',
+  'title-asc': 'sort.titleAsc',
+  'title-desc': 'sort.titleDesc',
+  'artist-asc': 'sort.artistAsc',
+  'artist-desc': 'sort.artistDesc',
+  'duration-asc': 'sort.durationAsc',
+  'duration-desc': 'sort.durationDesc',
+};
+function refreshSortUI() {
+  const labelEl = $('sort-label');
+  if (labelEl) {
+    const key = SORT_I18N[activeSort] || SORT_I18N['date-desc'];
+    labelEl.setAttribute('data-i18n', key);
+    labelEl.textContent = tr(key);
+  }
+  document.querySelectorAll('#sort-select .sort-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.sort === activeSort);
+  });
+}
+const sortSelect = $('sort-select');
+if (sortSelect) {
+  sortSelect.querySelector('.sort-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    sortSelect.classList.toggle('open');
+  });
+  sortSelect.querySelectorAll('.sort-opt').forEach(o => {
+    o.addEventListener('click', () => {
+      activeSort = o.dataset.sort;
+      sortSelect.classList.remove('open');
+      refreshSortUI();
+      renderLibrary();
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#sort-select')) sortSelect.classList.remove('open');
+  });
+  refreshSortUI();
+}
+
 // Library inline search
 $('library-search').addEventListener('input', () => {
   renderLibrary();
@@ -3207,7 +3294,6 @@ $('artist-detail-search').addEventListener('input', () => {
 // ── Settings UI ──
 const TOGGLE_KEY_MAP = {
   'scan-subdirs': 'scanSubdirs',
-  'auto-rescan': 'autoRescan',
   'downloads': 'downloads',
   'show-parser-browser': 'showParserBrowser',
 };
@@ -3311,13 +3397,24 @@ async function restoreCovers() {
   if (currentTrackIndex >= 0) updateNowPlayingUI(library[currentTrackIndex]);
 }
 
-// Optional: scan default folder on startup
-async function maybeAutoRescan() {
-  if (!settings.autoRescan || !settings.defaultFolder) return;
+// On startup, pull tracks from the app's own downloads folder ("Audex Downloads")
+// and, if the user has set one, from their default folder. This keeps the library
+// in sync with both sources without requiring manual import.
+async function rescanOnBoot() {
+  const folders = [];
   try {
-    const files = await window.electronAPI.scanFolder(settings.defaultFolder);
-    if (files && files.length > 0) await importPaths(files);
-  } catch (e) { /* ignore */ }
+    const downloadsDir = await window.electronAPI.getDownloadsDir();
+    if (downloadsDir) folders.push(downloadsDir);
+  } catch (_) { /* ignore */ }
+  if (settings.defaultFolder && !folders.includes(settings.defaultFolder)) {
+    folders.push(settings.defaultFolder);
+  }
+  for (const folder of folders) {
+    try {
+      const files = await window.electronAPI.scanFolder(folder);
+      if (files && files.length > 0) await importPaths(files);
+    } catch (_) { /* ignore */ }
+  }
 }
 
 // Boot
@@ -3329,4 +3426,4 @@ updateShuffleUI();
 updateRepeatUI();
 loadLastTrack();
 restoreCovers();
-maybeAutoRescan();
+rescanOnBoot();

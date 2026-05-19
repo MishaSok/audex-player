@@ -139,7 +139,22 @@
           <button class="chip" data-filter="favorites" data-i18n="filter.favorites">Только избранное</button>
           <div class="sort-right">
             <span data-i18n="sort.label">Сортировка:</span>
-            <span class="sort-active" id="sort-label" data-i18n="sort.dateDesc">Дата добавления ↓</span>
+            <div class="sort-select" id="sort-select">
+              <button class="sort-btn" type="button">
+                <span id="sort-label" data-i18n="sort.dateDesc">Дата добавления ↓</span>
+                <svg class="i" width="10" height="10"><use href="#i-chevron-down"/></svg>
+              </button>
+              <div class="sort-menu">
+                <div class="sort-opt" data-sort="date-desc" data-i18n="sort.dateDesc">Дата добавления ↓</div>
+                <div class="sort-opt" data-sort="date-asc" data-i18n="sort.dateAsc">Дата добавления ↑</div>
+                <div class="sort-opt" data-sort="title-asc" data-i18n="sort.titleAsc">Название А→Я</div>
+                <div class="sort-opt" data-sort="title-desc" data-i18n="sort.titleDesc">Название Я→А</div>
+                <div class="sort-opt" data-sort="artist-asc" data-i18n="sort.artistAsc">Исполнитель А→Я</div>
+                <div class="sort-opt" data-sort="artist-desc" data-i18n="sort.artistDesc">Исполнитель Я→А</div>
+                <div class="sort-opt" data-sort="duration-asc" data-i18n="sort.durationAsc">Длительность ↑</div>
+                <div class="sort-opt" data-sort="duration-desc" data-i18n="sort.durationDesc">Длительность ↓</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -521,13 +536,6 @@
                   <div class="setting-desc" data-i18n="setting.scanSubdirsDesc">Учитывать вложенные директории при индексации.</div>
                 </div>
                 <button class="toggle" data-setting="scan-subdirs"><div class="toggle-knob"></div></button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.autoRescan">Авто-обновление при старте</div>
-                  <div class="setting-desc" data-i18n="setting.autoRescanDesc">Перепроверять папку при каждом запуске.</div>
-                </div>
-                <button class="toggle" data-setting="auto-rescan"><div class="toggle-knob"></div></button>
               </div>
             </div>
           </section>
