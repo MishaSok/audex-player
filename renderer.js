@@ -3456,19 +3456,28 @@ function wireVolume(trackEl) {
   window.addEventListener('mouseup', () => { dragging = false; });
 }
 wireVolume($('vol-track'));
+wireVolume($('fs-vol-track'));
 
 function updateVolumeUI() {
   const v = audio.muted ? 0 : audio.volume;
-  $('vol-fill').style.width = `${v * 100}%`;
+  const pct = `${v * 100}%`;
+  $('vol-fill').style.width = pct;
+  const fsFill = $('fs-vol-fill');
+  if (fsFill) fsFill.style.width = pct;
   const icon = audio.muted || v === 0 ? '#i-volume-mute'
     : v < 0.5 ? '#i-volume-low'
     : '#i-volume';
   $('btn-mute').querySelector('use').setAttribute('href', icon);
+  const fsMute = $('fs-btn-mute');
+  if (fsMute) fsMute.querySelector('use').setAttribute('href', icon);
 }
-$('btn-mute').addEventListener('click', () => {
+function toggleMute() {
   audio.muted = !audio.muted;
   updateVolumeUI();
-});
+}
+$('btn-mute').addEventListener('click', toggleMute);
+const fsMuteBtn = $('fs-btn-mute');
+if (fsMuteBtn) fsMuteBtn.addEventListener('click', toggleMute);
 audio.volume = 1;
 updateVolumeUI();
 

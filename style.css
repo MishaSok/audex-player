@@ -2013,6 +2013,39 @@ input { font-family: inherit; color: inherit; }
   flex-wrap: wrap;
 }
 .fs-overlay.is-portrait .fs-queue { display: none; }
+
+/* Volume slider mirrored from the bottom playbar — desktop layout already
+   exposes it down there, so only show this copy in portrait mode. */
+.fs-volume {
+  display: none;
+  align-items: center;
+  /* 3-column grid keeps the slider dead-centered on the row while still leaving
+     room for the mute button on the left. */
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.fs-overlay.is-portrait .fs-volume { display: grid; }
+.fs-volume #fs-btn-mute { justify-self: end; }
+.fs-volume .fs-vol-track { justify-self: center; }
+.fs-vol-track {
+  width: 140px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+[data-theme="light"] .fs-vol-track { background: rgba(0, 0, 0, 0.08); }
+.fs-vol-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  background: var(--text-strong);
+  border-radius: 2px;
+}
 .fs-queue-title {
   font-size: 12.5px;
   font-weight: 500;
