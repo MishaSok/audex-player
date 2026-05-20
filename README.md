@@ -41,17 +41,6 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
   </tr>
 </table>
 
-> **📷 Which screenshots to add** — drop these four PNGs into `docs/screenshots/`:
->
-> | File | What to capture |
-> | --- | --- |
-> | `library.png` | The **Library** view with the track table full of songs (this is the hero image, shown wide). |
-> | `now-playing.png` | The **fullscreen "now playing"** view on desktop — cover, controls, volume slider, queue. |
-> | `mobile.png` | The **mobile / portrait mode** — open fullscreen, then tap the mobile-mode button. |
-> | `downloads.png` | The **Downloads** tab mid-action — a YouTube search result list or a Yandex Music parse. |
->
-> Use the dark theme for a consistent look. Capture the window at a normal desktop size (≈1280×820).
-
 ---
 
 ## ✨ Features
