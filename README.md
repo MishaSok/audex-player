@@ -36,14 +36,12 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
       <img src="docs/screenshots/mobile.png" alt="Mobile mode" /></td>
   </tr>
   <tr>
-    <td width="50%"><!-- Downloads tab with a YouTube search or Yandex parse in progress -->
+    <td colspan="2"><!-- Downloads tab with a YouTube search or Yandex parse in progress -->
       <img src="docs/screenshots/downloads.png" alt="Downloads" /></td>
-    <td width="50%"><!-- Settings page -->
-      <img src="docs/screenshots/settings.png" alt="Settings" /></td>
   </tr>
 </table>
 
-> **📷 Which screenshots to add** — drop these five PNGs into `docs/screenshots/`:
+> **📷 Which screenshots to add** — drop these four PNGs into `docs/screenshots/`:
 >
 > | File | What to capture |
 > | --- | --- |
@@ -51,7 +49,6 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 > | `now-playing.png` | The **fullscreen "now playing"** view on desktop — cover, controls, volume slider, queue. |
 > | `mobile.png` | The **mobile / portrait mode** — open fullscreen, then tap the mobile-mode button. |
 > | `downloads.png` | The **Downloads** tab mid-action — a YouTube search result list or a Yandex Music parse. |
-> | `settings.png` | The **Settings** page — themes, language, UI scale, contacts. |
 >
 > Use the dark theme for a consistent look. Capture the window at a normal desktop size (≈1280×820).
 
