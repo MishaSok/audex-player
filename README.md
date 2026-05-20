@@ -99,6 +99,19 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 
 ---
 
+## ⌨️ Keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd> | Open / close the search command palette |
+| <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>E</kbd> | Edit tags of the current track |
+| <kbd>Space</kbd> | Play / pause |
+| <kbd>Esc</kbd> | Close the fullscreen view or any open dialog |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Move between results in the command palette |
+| <kbd>Enter</kbd> | Run the highlighted command-palette result |
+
+---
+
 ## 📦 Download
 
 Grab the latest build for your platform from the [**Releases page**](https://github.com/MishaSok/audex-player/releases/latest):
