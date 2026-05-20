@@ -38,7 +38,12 @@
       "category": "AudioVideo;Audio;Player",
       "synopsis": "Minimal desktop music player",
       "description": "Audex is a minimal local music player built with Electron.",
-      "maintainer": "Mikhail Sokov <mikhail.sokov2006@gmail.com>"
+      "maintainer": "Mikhail Sokov <mikhail.sokov2006@gmail.com>",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "audex"
+        }
+      }
     },
     "mac": {
       "target": [
