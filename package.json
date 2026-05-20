@@ -34,7 +34,7 @@
     ],
     "linux": {
       "target": ["AppImage", "deb"],
-      "icon": "build/icon.png",
+      "icon": "build/icons",
       "category": "AudioVideo;Audio;Player",
       "synopsis": "Minimal desktop music player",
       "description": "Audex is a minimal local music player built with Electron.",
