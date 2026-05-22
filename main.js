@@ -236,7 +236,35 @@ ipcMain.handle('shell:deleteFile', async (event, filePath) => {
 
 // ── Downloads: YouTube via yt-dlp ─────────────────────────────────────────────
 
+// The standalone yt-dlp binary shipped inside the app (see scripts/fetch-ytdlp.js
+// and build.asarUnpack in package.json). Returns null when not packed.
+function resolveBundledYtDlp() {
+  const bundleRoot = app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'yt-dlp-bundle')
+    : path.join(__dirname, 'yt-dlp-bundle');
+  const name = process.platform === 'linux' ? 'yt-dlp_linux'
+    : process.platform === 'darwin' ? 'yt-dlp_macos'
+    : process.platform === 'win32' ? 'yt-dlp.exe'
+    : null;
+  if (!name) return null;
+  const candidate = path.join(bundleRoot, name);
+  try {
+    if (fs.existsSync(candidate)) {
+      // AppImage/asar-unpacked files can lose the exec bit on some setups.
+      if (process.platform !== 'win32') {
+        try { fs.chmodSync(candidate, 0o755); } catch (_) {}
+      }
+      return candidate;
+    }
+  } catch (_) {}
+  return null;
+}
+
 function ytDlpPath() {
+  // Prefer the bundled binary so the downloader works without a system install.
+  const bundled = resolveBundledYtDlp();
+  if (bundled) return bundled;
+  // Fall back to a system-installed yt-dlp (dev runs, or if the bundle is missing).
   const candidates = [
     'yt-dlp',
     path.join(process.env.HOME || '', '.local', 'bin', 'yt-dlp'),

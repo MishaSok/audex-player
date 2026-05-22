@@ -1,12 +1,13 @@
 {
   "name": "audex-player",
   "productName": "Audex",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Audex — minimal desktop music player",
   "main": "main.js",
   "scripts": {
     "start": "electron . --no-sandbox",
     "dist": "electron-builder",
+    "postinstall": "node scripts/fetch-ytdlp.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "build": {
@@ -27,10 +28,12 @@
       ".puppeteerrc.cjs",
       "build/icon.png",
       "build/icon.svg",
-      "chromium-bundle/**"
+      "chromium-bundle/**",
+      "yt-dlp-bundle/**"
     ],
     "asarUnpack": [
-      "chromium-bundle/**"
+      "chromium-bundle/**",
+      "yt-dlp-bundle/**"
     ],
     "linux": {
       "target": ["AppImage", "deb"],

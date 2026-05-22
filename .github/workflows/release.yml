@@ -32,6 +32,14 @@ jobs:
           fi
           ls chromium-bundle/chrome
 
+      - name: Verify bundled yt-dlp
+        run: |
+          if [ ! -f yt-dlp-bundle/yt-dlp_macos ]; then
+            echo "::error::yt-dlp-bundle/yt-dlp_macos missing — fetch-ytdlp postinstall must have failed"
+            exit 1
+          fi
+          ls -la yt-dlp-bundle
+
       - name: Build macOS artifacts
         env:
           # Build unsigned: users will need to bypass Gatekeeper manually
@@ -71,6 +79,15 @@ jobs:
             exit 1
           fi
           ls chromium-bundle/chrome
+
+      - name: Verify bundled yt-dlp
+        shell: bash
+        run: |
+          if [ ! -f yt-dlp-bundle/yt-dlp.exe ]; then
+            echo "::error::yt-dlp-bundle/yt-dlp.exe missing — fetch-ytdlp postinstall must have failed"
+            exit 1
+          fi
+          ls -la yt-dlp-bundle
 
       - name: Build Windows artifacts
         # Build unsigned: SmartScreen will warn on first launch until the binary

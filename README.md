@@ -112,15 +112,14 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 > - **macOS** — right-click the app → **Open**, or run `xattr -d com.apple.quarantine /Applications/Audex.app`.
 > - **Windows** — SmartScreen may warn; click **More info → Run anyway**.
 
-### Runtime dependency
+### Runtime dependencies
 
-The YouTube downloader needs [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) installed on your system:
+None — the release builds bundle everything they need:
 
-```bash
-pip install -U yt-dlp
-```
+- The YouTube downloader ships a standalone [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) binary, so no `pip install` is required.
+- The Yandex Music parser uses a Chromium build bundled with the app.
 
-The Yandex Music parser uses a Chromium build bundled with the app — no extra setup required.
+If a bundled `yt-dlp` is somehow missing, the app falls back to a system-installed one (`pip install -U yt-dlp`).
 
 ---
 
