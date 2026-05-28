@@ -31,4 +31,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('yandex:parseProgress', listener);
     return () => ipcRenderer.removeListener('yandex:parseProgress', listener);
   },
+  updateTrayState: (state) => ipcRenderer.invoke('tray:updateState', state),
+  onTrayCommand: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('tray:command', listener);
+    return () => ipcRenderer.removeListener('tray:command', listener);
+  },
 });

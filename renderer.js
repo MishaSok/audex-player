@@ -3234,6 +3234,7 @@ function updatePlayButtonUI() {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }
+  syncTray();
 }
 
 // MediaSession (maps to MPRIS on Linux — controls in the GNOME top bar)
@@ -3273,6 +3274,35 @@ function updateFavoriteUI() {
   fsFav.classList.toggle('active', fav);
   fsFav.querySelector('use').setAttribute('href', fav ? '#i-heart-filled' : '#i-heart');
   $('fs-fav-label').textContent = fav ? tr('btn.favoriteOn') : tr('btn.favorite');
+  syncTray();
+}
+
+// Push current now-playing snapshot to the main-process tray so it can update
+// its menu labels and tooltip. Safe to call before electronAPI is wired.
+function syncTray() {
+  if (!window.electronAPI || !window.electronAPI.updateTrayState) return;
+  const t = currentTrackIndex >= 0 ? library[currentTrackIndex] : null;
+  window.electronAPI.updateTrayState({
+    hasTrack: !!t,
+    isPlaying: !!isPlaying,
+    isFavorite: t ? favorites.includes(t.path) : false,
+    title: t ? (t.title || '') : '',
+    artist: t ? (t.artist || '') : '',
+  });
+}
+
+if (window.electronAPI && window.electronAPI.onTrayCommand) {
+  window.electronAPI.onTrayCommand(({ action }) => {
+    switch (action) {
+      case 'playPause':      togglePlay(); break;
+      case 'next':           nextTrack(); break;
+      case 'prev':           prevTrack(); break;
+      case 'toggleFavorite': {
+        if (currentTrackIndex >= 0) toggleFavorite(library[currentTrackIndex].path);
+        break;
+      }
+    }
+  });
 }
 
 function togglePlay() {

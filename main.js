@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -6,6 +6,27 @@ const musicMetadata = require('music-metadata');
 const NodeID3 = require('node-id3');
 
 app.setName('Audex');
+
+let mainWindow = null;
+let tray = null;
+let isQuitting = false;
+let trayState = {
+  hasTrack: false,
+  isPlaying: false,
+  isFavorite: false,
+  title: '',
+  artist: '',
+};
+
+function truncate(s, n) {
+  s = String(s || '');
+  return s.length > n ? s.slice(0, n - 1) + '…' : s;
+}
+
+function sendTrayCommand(action) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try { mainWindow.webContents.send('tray:command', { action }); } catch (_) {}
+}
 
 const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac']);
 
@@ -26,7 +47,7 @@ function scanDir(dirPath) {
 }
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
     minWidth: 1024,
@@ -45,19 +66,161 @@ function createWindow() {
   mainWindow.autoHideMenuBar = true;
 
   mainWindow.loadFile('index.html');
+
+  // Close to tray instead of quitting — only an explicit Quit (menu / app.quit)
+  // sets isQuitting and lets the window actually close.
+  mainWindow.on('close', (e) => {
+    if (!isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
+      if (process.platform === 'darwin') {
+        try { app.dock && app.dock.hide(); } catch (_) {}
+      }
+    }
+  });
+
+  mainWindow.on('closed', () => { mainWindow = null; refreshTray(); });
+  mainWindow.on('show', () => refreshTray());
+  mainWindow.on('hide', () => refreshTray());
 }
+
+// Cross-platform tray icon. Windows prefers .ico (multi-size); macOS and
+// Linux load the full-color 1024×1024 source and let nativeImage resize it
+// to the menu-bar / AppIndicator size — the small pre-rendered indexed-color
+// PNGs in build/icons render blank under some Linux indicators.
+function resolveTrayIconPath() {
+  const base = path.join(__dirname, 'build');
+  if (process.platform === 'win32') {
+    const ico = path.join(base, 'icon.ico');
+    if (fs.existsSync(ico)) return ico;
+  }
+  return path.join(base, 'icon.png');
+}
+
+function showMainWindow() {
+  if (!mainWindow) {
+    createWindow();
+    return;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+  if (process.platform === 'darwin') {
+    try { app.dock && app.dock.show(); } catch (_) {}
+  }
+}
+
+function buildTrayMenu() {
+  const { hasTrack, isPlaying, isFavorite, title, artist } = trayState;
+
+  const nowPlayingLabel = hasTrack
+    ? truncate(`${title}${artist ? ' — ' + artist : ''}`, 60)
+    : 'Сейчас ничего не играет';
+
+  return Menu.buildFromTemplate([
+    { label: nowPlayingLabel, enabled: false },
+    { type: 'separator' },
+    {
+      label: !hasTrack ? 'Воспроизвести' : (isPlaying ? 'Пауза' : 'Воспроизвести'),
+      enabled: hasTrack || true, // even with no track, triggers "play first track"
+      click: () => sendTrayCommand('playPause'),
+    },
+    {
+      label: 'Предыдущий трек',
+      enabled: hasTrack,
+      click: () => sendTrayCommand('prev'),
+    },
+    {
+      label: 'Следующий трек',
+      enabled: hasTrack,
+      click: () => sendTrayCommand('next'),
+    },
+    {
+      label: isFavorite ? 'Убрать из избранного' : 'В избранное',
+      enabled: hasTrack,
+      click: () => sendTrayCommand('toggleFavorite'),
+    },
+    { type: 'separator' },
+    { label: 'Открыть Audex', click: () => showMainWindow() },
+    {
+      label: 'Скрыть окно',
+      enabled: !!(mainWindow && mainWindow.isVisible()),
+      click: () => { if (mainWindow && mainWindow.isVisible()) mainWindow.hide(); },
+    },
+    { type: 'separator' },
+    {
+      label: 'Выход',
+      click: () => { isQuitting = true; app.quit(); },
+    },
+  ]);
+}
+
+function refreshTray() {
+  if (!tray) return;
+  tray.setContextMenu(buildTrayMenu());
+  const tip = trayState.hasTrack
+    ? truncate(`Audex — ${trayState.isPlaying ? '▶' : '❚❚'} ${trayState.title}${trayState.artist ? ' — ' + trayState.artist : ''}`, 120)
+    : 'Audex';
+  tray.setToolTip(tip);
+}
+
+function createTray() {
+  if (tray) return;
+  const iconPath = resolveTrayIconPath();
+  let image = nativeImage.createFromPath(iconPath);
+  if (!image.isEmpty()) {
+    if (process.platform === 'darwin') {
+      image = image.resize({ width: 16, height: 16 });
+    } else if (process.platform === 'linux') {
+      // GNOME AppIndicator and KDE StatusNotifier both render best around
+      // 22–24px; full-color RGBA scales cleanly from the 1024px source.
+      image = image.resize({ width: 22, height: 22 });
+    }
+    // Windows uses .ico (already multi-size) — no resize needed.
+  }
+  tray = new Tray(image);
+  refreshTray();
+
+  // Single click toggles the window on Windows/Linux. macOS opens the menu by
+  // default; users can double-click to open the window.
+  const onActivate = () => {
+    if (!mainWindow || !mainWindow.isVisible()) {
+      showMainWindow();
+    } else {
+      mainWindow.hide();
+    }
+  };
+  tray.on('click', onActivate);
+  tray.on('double-click', () => showMainWindow());
+}
+
+ipcMain.handle('tray:updateState', (event, state) => {
+  trayState = {
+    hasTrack: !!(state && state.hasTrack),
+    isPlaying: !!(state && state.isPlaying),
+    isFavorite: !!(state && state.isFavorite),
+    title: (state && state.title) || '',
+    artist: (state && state.artist) || '',
+  };
+  refreshTray();
+  return { success: true };
+});
 
 app.whenReady().then(() => {
   createWindow();
+  createTray();
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    else showMainWindow();
   });
 });
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit();
-});
+app.on('before-quit', () => { isQuitting = true; });
+
+// Tray keeps the app alive when all windows are closed — don't quit on
+// window-all-closed (mac already kept the app alive; we now do the same
+// on Linux/Windows so the tray icon persists).
 
 // Portrait ("mobile player") mode: shrinks the window to a tall narrow size and
 // remembers the previous bounds + minimum size so we can restore them on exit.
