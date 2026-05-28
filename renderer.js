@@ -19,6 +19,7 @@ let favorites = JSON.parse(localStorage.getItem(LS.favorites) || '[]');
 let playlists = JSON.parse(localStorage.getItem(LS.playlists) || '[]');
 let settings = Object.assign({
   theme: 'dark',          // 'dark' | 'light' | 'system'
+  accent: '',             // '' = theme default; otherwise a hex like '#5b9eff'
   language: 'en',
   defaultFolder: '',
   scanSubdirs: true,
@@ -67,6 +68,32 @@ applyTheme(settings.theme);
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
   if (settings.theme === 'system') applyTheme('system');
 });
+
+// ── Accent color ──
+// Preset palette. The first entry ('') means "use the theme's built-in accent".
+const ACCENT_PRESETS = [
+  { value: '',        label: 'default' },
+  { value: '#5b9eff', label: 'blue'    },
+  { value: '#7c8cff', label: 'indigo'  },
+  { value: '#b07cff', label: 'purple'  },
+  { value: '#ff6b8a', label: 'pink'    },
+  { value: '#ff5577', label: 'red'     },
+  { value: '#ff9a3d', label: 'orange'  },
+  { value: '#e8c547', label: 'yellow'  },
+  { value: '#4ecdc4', label: 'teal'    },
+  { value: '#7ec9a8', label: 'green'   },
+];
+function isHexColor(s) {
+  return typeof s === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s.trim());
+}
+function applyAccent(hex) {
+  if (hex && isHexColor(hex)) {
+    root.style.setProperty('--accent', hex);
+  } else {
+    root.style.removeProperty('--accent');
+  }
+}
+applyAccent(settings.accent);
 
 // ── UI scale ──
 const UI_SCALE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5];
@@ -242,6 +269,10 @@ const I18N = {
     'theme.dark': 'Тёмная',
     'theme.light': 'Светлая',
     'theme.system': 'Системная',
+    'setting.accent': 'Цвет акцента',
+    'setting.accentDesc': 'Подсветка активных элементов и текущего трека.',
+    'setting.accentDefault': 'По умолчанию',
+    'setting.accentCustom': 'Свой цвет',
     'setting.defaultFolder': 'Папка по умолчанию',
     'setting.defaultFolderDesc': 'Откуда загружать треки при запуске.',
     'setting.uiScale': 'Масштаб интерфейса',
@@ -459,6 +490,10 @@ const I18N = {
     'theme.dark': 'Dark',
     'theme.light': 'Light',
     'theme.system': 'System',
+    'setting.accent': 'Accent color',
+    'setting.accentDesc': 'Highlights active items and the currently playing track.',
+    'setting.accentDefault': 'Default',
+    'setting.accentCustom': 'Custom color',
     'setting.defaultFolder': 'Default folder',
     'setting.defaultFolderDesc': 'Where to load tracks from on startup.',
     'setting.uiScale': 'Interface scale',
@@ -676,6 +711,10 @@ const I18N = {
     'theme.dark': 'Dunkel',
     'theme.light': 'Hell',
     'theme.system': 'System',
+    'setting.accent': 'Akzentfarbe',
+    'setting.accentDesc': 'Hervorhebung aktiver Elemente und des aktuellen Titels.',
+    'setting.accentDefault': 'Standard',
+    'setting.accentCustom': 'Eigene Farbe',
     'setting.defaultFolder': 'Standardordner',
     'setting.defaultFolderDesc': 'Woher Titel beim Start geladen werden.',
     'setting.uiScale': 'Oberflächenskalierung',
@@ -893,6 +932,10 @@ const I18N = {
     'theme.dark': 'Sombre',
     'theme.light': 'Clair',
     'theme.system': 'Système',
+    'setting.accent': 'Couleur d’accent',
+    'setting.accentDesc': 'Met en évidence les éléments actifs et le morceau en cours.',
+    'setting.accentDefault': 'Par défaut',
+    'setting.accentCustom': 'Couleur personnalisée',
     'setting.defaultFolder': 'Dossier par défaut',
     'setting.defaultFolderDesc': "D'où charger les pistes au démarrage.",
     'setting.uiScale': "Échelle de l'interface",
@@ -1110,6 +1153,10 @@ const I18N = {
     'theme.dark': 'Темна',
     'theme.light': 'Світла',
     'theme.system': 'Системна',
+    'setting.accent': 'Колір акценту',
+    'setting.accentDesc': 'Підсвічування активних елементів і поточного треку.',
+    'setting.accentDefault': 'За замовчуванням',
+    'setting.accentCustom': 'Власний колір',
     'setting.defaultFolder': 'Тека за замовчуванням',
     'setting.defaultFolderDesc': 'Звідки завантажувати треки під час запуску.',
     'setting.uiScale': 'Масштаб інтерфейсу',
@@ -4184,11 +4231,67 @@ const TOGGLE_KEY_MAP = {
   'show-parser-browser': 'showParserBrowser',
 };
 
+function renderAccentPalette() {
+  const host = $('accent-palette');
+  if (!host) return;
+  const current = (settings.accent || '').toLowerCase();
+  const presetValues = new Set(ACCENT_PRESETS.map(p => p.value.toLowerCase()));
+  const isCustom = !!current && !presetValues.has(current);
+  const parts = ACCENT_PRESETS.map(p => {
+    const isActive = p.value.toLowerCase() === current;
+    const cls = ['accent-swatch'];
+    if (isActive) cls.push('active');
+    if (p.value === '') cls.push('is-default');
+    const style = p.value ? `background:${escapeHtml(p.value)};` : '';
+    const title = p.value === ''
+      ? tr('setting.accentDefault')
+      : escapeHtml(p.value);
+    return `<button type="button" class="${cls.join(' ')}" data-accent="${escapeHtml(p.value)}" style="${style}" title="${title}" aria-label="${title}"></button>`;
+  });
+  const customColor = isCustom ? current : '#5b9eff';
+  const customCls = ['accent-swatch', 'is-custom'];
+  if (isCustom) customCls.push('active');
+  parts.push(
+    `<span class="${customCls.join(' ')}" title="${escapeHtml(tr('setting.accentCustom'))}" aria-label="${escapeHtml(tr('setting.accentCustom'))}">` +
+      `<input type="color" class="accent-custom-input" id="accent-custom-input" value="${escapeHtml(customColor)}">` +
+    `</span>`
+  );
+  host.innerHTML = parts.join('');
+  host.querySelectorAll('.accent-swatch[data-accent]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.accent = btn.dataset.accent || '';
+      saveSettings();
+      applyAccent(settings.accent);
+      renderAccentPalette();
+    });
+  });
+  const customInput = $('accent-custom-input');
+  if (customInput) {
+    customInput.addEventListener('input', (e) => {
+      const v = e.target.value;
+      if (isHexColor(v)) {
+        settings.accent = v;
+        applyAccent(settings.accent);
+      }
+    });
+    customInput.addEventListener('change', (e) => {
+      const v = e.target.value;
+      if (isHexColor(v)) {
+        settings.accent = v;
+        saveSettings();
+        applyAccent(settings.accent);
+        renderAccentPalette();
+      }
+    });
+  }
+}
+
 function renderSettings() {
   // Theme cards
   document.querySelectorAll('.theme-card').forEach(card => {
     card.classList.toggle('active', card.dataset.theme === settings.theme);
   });
+  renderAccentPalette();
   // Toggles
   document.querySelectorAll('.toggle').forEach(t => {
     const key = TOGGLE_KEY_MAP[t.dataset.setting];
