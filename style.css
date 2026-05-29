@@ -2972,6 +2972,63 @@ input { font-family: inherit; color: inherit; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12); }
 
+/* ─── Update banner ───
+   Fixed, top-centered toast. Floats above content but below the fullscreen
+   player overlay (z 200) and command palette (z 400). Dismissible; the
+   renderer suppresses it for the rest of the day once closed. */
+.update-banner {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 10px 12px 10px 14px;
+  background: var(--panel-elev);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+.update-banner[hidden] { display: none; }
+.update-banner-icon { color: var(--accent); flex: 0 0 auto; }
+.update-banner-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+.update-banner-title { color: var(--text-strong); font-weight: 600; font-size: 13px; }
+.update-banner-version { color: var(--text-dim); font-size: 12px; }
+.update-banner-btn {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--panel);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.update-banner-btn:hover { filter: brightness(1.08); }
+.update-banner-close {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.update-banner-close:hover { background: var(--panel-alt); color: var(--text-strong); }
+
 /* ─── Responsive: narrow desktop windows ───
    Min window is 1024×700 (main.js). Everything below kicks in at ≤1100px so
    the cramped 1024–1100 range stays usable. All rules are inside the media

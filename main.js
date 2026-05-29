@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell, screen, Tray, Menu, nativeIm
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const https = require('https');
 const musicMetadata = require('music-metadata');
 const NodeID3 = require('node-id3');
 
@@ -383,6 +384,83 @@ ipcMain.handle('shell:openExternal', async (event, url) => {
     return { success: true };
   } catch (err) {
     return { success: false, error: String(err) };
+  }
+});
+
+// ── Update check ──
+// Polls the GitHub Releases API for the latest published release and compares
+// it to the running version. No auto-install — the renderer shows an in-app
+// banner whose "Download" button opens the release page via shell:openExternal.
+const GITHUB_REPO = 'MishaSok/audex-player';
+
+function parseVersion(v) {
+  // "v1.1.2" / "1.1.2" / "1.1.2-beta" -> [1, 1, 2]
+  const core = String(v).trim().replace(/^v/i, '').split(/[-+]/)[0];
+  return core.split('.').map((n) => parseInt(n, 10) || 0);
+}
+
+function isNewerVersion(latest, current) {
+  const a = parseVersion(latest);
+  const b = parseVersion(current);
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const x = a[i] || 0;
+    const y = b[i] || 0;
+    if (x > y) return true;
+    if (x < y) return false;
+  }
+  return false;
+}
+
+function fetchLatestRelease() {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      {
+        hostname: 'api.github.com',
+        path: `/repos/${GITHUB_REPO}/releases/latest`,
+        headers: {
+          'User-Agent': 'Audex-Player',
+          Accept: 'application/vnd.github+json',
+        },
+        timeout: 10000,
+      },
+      (res) => {
+        if (res.statusCode !== 200) {
+          res.resume();
+          reject(new Error(`GitHub API status ${res.statusCode}`));
+          return;
+        }
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', () => {
+          try { resolve(JSON.parse(body)); }
+          catch (err) { reject(err); }
+        });
+      }
+    );
+    req.on('timeout', () => req.destroy(new Error('GitHub API timeout')));
+    req.on('error', reject);
+  });
+}
+
+ipcMain.handle('update:check', async () => {
+  const currentVersion = app.getVersion();
+  try {
+    const release = await fetchLatestRelease();
+    if (!release || release.draft || release.prerelease || !release.tag_name) {
+      return { success: true, hasUpdate: false, currentVersion };
+    }
+    const latestVersion = String(release.tag_name).replace(/^v/i, '');
+    return {
+      success: true,
+      currentVersion,
+      latestVersion,
+      hasUpdate: isNewerVersion(latestVersion, currentVersion),
+      url: release.html_url || `https://github.com/${GITHUB_REPO}/releases/latest`,
+    };
+  } catch (err) {
+    return { success: false, error: String(err), currentVersion };
   }
 });
 

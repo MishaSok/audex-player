@@ -8,6 +8,7 @@ const LS = {
   playlists: 'audex-playlists',
   settings: 'audex-settings',
   recents: 'audex-recents',
+  updateDismiss: 'audex-update-dismiss',
   ytState: 'audex-dl-yt-state',
   ymState: 'audex-dl-ym-state',
   queue: 'audex-dl-queue',
@@ -161,6 +162,9 @@ function saveRecents() {
 const I18N = {
   ru: {
     'nav.library': 'Библиотека',
+    'update.available': 'Доступно обновление',
+    'update.download': 'Скачать',
+    'update.dismiss': 'Закрыть',
     'nav.artists': 'Исполнители',
     'nav.playlists': 'Плейлисты',
     'nav.favorites': 'Избранное',
@@ -384,6 +388,9 @@ const I18N = {
   },
   en: {
     'nav.library': 'Library',
+    'update.available': 'Update available',
+    'update.download': 'Download',
+    'update.dismiss': 'Dismiss',
     'nav.artists': 'Artists',
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favorites',
@@ -607,6 +614,9 @@ const I18N = {
   },
   de: {
     'nav.library': 'Bibliothek',
+    'update.available': 'Update verfügbar',
+    'update.download': 'Herunterladen',
+    'update.dismiss': 'Schließen',
     'nav.artists': 'Interpreten',
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favoriten',
@@ -830,6 +840,9 @@ const I18N = {
   },
   fr: {
     'nav.library': 'Bibliothèque',
+    'update.available': 'Mise à jour disponible',
+    'update.download': 'Télécharger',
+    'update.dismiss': 'Fermer',
     'nav.artists': 'Artistes',
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favoris',
@@ -1053,6 +1066,9 @@ const I18N = {
   },
   uk: {
     'nav.library': 'Бібліотека',
+    'update.available': 'Доступне оновлення',
+    'update.download': 'Завантажити',
+    'update.dismiss': 'Закрити',
     'nav.artists': 'Виконавці',
     'nav.playlists': 'Плейлисти',
     'nav.favorites': 'Улюблене',
@@ -4505,6 +4521,50 @@ async function rescanOnBoot() {
   }
 }
 
+// ── Update check ──
+// Asks the main process whether a newer GitHub release exists and, if so,
+// shows the in-app banner. The banner is suppressed for the rest of the day
+// once the user closes it (keyed by version + date), so it reappears the next
+// day — and immediately for any newer version.
+function updateTodayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function getUpdateDismiss() {
+  try { return JSON.parse(localStorage.getItem(LS.updateDismiss)) || {}; }
+  catch (_) { return {}; }
+}
+function showUpdateBanner(info) {
+  const banner = document.getElementById('update-banner');
+  if (!banner) return;
+  const versionEl = document.getElementById('update-banner-version');
+  if (versionEl) versionEl.textContent = 'v' + info.latestVersion;
+  const dlBtn = document.getElementById('update-download-btn');
+  if (dlBtn) dlBtn.onclick = () => {
+    if (info.url) window.electronAPI.openExternal(info.url);
+  };
+  const closeBtn = document.getElementById('update-close-btn');
+  if (closeBtn) closeBtn.onclick = () => {
+    banner.hidden = true;
+    try {
+      localStorage.setItem(LS.updateDismiss, JSON.stringify({
+        version: info.latestVersion,
+        date: updateTodayStr(),
+      }));
+    } catch (_) { /* ignore */ }
+  };
+  banner.hidden = false;
+}
+async function checkForUpdates() {
+  if (!window.electronAPI || typeof window.electronAPI.checkForUpdate !== 'function') return;
+  let info;
+  try { info = await window.electronAPI.checkForUpdate(); }
+  catch (_) { return; }
+  if (!info || !info.success || !info.hasUpdate) return;
+  const dismissed = getUpdateDismiss();
+  if (dismissed.version === info.latestVersion && dismissed.date === updateTodayStr()) return;
+  showUpdateBanner(info);
+}
+
 // Boot
 applyLanguage(settings.language);
 renderSettings();
@@ -4516,3 +4576,4 @@ loadLastTrack();
 restoreCovers();
 restoreDownloadsState();
 rescanOnBoot();
+checkForUpdates();
