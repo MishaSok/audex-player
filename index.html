@@ -523,106 +523,30 @@
               <svg class="i" width="11" height="11"><use href="#i-sun"/></svg>
               <span data-i18n="section.appearance">Внешний вид</span>
             </div>
-            <div class="theme-cards">
-              <button class="theme-card" data-theme="dark">
-                <div class="theme-preview theme-preview-dark">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"></div>
+            <div class="setting-card setting-card-tight">
+              <div class="setting-row">
+                <div class="setting-text">
+                  <div class="setting-label" data-i18n="setting.theme">Тема</div>
+                  <div class="setting-desc" data-i18n="setting.themeDesc">Цветовая схема приложения.</div>
                 </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span data-i18n="theme.dark">Тёмная</span>
-                  <span class="theme-radio"></span>
+                <div class="select" id="theme-select">
+                  <button class="select-btn">
+                    <span id="theme-current"></span>
+                    <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
+                  </button>
+                  <div class="select-menu">
+                    <div class="select-opt" data-theme="dark"><span class="opt-emoji">🌙</span><span data-i18n="theme.dark">Тёмная</span></div>
+                    <div class="select-opt" data-theme="light"><span class="opt-emoji">☀️</span><span data-i18n="theme.light">Светлая</span></div>
+                    <div class="select-opt" data-theme="system"><span class="opt-emoji">🖥️</span><span data-i18n="theme.system">Системная</span></div>
+                    <div class="select-opt" data-theme="nocturne"><span class="opt-emoji">🌌</span><span>Nocturne</span></div>
+                    <div class="select-opt" data-theme="terracotta"><span class="opt-emoji">🏺</span><span>Terracotta</span></div>
+                    <div class="select-opt" data-theme="forest"><span class="opt-emoji">🌲</span><span>Forest</span></div>
+                    <div class="select-opt" data-theme="vapor"><span class="opt-emoji">🌆</span><span>Vapor</span></div>
+                    <div class="select-opt" data-theme="noir"><span class="opt-emoji">🎬</span><span>Crimson Noir</span></div>
+                    <div class="select-opt" data-theme="arctic"><span class="opt-emoji">❄️</span><span>Arctic</span></div>
+                  </div>
                 </div>
-              </button>
-              <button class="theme-card" data-theme="light">
-                <div class="theme-preview theme-preview-light">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-sun"/></svg>
-                  <span data-i18n="theme.light">Светлая</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="system">
-                <div class="theme-preview theme-preview-system">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-monitor"/></svg>
-                  <span data-i18n="theme.system">Системная</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="nocturne">
-                <div class="theme-preview theme-preview-nocturne">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span>Nocturne</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="terracotta">
-                <div class="theme-preview theme-preview-terracotta">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-sun"/></svg>
-                  <span>Terracotta</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="forest">
-                <div class="theme-preview theme-preview-forest">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span>Forest</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="vapor">
-                <div class="theme-preview theme-preview-vapor">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span>Vapor</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="noir">
-                <div class="theme-preview theme-preview-noir">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-moon"/></svg>
-                  <span>Crimson Noir</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
-              <button class="theme-card" data-theme="arctic">
-                <div class="theme-preview theme-preview-arctic">
-                  <div class="tp-sidebar"></div>
-                  <div class="tp-main"><span class="tp-dot"></span></div>
-                </div>
-                <div class="theme-card-foot">
-                  <svg class="i" width="13" height="13"><use href="#i-sun"/></svg>
-                  <span>Arctic</span>
-                  <span class="theme-radio"></span>
-                </div>
-              </button>
+              </div>
             </div>
 
             <div class="setting-card setting-card-tight">

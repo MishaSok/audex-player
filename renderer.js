@@ -95,6 +95,25 @@ function applyAccent(hex) {
 }
 applyAccent(settings.accent);
 
+// ── Theme combobox options ──
+// Built-in themes (dark/light/system) use i18n labels; designer palettes use
+// their proper names. `emoji` is shown both in the menu and the select trigger.
+const THEME_OPTIONS = [
+  { id: 'dark',       emoji: '🌙', i18n: 'theme.dark' },
+  { id: 'light',      emoji: '☀️', i18n: 'theme.light' },
+  { id: 'system',     emoji: '🖥️', i18n: 'theme.system' },
+  { id: 'nocturne',   emoji: '🌌', name: 'Nocturne' },
+  { id: 'terracotta', emoji: '🏺', name: 'Terracotta' },
+  { id: 'forest',     emoji: '🌲', name: 'Forest' },
+  { id: 'vapor',      emoji: '🌆', name: 'Vapor' },
+  { id: 'noir',       emoji: '🎬', name: 'Crimson Noir' },
+  { id: 'arctic',     emoji: '❄️', name: 'Arctic' },
+];
+function themeLabel(id) {
+  const o = THEME_OPTIONS.find(t => t.id === id) || THEME_OPTIONS[0];
+  return `${o.emoji} ${o.i18n ? tr(o.i18n) : o.name}`;
+}
+
 // ── UI scale ──
 const UI_SCALE_STEPS = [0.8, 0.9, 1.0, 1.1, 1.25, 1.5];
 function clampUiScale(v) {
@@ -269,6 +288,8 @@ const I18N = {
     'theme.dark': 'Тёмная',
     'theme.light': 'Светлая',
     'theme.system': 'Системная',
+    'setting.theme': 'Тема',
+    'setting.themeDesc': 'Цветовая схема приложения.',
     'setting.accent': 'Цвет акцента',
     'setting.accentDesc': 'Подсветка активных элементов и текущего трека.',
     'setting.accentDefault': 'По умолчанию',
@@ -490,6 +511,8 @@ const I18N = {
     'theme.dark': 'Dark',
     'theme.light': 'Light',
     'theme.system': 'System',
+    'setting.theme': 'Theme',
+    'setting.themeDesc': 'Application color scheme.',
     'setting.accent': 'Accent color',
     'setting.accentDesc': 'Highlights active items and the currently playing track.',
     'setting.accentDefault': 'Default',
@@ -711,6 +734,8 @@ const I18N = {
     'theme.dark': 'Dunkel',
     'theme.light': 'Hell',
     'theme.system': 'System',
+    'setting.theme': 'Design',
+    'setting.themeDesc': 'Farbschema der Anwendung.',
     'setting.accent': 'Akzentfarbe',
     'setting.accentDesc': 'Hervorhebung aktiver Elemente und des aktuellen Titels.',
     'setting.accentDefault': 'Standard',
@@ -932,6 +957,8 @@ const I18N = {
     'theme.dark': 'Sombre',
     'theme.light': 'Clair',
     'theme.system': 'Système',
+    'setting.theme': 'Thème',
+    'setting.themeDesc': 'Schéma de couleurs de l’application.',
     'setting.accent': 'Couleur d’accent',
     'setting.accentDesc': 'Met en évidence les éléments actifs et le morceau en cours.',
     'setting.accentDefault': 'Par défaut',
@@ -1153,6 +1180,8 @@ const I18N = {
     'theme.dark': 'Темна',
     'theme.light': 'Світла',
     'theme.system': 'Системна',
+    'setting.theme': 'Тема',
+    'setting.themeDesc': 'Колірна схема застосунку.',
     'setting.accent': 'Колір акценту',
     'setting.accentDesc': 'Підсвічування активних елементів і поточного треку.',
     'setting.accentDefault': 'За замовчуванням',
@@ -4307,9 +4336,11 @@ function renderAccentPalette() {
 }
 
 function renderSettings() {
-  // Theme cards
-  document.querySelectorAll('.theme-card').forEach(card => {
-    card.classList.toggle('active', card.dataset.theme === settings.theme);
+  // Theme combobox
+  const themeCurrent = $('theme-current');
+  if (themeCurrent) themeCurrent.textContent = themeLabel(settings.theme);
+  document.querySelectorAll('#theme-select .select-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.theme === settings.theme);
   });
   renderAccentPalette();
   // Toggles
@@ -4334,10 +4365,19 @@ function renderSettings() {
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
 }
 
-document.querySelectorAll('.theme-card').forEach(card => {
-  card.addEventListener('click', () => {
-    settings.theme = card.dataset.theme;
+const themeSelect = $('theme-select');
+themeSelect.querySelector('.select-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  themeSelect.classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#theme-select')) themeSelect.classList.remove('open');
+});
+document.querySelectorAll('#theme-select .select-opt').forEach(o => {
+  o.addEventListener('click', () => {
+    settings.theme = o.dataset.theme;
     saveSettings();
+    themeSelect.classList.remove('open');
     applyTheme(settings.theme);
     renderSettings();
   });

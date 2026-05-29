@@ -1614,90 +1614,10 @@ input { font-family: inherit; color: inherit; }
   vertical-align: 2px;
 }
 
-/* Theme cards */
-.theme-cards { display: flex; flex-wrap: wrap; gap: 10px; }
-.theme-card {
-  flex: 1 1 calc(33.333% - 7px);
-  min-width: 120px;
-  padding: 12px;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  text-align: left;
-  transition: all 0.15s;
-}
-.theme-card.active {
-  background: var(--active-bg);
-  border-color: var(--text-faint);
-}
-.theme-preview {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  display: flex;
-  border: 1px solid var(--border-strong);
-}
-.theme-preview .tp-sidebar {
-  width: 32%;
-  border-right: 1px solid var(--border);
-}
-.theme-preview .tp-main { flex: 1; display: flex; align-items: center; padding: 0 8px; }
-.theme-preview .tp-dot { width: 45%; height: 5px; border-radius: 3px; }
-.theme-preview-dark { background: #0a0a0b; }
-.theme-preview-dark .tp-sidebar { background: #0d0d0e; }
-.theme-preview-light { background: #fafaf9; }
-.theme-preview-light .tp-sidebar { background: #f0eeea; }
-.theme-preview-system {
-  background: linear-gradient(90deg, #0a0a0b 50%, #fafaf9 50%);
-}
-.theme-preview-system .tp-sidebar { display: none; }
-.theme-preview-nocturne { background: #0b0e1a; }
-.theme-preview-nocturne .tp-sidebar { background: #0e1220; }
-.theme-preview-nocturne .tp-dot { background: #5cc8e0; }
-.theme-preview-terracotta { background: #f4ede1; }
-.theme-preview-terracotta .tp-sidebar { background: #ece3d3; }
-.theme-preview-terracotta .tp-dot { background: #c2562e; }
-.theme-preview-forest { background: #0a120d; }
-.theme-preview-forest .tp-sidebar { background: #0d1611; }
-.theme-preview-forest .tp-dot { background: #8fd14f; }
-.theme-preview-vapor { background: #120a1a; }
-.theme-preview-vapor .tp-sidebar { background: #160d20; }
-.theme-preview-vapor .tp-dot { background: #e85cc8; }
-.theme-preview-noir { background: #100a0b; }
-.theme-preview-noir .tp-sidebar { background: #140d0e; }
-.theme-preview-noir .tp-dot { background: #e0484f; }
-.theme-preview-arctic { background: #eef1f5; }
-.theme-preview-arctic .tp-sidebar { background: #e6eaf0; }
-.theme-preview-arctic .tp-dot { background: #2f6fd6; }
-.theme-card-foot {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: var(--text);
-}
-.theme-card.active .theme-card-foot { color: var(--text-strong); font-weight: 500; }
-.theme-radio {
-  margin-left: auto;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  position: relative;
-}
-.theme-card.active .theme-radio {
-  background: var(--text-strong);
-  border-color: var(--text-strong);
-}
-.theme-card.active .theme-radio::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  background: var(--bg);
-}
+/* Theme select — emoji marker in the trigger and each option */
+#theme-select .select-btn > span,
+#theme-select .select-opt { display: flex; align-items: center; gap: 8px; }
+#theme-select .opt-emoji { font-size: 14px; line-height: 1; flex-shrink: 0; }
 
 /* Accent palette */
 .accent-palette {
@@ -1960,7 +1880,7 @@ input { font-family: inherit; color: inherit; }
   top: 0;
   bottom: 0;
   width: 100%;
-  background: rgba(231, 231, 232, 0.75);
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -3110,9 +3030,4 @@ input { font-family: inherit; color: inherit; }
   .fs-cover { width: 280px; height: 280px; }
   .fs-cover-letter { font-size: 80px; }
   .fs-title { font-size: 44px; }
-
-  /* Settings — theme cards reflow into 2 columns if needed instead of always
-     squeezing 3 across. */
-  .theme-cards { flex-wrap: wrap; }
-  .theme-card { flex: 1 1 calc(50% - 5px); min-width: 140px; }
 }
