@@ -18,7 +18,7 @@ let libraryMeta = JSON.parse(localStorage.getItem(LS.libraryMeta) || '[]');
 let favorites = JSON.parse(localStorage.getItem(LS.favorites) || '[]');
 let playlists = JSON.parse(localStorage.getItem(LS.playlists) || '[]');
 let settings = Object.assign({
-  theme: 'dark',          // 'dark' | 'light' | 'system'
+  theme: 'dark',          // 'dark' | 'light' | 'system' | designer palette id (nocturne/terracotta/forest/vapor/noir/arctic)
   accent: '',             // '' = theme default; otherwise a hex like '#5b9eff'
   language: 'en',
   defaultFolder: '',

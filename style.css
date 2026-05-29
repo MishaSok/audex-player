@@ -46,6 +46,149 @@
   --modal-scrim: rgba(80, 80, 90, 0.4);
 }
 
+/* ─── Designer palettes (Claude Design) ───
+   Each maps the design's token shape onto Audex's CSS variables. The theme's
+   signature accent (the design "ember") is the default --accent; the user's
+   custom accent (applyAccent) still overrides it via inline style. */
+
+:root[data-theme="nocturne"] {
+  --bg: #0b0e1a;
+  --panel: #0e1220;
+  --panel-alt: #161c2e;
+  --panel-elev: #1b2236;
+  --border: rgba(150, 175, 255, 0.07);
+  --border-strong: rgba(150, 175, 255, 0.13);
+  --text: #dbe2f2;
+  --text-strong: #f1f4ff;
+  --text-muted: rgba(219, 226, 242, 0.56);
+  --text-dim: rgba(219, 226, 242, 0.4);
+  --text-faint: rgba(219, 226, 242, 0.28);
+  --hover-bg: rgba(150, 175, 255, 0.045);
+  --active-bg: rgba(150, 175, 255, 0.09);
+  --row-active-bg: rgba(150, 175, 255, 0.06);
+  --accent: #5cc8e0;
+  --accent-fav: #ff6b8a;
+  --accent-ok: #5fd6b0;
+  --accent-warn: #5cc8e0;
+  --danger: #ff6b8a;
+  --modal-scrim: rgba(3, 5, 12, 0.65);
+}
+
+:root[data-theme="terracotta"] {
+  --bg: #f4ede1;
+  --panel: #ece3d3;
+  --panel-alt: #e3d8c4;
+  --panel-elev: #f3ecdf;
+  --border: rgba(74, 52, 28, 0.11);
+  --border-strong: rgba(74, 52, 28, 0.18);
+  --text: #3c3127;
+  --text-strong: #241b12;
+  --text-muted: rgba(60, 49, 39, 0.62);
+  --text-dim: rgba(60, 49, 39, 0.44);
+  --text-faint: rgba(60, 49, 39, 0.3);
+  --hover-bg: rgba(74, 52, 28, 0.05);
+  --active-bg: rgba(74, 52, 28, 0.1);
+  --row-active-bg: rgba(74, 52, 28, 0.07);
+  --accent: #c2562e;
+  --accent-fav: #c63d4e;
+  --accent-ok: #3f8f6b;
+  --accent-warn: #c2562e;
+  --danger: #c63d4e;
+  --modal-scrim: rgba(60, 45, 25, 0.4);
+}
+
+:root[data-theme="forest"] {
+  --bg: #0a120d;
+  --panel: #0d1611;
+  --panel-alt: #142019;
+  --panel-elev: #18271e;
+  --border: rgba(150, 255, 190, 0.07);
+  --border-strong: rgba(150, 255, 190, 0.13);
+  --text: #dce8df;
+  --text-strong: #f0fff4;
+  --text-muted: rgba(220, 232, 223, 0.56);
+  --text-dim: rgba(220, 232, 223, 0.4);
+  --text-faint: rgba(220, 232, 223, 0.28);
+  --hover-bg: rgba(150, 255, 190, 0.045);
+  --active-bg: rgba(150, 255, 190, 0.09);
+  --row-active-bg: rgba(150, 255, 190, 0.06);
+  --accent: #8fd14f;
+  --accent-fav: #ff6b8a;
+  --accent-ok: #5fd6b0;
+  --accent-warn: #8fd14f;
+  --danger: #ff6b8a;
+  --modal-scrim: rgba(3, 10, 5, 0.65);
+}
+
+:root[data-theme="vapor"] {
+  --bg: #120a1a;
+  --panel: #160d20;
+  --panel-alt: #20142e;
+  --panel-elev: #281836;
+  --border: rgba(225, 150, 255, 0.08);
+  --border-strong: rgba(225, 150, 255, 0.14);
+  --text: #e6dbf2;
+  --text-strong: #f7f1ff;
+  --text-muted: rgba(230, 219, 242, 0.56);
+  --text-dim: rgba(230, 219, 242, 0.4);
+  --text-faint: rgba(230, 219, 242, 0.28);
+  --hover-bg: rgba(225, 150, 255, 0.05);
+  --active-bg: rgba(225, 150, 255, 0.1);
+  --row-active-bg: rgba(225, 150, 255, 0.07);
+  --accent: #e85cc8;
+  --accent-fav: #ff5a52;
+  --accent-ok: #5fd6b0;
+  --accent-warn: #e85cc8;
+  --danger: #ff5a52;
+  --modal-scrim: rgba(10, 4, 16, 0.65);
+}
+
+:root[data-theme="noir"] {
+  --bg: #100a0b;
+  --panel: #140d0e;
+  --panel-alt: #1f1416;
+  --panel-elev: #26181a;
+  --border: rgba(255, 150, 150, 0.07);
+  --border-strong: rgba(255, 150, 150, 0.13);
+  --text: #e8dcdd;
+  --text-strong: #fff4f4;
+  --text-muted: rgba(232, 220, 221, 0.56);
+  --text-dim: rgba(232, 220, 221, 0.4);
+  --text-faint: rgba(232, 220, 221, 0.28);
+  --hover-bg: rgba(255, 150, 150, 0.045);
+  --active-bg: rgba(255, 120, 120, 0.09);
+  --row-active-bg: rgba(255, 120, 120, 0.06);
+  --accent: #e0484f;
+  --accent-fav: #ff7a45;
+  --accent-ok: #6bd0a0;
+  --accent-warn: #e0484f;
+  --danger: #ff7a45;
+  --modal-scrim: rgba(10, 4, 5, 0.65);
+}
+
+:root[data-theme="arctic"] {
+  --bg: #eef1f5;
+  --panel: #e6eaf0;
+  --panel-alt: #dde2ea;
+  --panel-elev: #f1f4f8;
+  --border: rgba(30, 50, 80, 0.1);
+  --border-strong: rgba(30, 50, 80, 0.17);
+  --text: #2a3340;
+  --text-strong: #131a24;
+  --text-muted: rgba(42, 51, 64, 0.62);
+  --text-dim: rgba(42, 51, 64, 0.44);
+  --text-faint: rgba(42, 51, 64, 0.3);
+  --hover-bg: rgba(30, 50, 80, 0.05);
+  --active-bg: rgba(30, 50, 80, 0.09);
+  --row-active-bg: rgba(30, 50, 80, 0.06);
+  --accent: #2f6fd6;
+  --accent-fav: #d23b4e;
+  --accent-ok: #1f8a5b;
+  --accent-warn: #2f6fd6;
+  --danger: #d23b4e;
+  --modal-scrim: rgba(20, 30, 50, 0.4);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -1472,9 +1615,10 @@ input { font-family: inherit; color: inherit; }
 }
 
 /* Theme cards */
-.theme-cards { display: flex; gap: 10px; }
+.theme-cards { display: flex; flex-wrap: wrap; gap: 10px; }
 .theme-card {
-  flex: 1;
+  flex: 1 1 calc(33.333% - 7px);
+  min-width: 120px;
   padding: 12px;
   background: var(--panel-alt);
   border: 1px solid var(--border);
@@ -1499,7 +1643,8 @@ input { font-family: inherit; color: inherit; }
   width: 32%;
   border-right: 1px solid var(--border);
 }
-.theme-preview .tp-main { flex: 1; }
+.theme-preview .tp-main { flex: 1; display: flex; align-items: center; padding: 0 8px; }
+.theme-preview .tp-dot { width: 45%; height: 5px; border-radius: 3px; }
 .theme-preview-dark { background: #0a0a0b; }
 .theme-preview-dark .tp-sidebar { background: #0d0d0e; }
 .theme-preview-light { background: #fafaf9; }
@@ -1508,6 +1653,24 @@ input { font-family: inherit; color: inherit; }
   background: linear-gradient(90deg, #0a0a0b 50%, #fafaf9 50%);
 }
 .theme-preview-system .tp-sidebar { display: none; }
+.theme-preview-nocturne { background: #0b0e1a; }
+.theme-preview-nocturne .tp-sidebar { background: #0e1220; }
+.theme-preview-nocturne .tp-dot { background: #5cc8e0; }
+.theme-preview-terracotta { background: #f4ede1; }
+.theme-preview-terracotta .tp-sidebar { background: #ece3d3; }
+.theme-preview-terracotta .tp-dot { background: #c2562e; }
+.theme-preview-forest { background: #0a120d; }
+.theme-preview-forest .tp-sidebar { background: #0d1611; }
+.theme-preview-forest .tp-dot { background: #8fd14f; }
+.theme-preview-vapor { background: #120a1a; }
+.theme-preview-vapor .tp-sidebar { background: #160d20; }
+.theme-preview-vapor .tp-dot { background: #e85cc8; }
+.theme-preview-noir { background: #100a0b; }
+.theme-preview-noir .tp-sidebar { background: #140d0e; }
+.theme-preview-noir .tp-dot { background: #e0484f; }
+.theme-preview-arctic { background: #eef1f5; }
+.theme-preview-arctic .tp-sidebar { background: #e6eaf0; }
+.theme-preview-arctic .tp-dot { background: #2f6fd6; }
 .theme-card-foot {
   display: flex;
   align-items: center;
