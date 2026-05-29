@@ -8,7 +8,7 @@
 
 Built with Electron and vanilla JS — no frameworks, no bloat, just a clean charcoal-and-amber player that scans your files, downloads new tracks, and stays out of your way.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.1.2-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-2b2b2b)](https://github.com/MishaSok/audex-player/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-42-47848f)](https://www.electronjs.org/)
@@ -73,14 +73,17 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 ### 🎨 Interface
 
 - **Five UI languages** — Russian, English, German, French, Ukrainian.
-- **Dark / light / system** theme, with a single charcoal-and-amber Mono design.
+- **Themes** — dark / light / system, plus **6 hand-tuned designer color themes**, all selectable from a theme picker in Settings.
+- **Customizable accent color** — choose any accent from a set of presets or a custom color picker; it recolors now-playing highlights, progress bars and primary controls across the app.
 - **UI scale** setting — make the whole interface larger or smaller, applied instantly.
 - **Responsive layout** — adapts gracefully to narrow desktop windows.
 - Polished **animations** for now-playing transitions and UI controls (respecting `prefers-reduced-motion`).
 
 ### 🖥️ System integration
 
+- **System tray** — controls playback (play / pause, previous / next) right from the tray menu, and closing the window keeps the app running in the background so music never stops.
 - **MPRIS / Media Session** — now-playing metadata and transport controls appear in the GNOME top bar (and other OS media widgets).
+- **Update notifications** — on launch the app checks GitHub for a newer release and shows a dismissible in-app banner when one is available, with a one-click link to the download page.
 - **Mini-player navigation** — click the cover to open fullscreen, click the title/artist to jump to the library or artist page.
 
 ---
@@ -104,9 +107,9 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 
 | Platform | File |
 | --- | --- |
-| **Linux** | `Audex-1.1.0.AppImage` (portable) or `audex-player_1.1.0_amd64.deb` |
-| **macOS** (Apple Silicon) | `Audex-1.1.0-arm64.dmg` |
-| **Windows** | `Audex.Setup.1.1.0.exe` |
+| **Linux** | `Audex-1.1.2.AppImage` (portable) or `audex-player_1.1.2_amd64.deb` |
+| **macOS** (Apple Silicon) | `Audex-1.1.2-arm64.dmg` |
+| **Windows** | `Audex.Setup.1.1.2.exe` |
 
 > **Note:** builds are unsigned.
 > - **macOS** — right-click the app → **Open**, or run `xattr -d com.apple.quarantine /Applications/Audex.app`.
