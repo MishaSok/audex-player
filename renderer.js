@@ -1367,6 +1367,16 @@ function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan 
   let renderRow = () => document.createElement('div');
   const nodes = new Map(); // index -> element
   let rafPending = false;
+  let lastScrollTop = scrollEl.scrollTop;
+
+  // listEl's offset within the scroll container's content (header/topbar above it).
+  // It's constant while scrolling, so cache it and avoid a forced layout every frame.
+  let listOffset = 0;
+  let offsetValid = false;
+  function measureOffset() {
+    listOffset = listEl.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop;
+    offsetValid = true;
+  }
 
   function placeNode(node, index) {
     node.style.position = 'absolute';
@@ -1388,12 +1398,20 @@ function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan 
     }
     const scrollTop = scrollEl.scrollTop;
     const viewportH = scrollEl.clientHeight;
-    // listEl position relative to the scroll container (account for header/topbar above it)
-    const listOffset = listEl.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollTop;
+    if (!offsetValid) measureOffset();
+    // Velocity-aware buffer: a fast fling can jump far more than `overscan` rows
+    // between frames, leaving the newly-revealed area unmounted (blank rows). Extend
+    // the render range in the scroll direction by the per-frame travel so rows are
+    // mounted ahead of the viewport. Capped to bound per-frame work.
+    const delta = scrollTop - lastScrollTop;
+    lastScrollTop = scrollTop;
+    const velRows = Math.min(80, Math.ceil(Math.abs(delta) / rowHeight));
+    const aheadExtra = delta >= 0 ? velRows : 0;
+    const behindExtra = delta < 0 ? velRows : 0;
     const visibleStart = (scrollTop - listOffset) / rowHeight;
     const visibleEnd = (scrollTop - listOffset + viewportH) / rowHeight;
-    const start = Math.max(0, Math.floor(visibleStart) - overscan);
-    const end = Math.min(total, Math.ceil(visibleEnd) + overscan);
+    const start = Math.max(0, Math.floor(visibleStart) - overscan - behindExtra);
+    const end = Math.min(total, Math.ceil(visibleEnd) + overscan + aheadExtra);
 
     for (const [i, node] of nodes) {
       if (i < start || i >= end) {
@@ -1419,7 +1437,7 @@ function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan 
 
   const onScroll = () => schedule();
   scrollEl.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', schedule);
+  window.addEventListener('resize', () => { offsetValid = false; schedule(); });
 
   return {
     setItems(newItems, renderRowFn) {
@@ -1427,6 +1445,8 @@ function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan 
       if (renderRowFn) renderRow = renderRowFn;
       for (const [, node] of nodes) node.remove();
       nodes.clear();
+      offsetValid = false; // list may have moved (view switch / count change)
+      lastScrollTop = scrollEl.scrollTop;
       update();
     },
     // Re-render all currently mounted rows in place (used when only row visuals change, e.g. playing/favorite).
