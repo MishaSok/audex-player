@@ -309,6 +309,9 @@ const I18N = {
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
     'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
+    'section.system': 'Система',
+    'setting.hardwareAcceleration': 'Аппаратное ускорение',
+    'setting.hardwareAccelerationDesc': 'Использует видеокарту для отрисовки интерфейса. Если приложение зависает при запуске или работает с артефактами — выключите. Изменение применится после перезапуска.',
     'setting.uiLanguage': 'Язык интерфейса',
     'setting.uiLanguageDesc': 'Применяется сразу.',
     'setting.version': 'Версия',
@@ -535,6 +538,9 @@ const I18N = {
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
     'setting.showParserBrowserDesc': 'Useful for signing in to Yandex on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
+    'section.system': 'System',
+    'setting.hardwareAcceleration': 'Hardware acceleration',
+    'setting.hardwareAccelerationDesc': 'Uses the GPU to render the interface. If the app hangs on launch or shows graphical glitches, turn this off. Takes effect after a restart.',
     'setting.uiLanguage': 'Interface language',
     'setting.uiLanguageDesc': 'Applied immediately.',
     'setting.version': 'Version',
@@ -761,6 +767,9 @@ const I18N = {
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
     'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
+    'section.system': 'System',
+    'setting.hardwareAcceleration': 'Hardwarebeschleunigung',
+    'setting.hardwareAccelerationDesc': 'Nutzt die Grafikkarte zum Rendern der Oberfläche. Wenn die App beim Start hängt oder Grafikfehler zeigt, schalten Sie sie aus. Wird nach einem Neustart wirksam.',
     'setting.uiLanguage': 'Sprache der Oberfläche',
     'setting.uiLanguageDesc': 'Wird sofort angewendet.',
     'setting.version': 'Version',
@@ -987,6 +996,9 @@ const I18N = {
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
     'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
+    'section.system': 'Système',
+    'setting.hardwareAcceleration': 'Accélération matérielle',
+    'setting.hardwareAccelerationDesc': "Utilise la carte graphique pour afficher l'interface. Si l'application se bloque au démarrage ou présente des artefacts graphiques, désactivez-la. Prend effet après un redémarrage.",
     'setting.uiLanguage': "Langue de l'interface",
     'setting.uiLanguageDesc': 'Appliquée immédiatement.',
     'setting.version': 'Version',
@@ -1213,6 +1225,9 @@ const I18N = {
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
     'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
+    'section.system': 'Система',
+    'setting.hardwareAcceleration': 'Апаратне прискорення',
+    'setting.hardwareAccelerationDesc': 'Використовує відеокарту для відмалювання інтерфейсу. Якщо застосунок зависає при запуску або працює з артефактами — вимкніть. Зміна застосується після перезапуску.',
     'setting.uiLanguage': 'Мова інтерфейсу',
     'setting.uiLanguageDesc': 'Застосовується одразу.',
     'setting.version': 'Версія',
@@ -4362,8 +4377,10 @@ function renderSettings() {
   // Toggles
   document.querySelectorAll('.toggle').forEach(t => {
     const key = TOGGLE_KEY_MAP[t.dataset.setting];
+    if (!key) return; // toggles with their own handler (e.g. hardware acceleration)
     if (settings[key]) t.classList.add('on'); else t.classList.remove('on');
   });
+  refreshHwAccelToggle();
   // Folder
   $('default-folder-path').textContent = settings.defaultFolder || tr('placeholder.noFolder');
   // Language — labels stay in their native language regardless of currentLang.
@@ -4399,15 +4416,41 @@ document.querySelectorAll('#theme-select .select-opt').forEach(o => {
   });
 });
 document.querySelectorAll('.toggle').forEach(t => {
+  const key = TOGGLE_KEY_MAP[t.dataset.setting];
+  if (!key) return; // toggles with their own handler (e.g. hardware acceleration)
   t.addEventListener('click', () => {
     if (t.classList.contains('is-disabled')) return;
-    const key = TOGGLE_KEY_MAP[t.dataset.setting];
     settings[key] = !settings[key];
     saveSettings();
     t.classList.toggle('on', settings[key]);
     if (key === 'downloads') applyDownloadsVisibility();
   });
 });
+
+// ── Hardware acceleration toggle ──
+// State lives in the main process (a marker file read before app.ready), not in
+// localStorage. We query it for display and ask main to persist + restart.
+async function refreshHwAccelToggle() {
+  const t = $('toggle-hwaccel');
+  if (!t || !window.electronAPI || typeof window.electronAPI.getHardwareAcceleration !== 'function') return;
+  try {
+    const res = await window.electronAPI.getHardwareAcceleration();
+    t.classList.toggle('on', !!(res && res.enabled));
+  } catch (_) { /* leave as-is */ }
+}
+const hwAccelToggle = $('toggle-hwaccel');
+if (hwAccelToggle) {
+  hwAccelToggle.addEventListener('click', async () => {
+    if (hwAccelToggle.classList.contains('is-disabled')) return;
+    const enabled = !hwAccelToggle.classList.contains('on');
+    hwAccelToggle.classList.toggle('on', enabled);
+    try {
+      await window.electronAPI.setHardwareAcceleration(enabled);
+    } catch (_) { /* if it failed, re-sync from the source of truth */ }
+    // If the user declined the restart, the visible state still reflects the
+    // pending choice; re-sync to the actual effective state on next render.
+  });
+}
 $('btn-choose-default-folder').addEventListener('click', async () => {
   const folder = await window.electronAPI.chooseFolder();
   if (folder) {

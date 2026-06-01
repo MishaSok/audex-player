@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+  getHardwareAcceleration: () => ipcRenderer.invoke('app:getHardwareAcceleration'),
+  setHardwareAcceleration: (enabled) => ipcRenderer.invoke('app:setHardwareAcceleration', !!enabled),
   checkForUpdate: () => ipcRenderer.invoke('update:check'),
   ytSearch: (query, count) => ipcRenderer.invoke('downloads:ytSearch', query, count),
   ytDownload: (payload) => ipcRenderer.invoke('downloads:ytDownload', payload),

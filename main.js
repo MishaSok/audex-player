@@ -8,6 +8,26 @@ const NodeID3 = require('node-id3');
 
 app.setName('Audex');
 
+// ── GPU / hardware-acceleration fallback ──
+// Some Windows 10 GPU drivers make Electron hang on launch ("not responding").
+// We disable hardware acceleration when either:
+//   • the AUDEX_DISABLE_GPU env var or the --disable-gpu CLI flag is present, or
+//   • a `disable-gpu` marker file exists in userData. The marker is written
+//     automatically the first time the window goes unresponsive (see
+//     createWindow), so the *next* launch comes up without GPU and works.
+// Must run at module load, before app is ready, for disableHardwareAcceleration
+// to take effect.
+const gpuMarkerPath = path.join(app.getPath('userData'), 'disable-gpu');
+function isGpuDisabled() {
+  if (process.env.AUDEX_DISABLE_GPU) return true;
+  if (process.argv.includes('--disable-gpu')) return true;
+  try { return fs.existsSync(gpuMarkerPath); } catch (_) { return false; }
+}
+if (isGpuDisabled()) {
+  app.disableHardwareAcceleration();
+  app.commandLine.appendSwitch('disable-gpu');
+}
+
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;
@@ -53,6 +73,7 @@ function createWindow() {
     height: 820,
     minWidth: 1024,
     minHeight: 700,
+    show: false,
     backgroundColor: '#0a0a0b',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: {
@@ -65,6 +86,34 @@ function createWindow() {
 
   mainWindow.setMenuBarVisibility(false);
   mainWindow.autoHideMenuBar = true;
+
+  // Show only once the renderer has painted its first frame — avoids the blank
+  // white window that otherwise flashes (and looks like a freeze) on slow boots.
+  mainWindow.once('ready-to-show', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+  });
+
+  // If the renderer hangs (common with broken GPU drivers on Windows 10), drop a
+  // marker so the next launch disables hardware acceleration, and offer an
+  // immediate restart. No-op once we're already running without GPU.
+  mainWindow.on('unresponsive', () => {
+    if (isGpuDisabled()) return;
+    try { fs.writeFileSync(gpuMarkerPath, '1'); } catch (_) { /* ignore */ }
+    const choice = dialog.showMessageBoxSync(mainWindow, {
+      type: 'warning',
+      buttons: ['Перезапустить', 'Подождать'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Audex не отвечает',
+      message: 'Похоже, приложение зависло из-за графического ускорения.',
+      detail: 'Перезапустить с отключённым аппаратным ускорением? Это часто помогает на Windows.',
+    });
+    if (choice === 0) {
+      isQuitting = true;
+      app.relaunch();
+      app.exit(0);
+    }
+  });
 
   mainWindow.loadFile('index.html');
 
@@ -385,6 +434,43 @@ ipcMain.handle('shell:openExternal', async (event, url) => {
   } catch (err) {
     return { success: false, error: String(err) };
   }
+});
+
+// ── Hardware acceleration toggle ──
+// Reflects/controls the `disable-gpu` marker file used by the GPU fallback at
+// the top of this file. Returns whether hardware acceleration is currently
+// effective. Toggling writes or removes the marker; the change needs a restart
+// to take hold (disableHardwareAcceleration only works before app is ready), so
+// we offer one via a native dialog.
+ipcMain.handle('app:getHardwareAcceleration', () => {
+  return { enabled: !isGpuDisabled() };
+});
+
+ipcMain.handle('app:setHardwareAcceleration', async (event, enabled) => {
+  try {
+    if (enabled) {
+      try { fs.rmSync(gpuMarkerPath, { force: true }); } catch (_) { /* ignore */ }
+    } else {
+      fs.writeFileSync(gpuMarkerPath, '1');
+    }
+  } catch (err) {
+    return { success: false, error: String(err) };
+  }
+  const choice = dialog.showMessageBoxSync(mainWindow, {
+    type: 'question',
+    buttons: ['Перезапустить', 'Позже'],
+    defaultId: 0,
+    cancelId: 1,
+    title: 'Требуется перезапуск',
+    message: 'Изменение применится после перезапуска приложения.',
+    detail: 'Перезапустить Audex сейчас?',
+  });
+  if (choice === 0) {
+    isQuitting = true;
+    app.relaunch();
+    app.exit(0);
+  }
+  return { success: true, restarted: choice === 0 };
 });
 
 // ── Update check ──
