@@ -393,6 +393,13 @@ ipcMain.handle('music:parseMetadata', async (event, filePath) => {
   }
 });
 
+// Read raw audio bytes so the renderer can decode the track and extract real
+// amplitude peaks for the waveform progress bar (Web Audio decode runs in the
+// renderer). Returns a Buffer; IPC serializes it to a Uint8Array on the other side.
+ipcMain.handle('audio:readFile', async (event, filePath) => {
+  return await fs.promises.readFile(filePath);
+});
+
 ipcMain.handle('music:writeMetadata', async (event, { filePath, tags }) => {
   if (path.extname(filePath).toLowerCase() !== '.mp3') {
     return { success: false, error: 'Запись тегов поддерживается только для MP3' };

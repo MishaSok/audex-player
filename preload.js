@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder'),
   scanFolder: (folderPath) => ipcRenderer.invoke('music:scanFolder', folderPath),
   parseMetadata: (filePath) => ipcRenderer.invoke('music:parseMetadata', filePath),
+  readAudioFile: (filePath) => ipcRenderer.invoke('audio:readFile', filePath),
   writeMetadata: (filePath, tags) => ipcRenderer.invoke('music:writeMetadata', { filePath, tags }),
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),

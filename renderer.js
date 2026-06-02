@@ -12,6 +12,7 @@ const LS = {
   ytState: 'audex-dl-yt-state',
   ymState: 'audex-dl-ym-state',
   queue: 'audex-dl-queue',
+  wavePeaks: 'audex-wave-peaks',
 };
 
 // State
@@ -32,6 +33,18 @@ let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
 const coverCache = {};
 let library = libraryMeta.map(t => ({ ...t, cover: coverCache[t.path] || null }));
+
+// Real waveform peaks (path -> Float[0..1], length WAVE_BARS), decoded from audio
+// on first play and cached. Loaded from compact 0..255 ints in localStorage.
+const WAVE_CACHE_MAX = 600;
+const wavePeaksCache = (() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS.wavePeaks) || '{}');
+    const out = {};
+    for (const k in raw) out[k] = raw[k].map(v => v / 255);
+    return out;
+  } catch (_) { return {}; }
+})();
 
 let currentTrackIndex = -1;
 let currentQueue = library;          // the list we're playing through
@@ -151,6 +164,19 @@ function saveSettings() {
 }
 function saveRecents() {
   localStorage.setItem(LS.recents, JSON.stringify(recents.slice(0, 4)));
+}
+// Waveform peaks are persisted as compact 0..255 ints (path -> int[]), capped to
+// the most-recently-decoded tracks so the cache can't grow without bound.
+function saveWavePeaks() {
+  try {
+    const raw = {};
+    for (const k of Object.keys(wavePeaksCache).slice(-WAVE_CACHE_MAX)) {
+      raw[k] = wavePeaksCache[k].map(v => Math.round(v * 255));
+    }
+    localStorage.setItem(LS.wavePeaks, JSON.stringify(raw));
+  } catch (e) {
+    console.warn('wave peaks cache save failed:', e);
+  }
 }
 
 // ── i18n ──
@@ -3347,6 +3373,8 @@ function updateNowPlayingUI(track) {
   }
   lastNowPlayingPath = track.path;
 
+  buildWaveforms(track);
+
   updateFavoriteUI();
   updatePlayButtonUI();
   updateFullscreenQueue();
@@ -3587,6 +3615,197 @@ $('fs-btn-repeat').addEventListener('click', () => {
   updateRepeatUI();
 });
 
+// ── Inline waveform progress bar ──
+// The progress bar is rendered as the track's amplitude envelope (like Amberol):
+// played bars use --accent, the rest are dim, and hovering shows a seek preview.
+// Bar heights are the *real* per-bucket peaks decoded from the audio via the Web
+// Audio API (computeRealPeaks), cached per track in wavePeaksCache. While decoding
+// — or if decode fails — we fall back to a deterministic seeded envelope keyed off
+// the track so the bar always shows something stable instantly.
+const WAVE_BARS = 130;
+
+function waveSeededRand(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function waveHashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+// Build a peaks array (0.06..1) that looks like music: a slow loudness curve
+// (intro → build → chorus → outro) modulated by fast bar-to-bar variation.
+function waveBuildPeaks(seed, n = WAVE_BARS) {
+  const rand = waveSeededRand(seed);
+  const peaks = [];
+  for (let i = 0; i < n; i++) {
+    const p = i / n;
+    const intro = Math.min(1, p / 0.08);
+    const outro = Math.min(1, (1 - p) / 0.1);
+    const body = 0.55 + 0.35 * Math.sin(p * Math.PI * 2.3 - 0.6)
+                      + 0.12 * Math.sin(p * Math.PI * 7.1);
+    const macro = Math.max(0.18, body) * intro * outro;
+    const micro = 0.55 + 0.45 * rand();
+    peaks.push(Math.max(0.06, Math.min(1, macro * micro)));
+  }
+  return peaks;
+}
+
+// Decode a track's audio bytes into WAVE_BARS amplitude peaks (0..1). Uses a
+// low-rate OfflineAudioContext so decodeAudioData resamples down — we only need
+// the loudness envelope, so 8 kHz keeps memory small even for long tracks.
+let waveDecodeCtx = null;
+async function decodePeaks(arrayBuffer) {
+  if (!waveDecodeCtx) {
+    const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Ctx) throw new Error('OfflineAudioContext unavailable');
+    waveDecodeCtx = new Ctx(1, 1, 8000);
+  }
+  const audioBuf = await waveDecodeCtx.decodeAudioData(arrayBuffer);
+  const chCount = audioBuf.numberOfChannels;
+  const len = audioBuf.length;
+  const channels = [];
+  for (let c = 0; c < chCount; c++) channels.push(audioBuf.getChannelData(c));
+
+  const peaks = new Float32Array(WAVE_BARS);
+  const bucket = Math.max(1, Math.floor(len / WAVE_BARS));
+  let globalMax = 0;
+  for (let i = 0; i < WAVE_BARS; i++) {
+    const start = i * bucket;
+    const end = i === WAVE_BARS - 1 ? len : Math.min(len, start + bucket);
+    let max = 0;
+    for (let j = start; j < end; j++) {
+      for (let c = 0; c < chCount; c++) {
+        const v = Math.abs(channels[c][j]);
+        if (v > max) max = v;
+      }
+    }
+    peaks[i] = max;
+    if (max > globalMax) globalMax = max;
+  }
+  const norm = globalMax > 0 ? 1 / globalMax : 0;
+  const out = new Array(WAVE_BARS);
+  for (let i = 0; i < WAVE_BARS; i++) {
+    // pow(.,0.7) lifts quiet sections so they stay legible; floor keeps silent gaps visible
+    out[i] = Math.max(0.05, Math.min(1, Math.pow(peaks[i] * norm, 0.7)));
+  }
+  return out;
+}
+
+function cacheWavePeaks(path, peaks) {
+  wavePeaksCache[path] = peaks;
+  const keys = Object.keys(wavePeaksCache);
+  if (keys.length > WAVE_CACHE_MAX) delete wavePeaksCache[keys[0]];
+  saveWavePeaks();
+}
+
+// Decode real peaks for a track in the background, then repaint if it's still
+// the current track. Deduped via wavePeaksInFlight so re-plays don't re-decode.
+const wavePeaksInFlight = new Set();
+async function computeRealPeaks(track) {
+  const p = track.path;
+  if (!p || wavePeaksCache[p] || wavePeaksInFlight.has(p)) return;
+  if (!window.electronAPI || !window.electronAPI.readAudioFile) return;
+  wavePeaksInFlight.add(p);
+  try {
+    const bytes = await window.electronAPI.readAudioFile(p); // Uint8Array
+    // decodeAudioData detaches the buffer, so hand it a standalone copy
+    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const peaks = await decodePeaks(ab);
+    cacheWavePeaks(p, peaks);
+    if (lastNowPlayingPath === p) {
+      playbarWave.setPeaks(peaks, p + ':real');
+      fsWave.setPeaks(peaks, p + ':real');
+    }
+  } catch (e) {
+    console.warn('Waveform decode failed for', p, e);
+  } finally {
+    wavePeaksInFlight.delete(p);
+  }
+}
+
+// Controller bound to a container element; manages bar DOM + paint state.
+function makeWave(containerEl) {
+  let bars = [];
+  let progress = 0;   // 0..100
+  let hover = null;   // 0..100 seek-preview position, or null
+  let builtKey = null;
+
+  function setPeaks(peaks, key) {
+    if (key === builtKey) return;
+    builtKey = key;
+    containerEl.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    bars = peaks.map((h) => {
+      const b = document.createElement('div');
+      b.className = 'wave-bar';
+      b.style.height = `${Math.round(h * 100)}%`;
+      frag.appendChild(b);
+      return b;
+    });
+    containerEl.appendChild(frag);
+    paint();
+  }
+
+  function paint() {
+    const n = bars.length;
+    if (!n) return;
+    for (let i = 0; i < n; i++) {
+      const pct = (i + 0.5) / n * 100;
+      const played = pct <= progress;
+      const inPreview = hover != null && pct > progress && pct <= hover;
+      const b = bars[i];
+      b.classList.toggle('played', played);
+      b.classList.toggle('preview', inPreview);
+    }
+  }
+
+  function setProgress(p) {
+    if (p === progress) return;
+    progress = p;
+    paint();
+  }
+  function setHover(h) {
+    if (h === hover) return;
+    hover = h;
+    paint();
+  }
+
+  // Hover preview: highlight where a click would seek to.
+  containerEl.addEventListener('mousemove', (e) => {
+    const rect = containerEl.getBoundingClientRect();
+    setHover(Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100)));
+  });
+  containerEl.addEventListener('mouseleave', () => setHover(null));
+
+  return { setPeaks, setProgress, setHover };
+}
+
+const playbarWave = makeWave($('progress-track'));
+const fsWave = makeWave($('fs-progress-track'));
+
+function buildWaveforms(track) {
+  const p = track.path;
+  const real = wavePeaksCache[p];
+  if (real) {
+    playbarWave.setPeaks(real, p + ':real');
+    fsWave.setPeaks(real, p + ':real');
+  } else {
+    // show the synthetic shape immediately, then decode real peaks in the background
+    const syn = waveBuildPeaks(waveHashStr((track.title || '') + (track.artist || '')));
+    playbarWave.setPeaks(syn, p + ':syn');
+    fsWave.setPeaks(syn, p + ':syn');
+    computeRealPeaks(track);
+  }
+}
+
 // ── Audio events ──
 audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); });
 audio.addEventListener('pause', () => { isPlaying = false; updatePlayButtonUI(); });
@@ -3598,10 +3817,8 @@ audio.addEventListener('timeupdate', () => {
     $('time-total').textContent = formatTime(dur);
     $('fs-time-total').textContent = formatTime(dur);
     const pct = (cur / dur) * 100;
-    $('progress-fill').style.width = `${pct}%`;
-    $('progress-thumb').style.left = `${pct}%`;
-    $('fs-progress-fill').style.width = `${pct}%`;
-    $('fs-progress-thumb').style.left = `${pct}%`;
+    playbarWave.setProgress(pct);
+    fsWave.setProgress(pct);
   }
 });
 audio.addEventListener('ended', () => {

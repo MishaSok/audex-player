@@ -1826,39 +1826,28 @@ input { font-family: inherit; color: inherit; }
 }
 .progress-track {
   flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
+  height: 28px;
   position: relative;
   cursor: pointer;
 }
-.progress-track:hover { height: 5px; }
-.progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0%;
-  background: var(--accent);
-  border-radius: 2px;
+
+/* ── Inline waveform progress bar ── */
+.wave {
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  width: 100%;
+  cursor: pointer;
 }
-.progress-thumb {
-  position: absolute;
-  left: 0%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.1s, width 0.1s, height 0.1s;
+.wave-bar {
+  flex: 1;
+  min-height: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--text-strong) 16%, transparent);
+  transition: background 0.12s;
 }
-.progress-track:hover .progress-thumb {
-  width: 10px;
-  height: 10px;
-  opacity: 1;
-}
+.wave-bar.played { background: var(--accent); }
+.wave-bar.preview { background: color-mix(in srgb, var(--text-strong) 42%, transparent); }
 
 .playbar-right {
   display: flex;
@@ -2056,33 +2045,12 @@ input { font-family: inherit; color: inherit; }
 }
 .fs-progress { margin-bottom: 24px; }
 .fs-progress-track {
-  height: 3px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 2px;
+  height: 40px;
   position: relative;
   margin-bottom: 8px;
   cursor: pointer;
 }
-.fs-progress-fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  background: var(--accent);
-  border-radius: 2px;
-  width: 0%;
-}
-.fs-progress-thumb {
-  position: absolute;
-  left: 0%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
-}
+.fs-wave { gap: 2px; }
 .fs-time-row {
   display: flex;
   justify-content: space-between;
