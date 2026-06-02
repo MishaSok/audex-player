@@ -612,6 +612,30 @@ function ytDlpPath() {
   return candidates[0];
 }
 
+// ffmpeg is required by yt-dlp for audio extraction (mp3) and thumbnail embedding.
+// We ship the static binary via the ffmpeg-static npm package (asarUnpack'd in
+// package.json). require() resolves the path inside the asar; rewrite it to the
+// unpacked copy so the binary is actually runnable. Returns null if unavailable
+// (then yt-dlp falls back to a system ffmpeg on PATH, if any).
+let _ffmpegPath;
+function resolveBundledFfmpeg() {
+  if (_ffmpegPath !== undefined) return _ffmpegPath;
+  _ffmpegPath = null;
+  try {
+    let p = require('ffmpeg-static');
+    if (p) {
+      if (app.isPackaged) p = p.replace('app.asar', 'app.asar.unpacked');
+      if (fs.existsSync(p)) {
+        if (process.platform !== 'win32') {
+          try { fs.chmodSync(p, 0o755); } catch (_) {}
+        }
+        _ffmpegPath = p;
+      }
+    }
+  } catch (_) {}
+  return _ffmpegPath;
+}
+
 function runYtDlp(args, { timeoutMs } = {}) {
   return new Promise((resolve) => {
     let stdout = '';
@@ -774,6 +798,8 @@ ipcMain.handle('downloads:ytDownload', async (event, payload) => {
     '--print', 'after_move:filepath',
     target,
   ];
+  const ffmpeg = resolveBundledFfmpeg();
+  if (ffmpeg) args.push('--ffmpeg-location', ffmpeg);
 
   const sendProgress = (data) => {
     try {
@@ -856,6 +882,8 @@ ipcMain.handle('downloads:ytDownloadByQuery', async (event, payload) => {
     '--print', 'after_move:filepath',
     target,
   ];
+  const ffmpeg = resolveBundledFfmpeg();
+  if (ffmpeg) args.push('--ffmpeg-location', ffmpeg);
 
   const sendProgress = (data) => {
     try {

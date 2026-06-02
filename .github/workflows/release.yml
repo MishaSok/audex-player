@@ -40,6 +40,14 @@ jobs:
           fi
           ls -la yt-dlp-bundle
 
+      - name: Verify bundled ffmpeg
+        run: |
+          if [ ! -f node_modules/ffmpeg-static/ffmpeg ]; then
+            echo "::error::ffmpeg-static binary missing — npm ci postinstall must have failed"
+            exit 1
+          fi
+          ls -la node_modules/ffmpeg-static
+
       - name: Build macOS artifacts
         env:
           # Build unsigned: users will need to bypass Gatekeeper manually
@@ -88,6 +96,15 @@ jobs:
             exit 1
           fi
           ls -la yt-dlp-bundle
+
+      - name: Verify bundled ffmpeg
+        shell: bash
+        run: |
+          if [ ! -f node_modules/ffmpeg-static/ffmpeg.exe ]; then
+            echo "::error::ffmpeg-static binary missing — npm ci postinstall must have failed"
+            exit 1
+          fi
+          ls -la node_modules/ffmpeg-static
 
       - name: Build Windows artifacts
         # Build unsigned: SmartScreen will warn on first launch until the binary
