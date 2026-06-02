@@ -49,6 +49,9 @@
       <symbol id="i-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L13.5 9.5 L21 11 L13.5 12.5 L12 20 L10.5 12.5 L3 11 L10.5 9.5 Z"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 18v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></symbol>
       <symbol id="i-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+      <symbol id="i-report" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="0.6"/><rect x="12.5" y="7" width="3" height="10" rx="0.6"/><rect x="18" y="13.5" width="3" height="3.5" rx="0.6"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
       <!-- Audex logomark: geometric A with 3-bar equalizer -->
       <symbol id="audex-mark" viewBox="0 0 100 100">
         <g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
@@ -102,6 +105,10 @@
           <svg class="i" width="14" height="14"><use href="#i-heart"/></svg>
           <span data-i18n="nav.favorites">Избранное</span>
           <span class="nav-meta" id="count-favorites">0</span>
+        </a>
+        <a href="#" class="nav-item" data-view="report">
+          <svg class="i" width="14" height="14"><use href="#i-report"/></svg>
+          <span data-i18n="nav.report">Отчёт</span>
         </a>
         <a href="#" class="nav-item nav-downloads" data-view="downloads" id="nav-downloads" hidden>
           <svg class="i" width="14" height="14"><use href="#i-download"/></svg>
@@ -376,6 +383,22 @@
             <div class="empty-text" data-i18n="empty.favorites.text">Нажми сердечко на любом треке, чтобы добавить его сюда.</div>
           </div>
         </div>
+      </section>
+
+      <!-- Listening Report (on-device analytics) -->
+      <section id="view-report" class="view-section">
+        <header class="topbar">
+          <div class="crumb">
+            <span class="crumb-item" data-i18n="crumb.collection">Коллекция</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-item active" data-i18n="nav.report">Отчёт</span>
+          </div>
+          <div class="report-privacy">
+            <svg class="i" width="12" height="12"><use href="#i-lock"/></svg>
+            <span data-i18n="report.onDevice">Считается на устройстве</span>
+          </div>
+        </header>
+        <div id="report-content"></div>
       </section>
 
       <!-- Downloads -->

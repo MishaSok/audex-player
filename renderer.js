@@ -13,6 +13,7 @@ const LS = {
   ymState: 'audex-dl-ym-state',
   queue: 'audex-dl-queue',
   wavePeaks: 'audex-wave-peaks',
+  playLog: 'audex-play-log',
 };
 
 // State
@@ -44,6 +45,19 @@ const wavePeaksCache = (() => {
     for (const k in raw) out[k] = raw[k].map(v => v / 255);
     return out;
   } catch (_) { return {}; }
+})();
+
+// Play history for the on-device Listening Report. Each entry:
+// { t: startTs(ms), p: path, n: title, a: artist, b: album, s: seconds listened }.
+// Capped in count and age so it can't grow unbounded (see savePlayLog / plPush).
+const PLAYLOG_MAX = 4000;
+const PLAYLOG_MAX_AGE_MS = 400 * 24 * 60 * 60 * 1000; // ~13 months
+let playLog = (() => {
+  try {
+    const arr = JSON.parse(localStorage.getItem(LS.playLog) || '[]');
+    const cutoff = Date.now() - PLAYLOG_MAX_AGE_MS;
+    return Array.isArray(arr) ? arr.filter(e => e && e.t >= cutoff) : [];
+  } catch (_) { return []; }
 })();
 
 let currentTrackIndex = -1;
@@ -165,6 +179,14 @@ function saveSettings() {
 function saveRecents() {
   localStorage.setItem(LS.recents, JSON.stringify(recents.slice(0, 4)));
 }
+function savePlayLog() {
+  try {
+    if (playLog.length > PLAYLOG_MAX) playLog = playLog.slice(-PLAYLOG_MAX);
+    localStorage.setItem(LS.playLog, JSON.stringify(playLog));
+  } catch (e) {
+    console.warn('play log save failed:', e);
+  }
+}
 // Waveform peaks are persisted as compact 0..255 ints (path -> int[]), capped to
 // the most-recently-decoded tracks so the cache can't grow without bound.
 function saveWavePeaks() {
@@ -199,6 +221,32 @@ const I18N = {
     'nav.recents': 'Недавнее',
     'nav.openFiles': 'Открыть файлы',
     'nav.settings': 'Настройки',
+    'nav.report': 'Отчёт',
+    'report.onDevice': 'Считается на устройстве',
+    'report.eyebrow': 'Отчёт о прослушивании',
+    'report.period.day': 'День',
+    'report.period.week': 'Неделя',
+    'report.period.month': 'Месяц',
+    'report.period.year': 'Год',
+    'report.today': 'Сегодня',
+    'report.thisWeek': 'Эта неделя',
+    'report.listeningTime': 'Время прослушивания',
+    'report.vsPrev': 'к прошлому периоду',
+    'report.tracksPlayed': 'Треков сыграно',
+    'report.artists': 'Исполнителей',
+    'report.added': 'Добавлено в коллекцию',
+    'report.streak': 'Серия прослушиваний',
+    'report.days': 'дней',
+    'report.whenListen': 'Когда ты слушаешь',
+    'report.topArtists': 'Топ-исполнители',
+    'report.topTracks': 'Топ-треки',
+    'report.plays': 'просл.',
+    'report.minUnit': 'мин',
+    'report.hoursUnit': 'часов',
+    'report.hShort': 'ч',
+    'report.mShort': 'м',
+    'report.empty.title': 'Здесь появится твоя статистика',
+    'report.empty.text': 'Слушай музыку — отчёт соберётся из истории прослушивания на этом устройстве.',
     'crumb.collection': 'Коллекция',
     'search.placeholder': 'Поиск…',
     'search.artistPlaceholder': 'Поиск исполнителя…',
@@ -428,6 +476,32 @@ const I18N = {
     'nav.recents': 'Recent',
     'nav.openFiles': 'Open files',
     'nav.settings': 'Settings',
+    'nav.report': 'Report',
+    'report.onDevice': 'Computed on this device',
+    'report.eyebrow': 'Listening report',
+    'report.period.day': 'Day',
+    'report.period.week': 'Week',
+    'report.period.month': 'Month',
+    'report.period.year': 'Year',
+    'report.today': 'Today',
+    'report.thisWeek': 'This week',
+    'report.listeningTime': 'Listening time',
+    'report.vsPrev': 'vs previous period',
+    'report.tracksPlayed': 'Tracks played',
+    'report.artists': 'Artists',
+    'report.added': 'Added to collection',
+    'report.streak': 'Listening streak',
+    'report.days': 'days',
+    'report.whenListen': 'When you listen',
+    'report.topArtists': 'Top artists',
+    'report.topTracks': 'Top tracks',
+    'report.plays': 'plays',
+    'report.minUnit': 'min',
+    'report.hoursUnit': 'hours',
+    'report.hShort': 'h',
+    'report.mShort': 'm',
+    'report.empty.title': 'Your stats will appear here',
+    'report.empty.text': 'Play some music — the report builds from listening history kept on this device.',
     'crumb.collection': 'Collection',
     'search.placeholder': 'Search…',
     'search.artistPlaceholder': 'Search artist…',
@@ -657,6 +731,32 @@ const I18N = {
     'nav.recents': 'Zuletzt',
     'nav.openFiles': 'Dateien öffnen',
     'nav.settings': 'Einstellungen',
+    'nav.report': 'Bericht',
+    'report.onDevice': 'Auf diesem Gerät berechnet',
+    'report.eyebrow': 'Hörbericht',
+    'report.period.day': 'Tag',
+    'report.period.week': 'Woche',
+    'report.period.month': 'Monat',
+    'report.period.year': 'Jahr',
+    'report.today': 'Heute',
+    'report.thisWeek': 'Diese Woche',
+    'report.listeningTime': 'Hörzeit',
+    'report.vsPrev': 'ggü. Vorperiode',
+    'report.tracksPlayed': 'Titel gespielt',
+    'report.artists': 'Interpreten',
+    'report.added': 'Zur Sammlung hinzugefügt',
+    'report.streak': 'Hörserie',
+    'report.days': 'Tage',
+    'report.whenListen': 'Wann du hörst',
+    'report.topArtists': 'Top-Interpreten',
+    'report.topTracks': 'Top-Titel',
+    'report.plays': 'Wdg.',
+    'report.minUnit': 'Min',
+    'report.hoursUnit': 'Stunden',
+    'report.hShort': 'Std',
+    'report.mShort': 'Min',
+    'report.empty.title': 'Hier erscheint deine Statistik',
+    'report.empty.text': 'Höre Musik — der Bericht entsteht aus dem Verlauf auf diesem Gerät.',
     'crumb.collection': 'Sammlung',
     'search.placeholder': 'Suche…',
     'search.artistPlaceholder': 'Interpreten suchen…',
@@ -886,6 +986,32 @@ const I18N = {
     'nav.recents': 'Récents',
     'nav.openFiles': 'Ouvrir des fichiers',
     'nav.settings': 'Paramètres',
+    'nav.report': 'Rapport',
+    'report.onDevice': 'Calculé sur cet appareil',
+    'report.eyebrow': "Rapport d'écoute",
+    'report.period.day': 'Jour',
+    'report.period.week': 'Semaine',
+    'report.period.month': 'Mois',
+    'report.period.year': 'Année',
+    'report.today': "Aujourd'hui",
+    'report.thisWeek': 'Cette semaine',
+    'report.listeningTime': "Temps d'écoute",
+    'report.vsPrev': 'vs période précédente',
+    'report.tracksPlayed': 'Titres écoutés',
+    'report.artists': 'Artistes',
+    'report.added': 'Ajoutés à la collection',
+    'report.streak': "Série d'écoute",
+    'report.days': 'jours',
+    'report.whenListen': 'Quand tu écoutes',
+    'report.topArtists': 'Top artistes',
+    'report.topTracks': 'Top titres',
+    'report.plays': 'éc.',
+    'report.minUnit': 'min',
+    'report.hoursUnit': 'heures',
+    'report.hShort': 'h',
+    'report.mShort': 'm',
+    'report.empty.title': 'Tes statistiques apparaîtront ici',
+    'report.empty.text': "Écoute de la musique — le rapport se construit à partir de l'historique conservé sur cet appareil.",
     'crumb.collection': 'Collection',
     'search.placeholder': 'Recherche…',
     'search.artistPlaceholder': 'Rechercher un artiste…',
@@ -1115,6 +1241,32 @@ const I18N = {
     'nav.recents': 'Нещодавнє',
     'nav.openFiles': 'Відкрити файли',
     'nav.settings': 'Налаштування',
+    'nav.report': 'Звіт',
+    'report.onDevice': 'Обчислюється на пристрої',
+    'report.eyebrow': 'Звіт про прослуховування',
+    'report.period.day': 'День',
+    'report.period.week': 'Тиждень',
+    'report.period.month': 'Місяць',
+    'report.period.year': 'Рік',
+    'report.today': 'Сьогодні',
+    'report.thisWeek': 'Цей тиждень',
+    'report.listeningTime': 'Час прослуховування',
+    'report.vsPrev': 'до минулого періоду',
+    'report.tracksPlayed': 'Треків зіграно',
+    'report.artists': 'Виконавців',
+    'report.added': 'Додано до колекції',
+    'report.streak': 'Серія прослуховувань',
+    'report.days': 'днів',
+    'report.whenListen': 'Коли ти слухаєш',
+    'report.topArtists': 'Топ-виконавці',
+    'report.topTracks': 'Топ-треки',
+    'report.plays': 'просл.',
+    'report.minUnit': 'хв',
+    'report.hoursUnit': 'годин',
+    'report.hShort': 'г',
+    'report.mShort': 'хв',
+    'report.empty.title': 'Тут зʼявиться твоя статистика',
+    'report.empty.text': 'Слухай музику — звіт збереться з історії прослуховування на цьому пристрої.',
     'crumb.collection': 'Колекція',
     'search.placeholder': 'Пошук…',
     'search.artistPlaceholder': 'Пошук виконавця…',
@@ -1649,6 +1801,7 @@ function setView(view) {
   else if (view === 'playlist-detail') renderPlaylistDetail(activePlaylistId);
   else if (view === 'artists') renderArtists();
   else if (view === 'artist-detail') renderArtistDetail(activeArtistName);
+  else if (view === 'report') renderReport();
   else if (view === 'settings') renderSettings();
 }
 
@@ -3528,6 +3681,7 @@ async function importPaths(paths) {
     if (library.some(t => t.path === p)) continue;
     const metadata = await window.electronAPI.parseMetadata(p);
     if (metadata.cover) coverCache[p] = metadata.cover;
+    metadata.addedAt = Date.now();   // for the Listening Report "added to collection" stat
     library.push(metadata);
     added++;
   }
@@ -3806,9 +3960,275 @@ function buildWaveforms(track) {
   }
 }
 
+// ── Play history logging (feeds the Listening Report) ──
+// One log entry per "play session" of a track; `s` accumulates real listened
+// seconds via wall-clock deltas on timeupdate (robust to seeking and pausing).
+let plEntry = null;     // active log entry (a reference inside playLog) or null
+let plLastTick = 0;     // ms timestamp of the last accumulation tick
+let plSaveAccum = 0;    // listened seconds since the last persist
+
+function plTick() {
+  if (!plEntry || !isPlaying) return;
+  const now = Date.now();
+  // Clamp the delta so background-tab throttling or long stalls don't inflate totals.
+  const dt = Math.min((now - plLastTick) / 1000, 2);
+  plEntry.s += dt;
+  plSaveAccum += dt;
+  plLastTick = now;
+}
+
+function plStartIfNeeded() {
+  const track = library[currentTrackIndex];
+  if (!track) return;
+  // Same track resuming after pause → keep the entry, just restart the tick clock.
+  if (plEntry && plEntry.p === track.path) { plLastTick = Date.now(); return; }
+  plTick(); // flush remaining seconds onto the previous entry before switching
+  plEntry = { t: Date.now(), p: track.path, n: track.title || '', a: track.artist || '', b: track.album || '', s: 0 };
+  playLog.push(plEntry);
+  plLastTick = plEntry.t;
+  plSaveAccum = 0;
+  savePlayLog();
+  refreshReportIfActive();
+}
+
+function plFinalize() {
+  plTick();
+  savePlayLog();
+  refreshReportIfActive();
+}
+
+function refreshReportIfActive() {
+  if (currentView === 'report') renderReport();
+}
+
+// ── Listening Report ──────────────────────────────────────────────────────────
+// On-device analytics aggregated live from playLog. Nothing leaves the machine.
+let reportPeriod = 'week';
+const REPORT_LOCALE = { ru: 'ru-RU', en: 'en-US', de: 'de-DE', fr: 'fr-FR', uk: 'uk-UA' };
+const REPORT_PLAY_SEC = 15;   // a log entry counts as a "play" once listened ≥ this
+const REPORT_STREAK_SEC = 30; // a day counts toward the streak with ≥ this much listening
+
+function reportLocale() { return REPORT_LOCALE[currentLang] || 'en-US'; }
+function repStartOfDay(ts) { const x = new Date(ts); x.setHours(0, 0, 0, 0); return x.getTime(); }
+function repCap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+// { start, end, prevStart, prevEnd } in epoch ms for the selected period.
+function reportWindow(period, now = Date.now()) {
+  const nd = new Date(now);
+  if (period === 'day') {
+    const start = repStartOfDay(now);
+    return { start, end: now, prevStart: start - 86400000, prevEnd: start };
+  }
+  if (period === 'week') {
+    const sod = repStartOfDay(now);
+    const dow = (new Date(sod).getDay() + 6) % 7; // Monday = 0
+    const start = sod - dow * 86400000;
+    return { start, end: now, prevStart: start - 7 * 86400000, prevEnd: start };
+  }
+  if (period === 'month') {
+    const start = new Date(nd.getFullYear(), nd.getMonth(), 1).getTime();
+    return { start, end: now, prevStart: new Date(nd.getFullYear(), nd.getMonth() - 1, 1).getTime(), prevEnd: start };
+  }
+  const start = new Date(nd.getFullYear(), 0, 1).getTime();
+  return { start, end: now, prevStart: new Date(nd.getFullYear() - 1, 0, 1).getTime(), prevEnd: start };
+}
+
+function reportHeading(period, now = Date.now()) {
+  const loc = reportLocale();
+  const nd = new Date(now);
+  const dm = (d) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long' }).format(d);
+  const monthOnly = (d) => new Intl.DateTimeFormat(loc, { month: 'long' }).format(d);
+  if (period === 'day') return { label: tr('report.today'), range: dm(nd) };
+  if (period === 'week') {
+    const w = reportWindow('week', now);
+    return { label: tr('report.thisWeek'), range: `${dm(new Date(w.start))} — ${dm(new Date(w.start + 6 * 86400000))}` };
+  }
+  if (period === 'month') {
+    const m = monthOnly(nd);
+    return { label: repCap(m), range: `${m} ${nd.getFullYear()}` };
+  }
+  return { label: String(nd.getFullYear()), range: `${monthOnly(new Date(nd.getFullYear(), 0, 1))} — ${monthOnly(nd)} ${nd.getFullYear()}` };
+}
+
+function fmtListenTime(totalSec) {
+  const m = Math.round(totalSec / 60);
+  if (m < 60) return { value: String(m), unit: tr('report.minUnit') };
+  const h = Math.floor(m / 60), mm = m % 60;
+  if (h < 100) return { value: `${h}${tr('report.hShort')} ${String(mm).padStart(2, '0')}${tr('report.mShort')}`, unit: '' };
+  return { value: h.toLocaleString(reportLocale()), unit: tr('report.hoursUnit') };
+}
+
+// Current streak: consecutive days (ending today, or yesterday if nothing today
+// yet) with at least REPORT_STREAK_SEC of listening. Global, not period-scoped.
+function computeStreak() {
+  const days = new Set();
+  for (const e of playLog) if (e.s >= REPORT_STREAK_SEC) days.add(repStartOfDay(e.t));
+  if (!days.size) return 0;
+  let cursor = repStartOfDay(Date.now());
+  if (!days.has(cursor)) cursor -= 86400000; // grace: today may have no plays yet
+  let streak = 0;
+  while (days.has(cursor)) { streak++; cursor -= 86400000; }
+  return streak;
+}
+
+function computeReport(period) {
+  const w = reportWindow(period);
+  let sec = 0, prevSec = 0, plays = 0;
+  const clock = new Array(24).fill(0);
+  const artistAgg = new Map();   // artist -> { name, plays, cover }
+  const trackAgg = new Map();    // path   -> { title, artist, plays, cover }
+  const artistsSet = new Set();
+
+  for (const e of playLog) {
+    if (e.t >= w.start && e.t < w.end) {
+      sec += e.s;
+      clock[new Date(e.t).getHours()] += e.s;
+      if (e.s >= REPORT_PLAY_SEC) {
+        plays++;
+        const cover = coverCache[e.p] || null;
+        if (e.a) artistsSet.add(e.a);
+        const ak = e.a || '—';
+        const a = artistAgg.get(ak) || { name: e.a || '—', plays: 0, cover: null };
+        a.plays++; if (!a.cover) a.cover = cover;
+        artistAgg.set(ak, a);
+        const t = trackAgg.get(e.p) || { title: e.n || '—', artist: e.a || '', plays: 0, cover: null };
+        t.plays++; if (!t.cover) t.cover = cover;
+        trackAgg.set(e.p, t);
+      }
+    } else if (e.t >= w.prevStart && e.t < w.prevEnd) {
+      prevSec += e.s;
+    }
+  }
+
+  const peak = Math.max(0, ...clock);
+  const clockNorm = peak > 0 ? clock.map(v => v / peak) : clock.map(() => 0);
+  const minutes = sec / 60, prevMinutes = prevSec / 60;
+  let deltaPct = 0;
+  if (prevMinutes > 0) deltaPct = Math.round((minutes - prevMinutes) / prevMinutes * 100);
+  else if (minutes > 0) deltaPct = 100;
+  const newAdds = library.filter(t => t.addedAt && t.addedAt >= w.start && t.addedAt < w.end).length;
+
+  return {
+    sec, plays, artists: artistsSet.size, newAdds, deltaPct,
+    streak: computeStreak(),
+    clock: clockNorm,
+    topArtists: [...artistAgg.values()].sort((a, b) => b.plays - a.plays).slice(0, 5),
+    topTracks: [...trackAgg.values()].sort((a, b) => b.plays - a.plays).slice(0, 5),
+  };
+}
+
+function repCoverHtml(cover, label, round) {
+  const cls = `rep-cover${round ? ' rep-cover-round' : ''}`;
+  if (cover) return `<div class="${cls}" style="background-image:url('${cover}')"></div>`;
+  return `<div class="${cls} rep-cover-empty">${escapeHtml((label || '?')[0] || '?')}</div>`;
+}
+
+function repRankHtml(items, kind) {
+  if (!items.length) return `<div class="rep-rank-empty">—</div>`;
+  const max = Math.max(...items.map(i => i.plays)) || 1;
+  return `<div class="rep-rank-list">${items.map((it, i) => {
+    const name = kind === 'artist' ? it.name : it.title;
+    return `<div class="rep-rank-row">
+      <div class="rep-rank-num">${i + 1}</div>
+      ${repCoverHtml(it.cover, name, kind === 'artist')}
+      <div class="rep-rank-main">
+        <div class="rep-rank-name">${escapeHtml(name || '—')}</div>
+        ${kind === 'track' ? `<div class="rep-rank-sub">${escapeHtml(it.artist || '')}</div>` : ''}
+        <div class="rep-rank-bar"><div class="rep-rank-fill" style="width:${(it.plays / max * 100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="rep-rank-plays">${it.plays.toLocaleString(reportLocale())} ${tr('report.plays')}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function repStatHtml(value, unit, label, kind) {
+  return `<div class="rep-stat">
+    <div class="rep-stat-val${kind ? ' rep-' + kind : ''}">${value}${unit ? `<span class="rep-stat-unit">${unit}</span>` : ''}</div>
+    <div class="rep-stat-label">${label}</div>
+  </div>`;
+}
+
+function renderReport() {
+  const el = $('report-content');
+  if (!el) return;
+  const loc = reportLocale();
+  const tabs = ['day', 'week', 'month', 'year']
+    .map(k => `<button class="rep-tab${k === reportPeriod ? ' active' : ''}" data-period="${k}">${tr('report.period.' + k)}</button>`)
+    .join('');
+
+  if (!playLog.length) {
+    el.innerHTML = `
+      <div class="rep-head"><div><div class="rep-eyebrow">${tr('report.eyebrow')}</div></div>
+        <div class="rep-tabs">${tabs}</div></div>
+      <div class="empty-state">
+        <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-report"/></svg></div>
+        <div class="empty-title">${tr('report.empty.title')}</div>
+        <div class="empty-text">${tr('report.empty.text')}</div>
+      </div>`;
+    el.querySelectorAll('.rep-tab').forEach(b => { b.onclick = () => { reportPeriod = b.dataset.period; renderReport(); }; });
+    return;
+  }
+
+  const r = computeReport(reportPeriod);
+  const h = reportHeading(reportPeriod);
+  const time = fmtListenTime(r.sec);
+  const up = r.deltaPct >= 0;
+
+  const clockBars = r.clock.map((v) => {
+    const peak = v >= 0.999 && v > 0;
+    return `<div class="rep-clock-col"><div class="rep-clock-bar${peak ? ' is-peak' : ''}" style="height:${Math.max(4, v * 100)}%"></div></div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="rep-head">
+      <div>
+        <div class="rep-eyebrow">${tr('report.eyebrow')} · ${escapeHtml(h.range)}</div>
+        <div class="rep-title">${escapeHtml(h.label)}</div>
+      </div>
+      <div class="rep-tabs">${tabs}</div>
+    </div>
+
+    <div class="rep-top">
+      <div class="rep-hero">
+        <div class="rep-hero-cap"><svg class="i" width="13" height="13"><use href="#i-clock"/></svg> ${tr('report.listeningTime')}</div>
+        <div>
+          <div class="rep-hero-time"><span class="rep-hero-num">${time.value}</span>${time.unit ? `<span class="rep-hero-unit">${time.unit}</span>` : ''}</div>
+          <div class="rep-hero-delta">
+            <span class="rep-delta ${up ? 'up' : 'down'}">${up ? '↑' : '↓'} ${Math.abs(r.deltaPct)}%</span>
+            <span class="rep-delta-note">${tr('report.vsPrev')}</span>
+          </div>
+        </div>
+      </div>
+      <div class="rep-stats">
+        ${repStatHtml(r.plays.toLocaleString(loc), '', tr('report.tracksPlayed'))}
+        ${repStatHtml(r.artists.toLocaleString(loc), '', tr('report.artists'))}
+        ${repStatHtml(r.newAdds.toLocaleString(loc), '', tr('report.added'), 'ok')}
+        ${repStatHtml(r.streak.toLocaleString(loc), tr('report.days'), tr('report.streak'), 'accent')}
+      </div>
+    </div>
+
+    <div class="rep-lower">
+      <div class="rep-card">
+        <div class="rep-card-title"><svg class="i" width="14" height="14"><use href="#i-clock"/></svg> ${tr('report.whenListen')}</div>
+        <div class="rep-clock-bars">${clockBars}</div>
+        <div class="rep-clock-axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>
+      </div>
+      <div class="rep-card">
+        <div class="rep-card-title">${tr('report.topArtists')}</div>
+        ${repRankHtml(r.topArtists.slice(0, 4), 'artist')}
+      </div>
+      <div class="rep-card">
+        <div class="rep-card-title">${tr('report.topTracks')}</div>
+        ${repRankHtml(r.topTracks.slice(0, 4), 'track')}
+      </div>
+    </div>`;
+
+  el.querySelectorAll('.rep-tab').forEach(b => { b.onclick = () => { reportPeriod = b.dataset.period; renderReport(); }; });
+}
+
 // ── Audio events ──
-audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); });
-audio.addEventListener('pause', () => { isPlaying = false; updatePlayButtonUI(); });
+audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); plStartIfNeeded(); });
+audio.addEventListener('pause', () => { plTick(); isPlaying = false; updatePlayButtonUI(); savePlayLog(); });
 audio.addEventListener('timeupdate', () => {
   const cur = audio.currentTime, dur = audio.duration;
   $('time-current').textContent = formatTime(cur);
@@ -3820,8 +4240,11 @@ audio.addEventListener('timeupdate', () => {
     playbarWave.setProgress(pct);
     fsWave.setProgress(pct);
   }
+  plTick();
+  if (plSaveAccum >= 15) { plSaveAccum = 0; savePlayLog(); }   // persist periodically, not every tick
 });
 audio.addEventListener('ended', () => {
+  plFinalize();
   if (repeatMode === 2) { audio.currentTime = 0; audio.play(); }
   else nextTrack();
 });
