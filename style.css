@@ -3280,14 +3280,16 @@ input { font-family: inherit; color: inherit; }
     display: none;
   }
 
-  /* Playbar — drop the volume slider (mute button stays; scroll-wheel still
-     adjusts volume in the renderer). Progress can use the full center column. */
+  /* Playbar — keep the volume slider (just narrower) so volume stays
+     adjustable; hiding it left only the mute toggle, which isn't discoverable.
+     Tighten the right column and gaps so it still fits the cramped range. */
   .playbar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
     padding: 0 14px;
     gap: 14px;
   }
-  .vol-track { display: none; }
+  .playbar-right { gap: 8px; }
+  .vol-track { width: 56px; }
   .progress-row { max-width: none; }
 
   /* Fullscreen overlay — slimmer queue column and a smaller cover so the
