@@ -35,6 +35,18 @@ let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 const coverCache = {};
 let library = libraryMeta.map(t => ({ ...t, cover: coverCache[t.path] || null }));
 
+// Backfill `addedAt` for tracks imported before the Listening Report shipped.
+// Their real add-date is unknown, so we stamp a fixed past sentinel (1 = just
+// after the epoch): they count toward the all-time "Added to collection" stat
+// (window starts at 0) without inflating the day/month/year periods.
+(function backfillLegacyAddedAt() {
+  let changed = false;
+  for (const t of library) {
+    if (!t.addedAt) { t.addedAt = 1; changed = true; }
+  }
+  if (changed) saveLibrary();
+})();
+
 // Real waveform peaks (path -> Float[0..1], length WAVE_BARS), decoded from audio
 // on first play and cached. Loaded from compact 0..255 ints in localStorage.
 const WAVE_CACHE_MAX = 600;
@@ -228,6 +240,8 @@ const I18N = {
     'report.period.week': 'Неделя',
     'report.period.month': 'Месяц',
     'report.period.year': 'Год',
+    'report.period.all': 'Всё время',
+    'report.allTime': 'За всё время',
     'report.today': 'Сегодня',
     'report.thisWeek': 'Эта неделя',
     'report.listeningTime': 'Время прослушивания',
@@ -483,6 +497,8 @@ const I18N = {
     'report.period.week': 'Week',
     'report.period.month': 'Month',
     'report.period.year': 'Year',
+    'report.period.all': 'All time',
+    'report.allTime': 'All time',
     'report.today': 'Today',
     'report.thisWeek': 'This week',
     'report.listeningTime': 'Listening time',
@@ -738,6 +754,8 @@ const I18N = {
     'report.period.week': 'Woche',
     'report.period.month': 'Monat',
     'report.period.year': 'Jahr',
+    'report.period.all': 'Gesamt',
+    'report.allTime': 'Gesamte Zeit',
     'report.today': 'Heute',
     'report.thisWeek': 'Diese Woche',
     'report.listeningTime': 'Hörzeit',
@@ -993,6 +1011,8 @@ const I18N = {
     'report.period.week': 'Semaine',
     'report.period.month': 'Mois',
     'report.period.year': 'Année',
+    'report.period.all': 'Tout le temps',
+    'report.allTime': 'Tout le temps',
     'report.today': "Aujourd'hui",
     'report.thisWeek': 'Cette semaine',
     'report.listeningTime': "Temps d'écoute",
@@ -1248,6 +1268,8 @@ const I18N = {
     'report.period.week': 'Тиждень',
     'report.period.month': 'Місяць',
     'report.period.year': 'Рік',
+    'report.period.all': 'Увесь час',
+    'report.allTime': 'За увесь час',
     'report.today': 'Сьогодні',
     'report.thisWeek': 'Цей тиждень',
     'report.listeningTime': 'Час прослуховування',
@@ -4003,7 +4025,7 @@ function refreshReportIfActive() {
 
 // ── Listening Report ──────────────────────────────────────────────────────────
 // On-device analytics aggregated live from playLog. Nothing leaves the machine.
-let reportPeriod = 'week';
+let reportPeriod = 'day';
 const REPORT_LOCALE = { ru: 'ru-RU', en: 'en-US', de: 'de-DE', fr: 'fr-FR', uk: 'uk-UA' };
 const REPORT_PLAY_SEC = 15;   // a log entry counts as a "play" once listened ≥ this
 const REPORT_STREAK_SEC = 30; // a day counts toward the streak with ≥ this much listening
@@ -4015,15 +4037,12 @@ function repCap(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
 // { start, end, prevStart, prevEnd } in epoch ms for the selected period.
 function reportWindow(period, now = Date.now()) {
   const nd = new Date(now);
+  if (period === 'all') {
+    return { start: 0, end: now, prevStart: 0, prevEnd: 0 };
+  }
   if (period === 'day') {
     const start = repStartOfDay(now);
     return { start, end: now, prevStart: start - 86400000, prevEnd: start };
-  }
-  if (period === 'week') {
-    const sod = repStartOfDay(now);
-    const dow = (new Date(sod).getDay() + 6) % 7; // Monday = 0
-    const start = sod - dow * 86400000;
-    return { start, end: now, prevStart: start - 7 * 86400000, prevEnd: start };
   }
   if (period === 'month') {
     const start = new Date(nd.getFullYear(), nd.getMonth(), 1).getTime();
@@ -4038,11 +4057,13 @@ function reportHeading(period, now = Date.now()) {
   const nd = new Date(now);
   const dm = (d) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long' }).format(d);
   const monthOnly = (d) => new Intl.DateTimeFormat(loc, { month: 'long' }).format(d);
-  if (period === 'day') return { label: tr('report.today'), range: dm(nd) };
-  if (period === 'week') {
-    const w = reportWindow('week', now);
-    return { label: tr('report.thisWeek'), range: `${dm(new Date(w.start))} — ${dm(new Date(w.start + 6 * 86400000))}` };
+  const dmy = (d) => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+  if (period === 'all') {
+    let first = now;
+    for (const e of playLog) if (e.t < first) first = e.t;
+    return { label: tr('report.allTime'), range: `${dmy(new Date(first))} — ${dmy(nd)}` };
   }
+  if (period === 'day') return { label: tr('report.today'), range: dm(nd) };
   if (period === 'month') {
     const m = monthOnly(nd);
     return { label: repCap(m), range: `${m} ${nd.getFullYear()}` };
@@ -4152,7 +4173,7 @@ function renderReport() {
   const el = $('report-content');
   if (!el) return;
   const loc = reportLocale();
-  const tabs = ['day', 'week', 'month', 'year']
+  const tabs = ['day', 'month', 'year', 'all']
     .map(k => `<button class="rep-tab${k === reportPeriod ? ' active' : ''}" data-period="${k}">${tr('report.period.' + k)}</button>`)
     .join('');
 
@@ -4173,6 +4194,7 @@ function renderReport() {
   const h = reportHeading(reportPeriod);
   const time = fmtListenTime(r.sec);
   const up = r.deltaPct >= 0;
+  const showDelta = reportPeriod !== 'all'; // no "previous period" for all-time
 
   const clockBars = r.clock.map((v) => {
     const peak = v >= 0.999 && v > 0;
@@ -4193,10 +4215,10 @@ function renderReport() {
         <div class="rep-hero-cap"><svg class="i" width="13" height="13"><use href="#i-clock"/></svg> ${tr('report.listeningTime')}</div>
         <div>
           <div class="rep-hero-time"><span class="rep-hero-num">${time.value}</span>${time.unit ? `<span class="rep-hero-unit">${time.unit}</span>` : ''}</div>
-          <div class="rep-hero-delta">
+          ${showDelta ? `<div class="rep-hero-delta">
             <span class="rep-delta ${up ? 'up' : 'down'}">${up ? '↑' : '↓'} ${Math.abs(r.deltaPct)}%</span>
             <span class="rep-delta-note">${tr('report.vsPrev')}</span>
-          </div>
+          </div>` : ''}
         </div>
       </div>
       <div class="rep-stats">
