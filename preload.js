@@ -35,6 +35,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('yandex:parseProgress', listener);
     return () => ipcRenderer.removeListener('yandex:parseProgress', listener);
   },
+  discordConnect: (clientId) => ipcRenderer.invoke('discord:connect', { clientId }),
+  discordDisconnect: () => ipcRenderer.invoke('discord:disconnect'),
+  discordSetActivity: (activity) => ipcRenderer.invoke('discord:setActivity', { activity }),
+  discordGetStatus: () => ipcRenderer.invoke('discord:getStatus'),
+  lookupCover: (query) => ipcRenderer.invoke('music:lookupCover', query),
+  onDiscordStatus: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('discord:status', listener);
+    return () => ipcRenderer.removeListener('discord:status', listener);
+  },
   updateTrayState: (state) => ipcRenderer.invoke('tray:updateState', state),
   onTrayCommand: (cb) => {
     const listener = (_e, data) => cb(data);

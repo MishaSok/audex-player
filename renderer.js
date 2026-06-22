@@ -32,6 +32,46 @@ let settings = Object.assign({
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
+// ── Discord Rich Presence ──
+// Paste your Discord Application Client ID here (https://discord.com/developers
+// → New Application → copy the Application ID). Until it's set, the integration
+// stays inert: the Settings panel shows but "Connect" reports a missing ID.
+// Album covers are resolved as public https URLs from the iTunes Search API and
+// passed straight into the activity's large_image — no art-asset upload needed.
+const DISCORD_CLIENT_ID = '1518146518392115271';
+// Public fallback image used as the activity's large_image when iTunes can't
+// resolve an album cover (no match). Served raw from the project repo.
+const AUDEX_LOGO_URL = 'https://raw.githubusercontent.com/MishaSok/audex-player/main/build/icons/512x512.png';
+// Nested Discord prefs (shallow-merge above doesn't deep-merge, so normalize).
+const DISCORD_DEFAULTS = {
+  enabled: false,
+  showTitle: true,
+  showArtist: true,
+  showCover: true,
+  showTimer: true,
+  showPaused: false,
+  privacyInvisible: true,
+  privacyPrivate: false,
+  buttons: [
+    { label: 'GitHub', url: 'https://github.com/MishaSok/audex-player' },
+    { label: 'Найти на YouTube', url: '' },
+  ],
+};
+settings.discord = Object.assign({}, DISCORD_DEFAULTS, settings.discord || {});
+if (!Array.isArray(settings.discord.buttons)) settings.discord.buttons = DISCORD_DEFAULTS.buttons.map(b => ({ ...b }));
+// One-time relabel of the old placeholder button to a clear GitHub link. Only
+// matches the exact legacy default, so it never overrides a user's own edits
+// and is idempotent (after relabel it no longer matches).
+(function migrateDiscordGithubButton() {
+  const b0 = settings.discord.buttons[0];
+  if (b0 && b0.label === 'Слушать в Audex' && b0.url === 'https://github.com/MishaSok/audex-player') {
+    b0.label = 'GitHub';
+    saveSettings();
+  }
+})();
+let discordConnected = false;
+let discordUser = null;
+
 const coverCache = {};
 let library = libraryMeta.map(t => ({ ...t, cover: coverCache[t.path] || null }));
 
@@ -261,6 +301,47 @@ const I18N = {
     'report.mShort': 'м',
     'report.empty.title': 'Здесь появится твоя статистика',
     'report.empty.text': 'Слушай музыку — отчёт соберётся из истории прослушивания на этом устройстве.',
+    'section.discord': 'Discord Rich Presence',
+    'discord.subtitle': 'Показывайте друзьям, что вы слушаете, прямо в профиле Discord — с обложкой, таймером и кнопками для перехода к треку.',
+    'discord.statusConnected': 'Подключено',
+    'discord.statusDisconnected': 'Не подключено',
+    'discord.connect': 'Подключить Discord',
+    'discord.disconnect': 'Отключить',
+    'discord.connectHint': 'Свяжите аккаунт, чтобы транслировать прослушивание в профиль.',
+    'discord.sessionActive': 'сессия активна',
+    'discord.connecting': 'Подключение…',
+    'discord.connectError': 'Не удалось подключиться. Убедитесь, что Discord запущен.',
+    'discord.waitingForDiscord': 'Discord не запущен — подключусь автоматически, когда он откроется.',
+    'discord.noClientId': 'Не задан Discord Client ID. Укажите его в DISCORD_CLIENT_ID в renderer.js.',
+    'discord.show': 'Что показывать',
+    'discord.showTitle': 'Название трека',
+    'discord.showTitleDesc': 'Основная строка активности.',
+    'discord.showArtist': 'Исполнитель и альбом',
+    'discord.showArtistDesc': 'Вторая строка под названием.',
+    'discord.showCover': 'Обложка альбома',
+    'discord.showCoverDesc': 'Большое изображение карточки.',
+    'discord.showTimer': 'Таймер трека',
+    'discord.showTimerDesc': 'Прошедшее и общее время с прогрессом.',
+    'discord.showPaused': 'Показывать на паузе',
+    'discord.showPausedDesc': 'Оставлять статус, когда воспроизведение остановлено.',
+    'discord.buttons': 'Кнопки на профиле',
+    'discord.buttonsHint': 'Discord допускает не более двух кнопок в активности. Ссылки должны начинаться с http(s)://',
+    'discord.btnLabel': 'Подпись',
+    'discord.btnUrl': 'Ссылка',
+    'discord.btnLabelPh': 'Текст кнопки',
+    'discord.btnUrlPh': 'https://…',
+    'discord.privacy': 'Приватность',
+    'discord.privacyInvisible': 'Скрывать в режиме «Невидимый»',
+    'discord.privacyInvisibleDesc': 'Не транслировать статус, когда вы оффлайн в Discord.',
+    'discord.privacyPrivate': 'Отключать для приватных плейлистов',
+    'discord.privacyPrivateDesc': 'Треки из закрытых плейлистов не попадут в профиль.',
+    'discord.preview': 'Как видят друзья',
+    'discord.previewListening': 'Слушает Audex',
+    'discord.previewPaused': 'Слушал · на паузе',
+    'discord.previewPlaceholder': 'Статус появится в профиле после подключения Discord',
+    'discord.previewNote': 'Карточка обновляется в реальном времени при смене трека, паузе и перемотке.',
+    'discord.previewOnline': 'В сети',
+    'discord.previewEmptyTrack': 'Ничего не играет',
     'crumb.collection': 'Коллекция',
     'search.placeholder': 'Поиск…',
     'search.artistPlaceholder': 'Поиск исполнителя…',
@@ -518,6 +599,47 @@ const I18N = {
     'report.mShort': 'm',
     'report.empty.title': 'Your stats will appear here',
     'report.empty.text': 'Play some music — the report builds from listening history kept on this device.',
+    'section.discord': 'Discord Rich Presence',
+    'discord.subtitle': 'Show friends what you are listening to right in your Discord profile — with cover art, a timer and buttons that jump to the track.',
+    'discord.statusConnected': 'Connected',
+    'discord.statusDisconnected': 'Not connected',
+    'discord.connect': 'Connect Discord',
+    'discord.disconnect': 'Disconnect',
+    'discord.connectHint': 'Link your account to broadcast your listening to your profile.',
+    'discord.sessionActive': 'session active',
+    'discord.connecting': 'Connecting…',
+    'discord.connectError': 'Could not connect. Make sure Discord is running.',
+    'discord.waitingForDiscord': 'Discord isn’t running — I’ll connect automatically once it opens.',
+    'discord.noClientId': 'No Discord Client ID set. Add it to DISCORD_CLIENT_ID in renderer.js.',
+    'discord.show': 'What to show',
+    'discord.showTitle': 'Track title',
+    'discord.showTitleDesc': 'The main activity line.',
+    'discord.showArtist': 'Artist and album',
+    'discord.showArtistDesc': 'The second line below the title.',
+    'discord.showCover': 'Album cover',
+    'discord.showCoverDesc': 'The large image on the card.',
+    'discord.showTimer': 'Track timer',
+    'discord.showTimerDesc': 'Elapsed and total time with progress.',
+    'discord.showPaused': 'Show while paused',
+    'discord.showPausedDesc': 'Keep the status when playback is stopped.',
+    'discord.buttons': 'Profile buttons',
+    'discord.buttonsHint': 'Discord allows at most two buttons in an activity. Links must start with http(s)://',
+    'discord.btnLabel': 'Label',
+    'discord.btnUrl': 'Link',
+    'discord.btnLabelPh': 'Button text',
+    'discord.btnUrlPh': 'https://…',
+    'discord.privacy': 'Privacy',
+    'discord.privacyInvisible': 'Hide while «Invisible»',
+    'discord.privacyInvisibleDesc': 'Do not broadcast the status while you appear offline on Discord.',
+    'discord.privacyPrivate': 'Disable for private playlists',
+    'discord.privacyPrivateDesc': 'Tracks from private playlists won’t reach your profile.',
+    'discord.preview': 'What friends see',
+    'discord.previewListening': 'Listening to Audex',
+    'discord.previewPaused': 'Was listening · paused',
+    'discord.previewPlaceholder': 'The status appears in your profile once Discord is connected',
+    'discord.previewNote': 'The card updates live on track change, pause and seeking.',
+    'discord.previewOnline': 'Online',
+    'discord.previewEmptyTrack': 'Nothing playing',
     'crumb.collection': 'Collection',
     'search.placeholder': 'Search…',
     'search.artistPlaceholder': 'Search artist…',
@@ -775,6 +897,47 @@ const I18N = {
     'report.mShort': 'Min',
     'report.empty.title': 'Hier erscheint deine Statistik',
     'report.empty.text': 'Höre Musik — der Bericht entsteht aus dem Verlauf auf diesem Gerät.',
+    'section.discord': 'Discord Rich Presence',
+    'discord.subtitle': 'Zeige Freunden direkt im Discord-Profil, was du hörst — mit Cover, Timer und Buttons zum Titel.',
+    'discord.statusConnected': 'Verbunden',
+    'discord.statusDisconnected': 'Nicht verbunden',
+    'discord.connect': 'Discord verbinden',
+    'discord.disconnect': 'Trennen',
+    'discord.connectHint': 'Verknüpfe dein Konto, um deine Wiedergabe im Profil zu zeigen.',
+    'discord.sessionActive': 'Sitzung aktiv',
+    'discord.connecting': 'Verbinde…',
+    'discord.connectError': 'Verbindung fehlgeschlagen. Stelle sicher, dass Discord läuft.',
+    'discord.waitingForDiscord': 'Discord läuft nicht — ich verbinde mich automatisch, sobald es geöffnet ist.',
+    'discord.noClientId': 'Keine Discord Client ID gesetzt. Trage sie in DISCORD_CLIENT_ID in renderer.js ein.',
+    'discord.show': 'Was anzeigen',
+    'discord.showTitle': 'Titelname',
+    'discord.showTitleDesc': 'Die Hauptzeile der Aktivität.',
+    'discord.showArtist': 'Interpret und Album',
+    'discord.showArtistDesc': 'Die zweite Zeile unter dem Titel.',
+    'discord.showCover': 'Albumcover',
+    'discord.showCoverDesc': 'Das große Bild auf der Karte.',
+    'discord.showTimer': 'Titel-Timer',
+    'discord.showTimerDesc': 'Vergangene und Gesamtzeit mit Fortschritt.',
+    'discord.showPaused': 'Bei Pause anzeigen',
+    'discord.showPausedDesc': 'Status beibehalten, wenn die Wiedergabe gestoppt ist.',
+    'discord.buttons': 'Profil-Buttons',
+    'discord.buttonsHint': 'Discord erlaubt höchstens zwei Buttons pro Aktivität. Links müssen mit http(s):// beginnen',
+    'discord.btnLabel': 'Beschriftung',
+    'discord.btnUrl': 'Link',
+    'discord.btnLabelPh': 'Button-Text',
+    'discord.btnUrlPh': 'https://…',
+    'discord.privacy': 'Privatsphäre',
+    'discord.privacyInvisible': 'Bei «Unsichtbar» verbergen',
+    'discord.privacyInvisibleDesc': 'Status nicht senden, wenn du auf Discord offline erscheinst.',
+    'discord.privacyPrivate': 'Für private Playlists deaktivieren',
+    'discord.privacyPrivateDesc': 'Titel aus privaten Playlists erscheinen nicht im Profil.',
+    'discord.preview': 'Was Freunde sehen',
+    'discord.previewListening': 'Hört Audex',
+    'discord.previewPaused': 'Hörte · pausiert',
+    'discord.previewPlaceholder': 'Der Status erscheint im Profil, sobald Discord verbunden ist',
+    'discord.previewNote': 'Die Karte aktualisiert sich live bei Titelwechsel, Pause und Spulen.',
+    'discord.previewOnline': 'Online',
+    'discord.previewEmptyTrack': 'Nichts wird abgespielt',
     'crumb.collection': 'Sammlung',
     'search.placeholder': 'Suche…',
     'search.artistPlaceholder': 'Interpreten suchen…',
@@ -1032,6 +1195,47 @@ const I18N = {
     'report.mShort': 'm',
     'report.empty.title': 'Tes statistiques apparaîtront ici',
     'report.empty.text': "Écoute de la musique — le rapport se construit à partir de l'historique conservé sur cet appareil.",
+    'section.discord': 'Discord Rich Presence',
+    'discord.subtitle': 'Montrez à vos amis ce que vous écoutez directement dans votre profil Discord — avec pochette, minuteur et boutons vers le morceau.',
+    'discord.statusConnected': 'Connecté',
+    'discord.statusDisconnected': 'Non connecté',
+    'discord.connect': 'Connecter Discord',
+    'discord.disconnect': 'Déconnecter',
+    'discord.connectHint': 'Liez votre compte pour diffuser votre écoute dans votre profil.',
+    'discord.sessionActive': 'session active',
+    'discord.connecting': 'Connexion…',
+    'discord.connectError': 'Connexion impossible. Vérifiez que Discord est lancé.',
+    'discord.waitingForDiscord': 'Discord n’est pas lancé — je me connecterai automatiquement dès son ouverture.',
+    'discord.noClientId': "Aucun Discord Client ID défini. Ajoutez-le dans DISCORD_CLIENT_ID dans renderer.js.",
+    'discord.show': 'Quoi afficher',
+    'discord.showTitle': 'Titre du morceau',
+    'discord.showTitleDesc': "La ligne principale de l'activité.",
+    'discord.showArtist': 'Artiste et album',
+    'discord.showArtistDesc': 'La deuxième ligne sous le titre.',
+    'discord.showCover': "Pochette d'album",
+    'discord.showCoverDesc': 'La grande image de la carte.',
+    'discord.showTimer': 'Minuteur du morceau',
+    'discord.showTimerDesc': 'Temps écoulé et total avec progression.',
+    'discord.showPaused': 'Afficher en pause',
+    'discord.showPausedDesc': 'Garder le statut quand la lecture est arrêtée.',
+    'discord.buttons': 'Boutons du profil',
+    'discord.buttonsHint': 'Discord autorise au plus deux boutons par activité. Les liens doivent commencer par http(s)://',
+    'discord.btnLabel': 'Libellé',
+    'discord.btnUrl': 'Lien',
+    'discord.btnLabelPh': 'Texte du bouton',
+    'discord.btnUrlPh': 'https://…',
+    'discord.privacy': 'Confidentialité',
+    'discord.privacyInvisible': 'Masquer en mode « Invisible »',
+    'discord.privacyInvisibleDesc': 'Ne pas diffuser le statut quand vous êtes hors ligne sur Discord.',
+    'discord.privacyPrivate': 'Désactiver pour les playlists privées',
+    'discord.privacyPrivateDesc': "Les morceaux des playlists privées n'apparaîtront pas dans le profil.",
+    'discord.preview': 'Ce que voient vos amis',
+    'discord.previewListening': 'Écoute Audex',
+    'discord.previewPaused': 'Écoutait · en pause',
+    'discord.previewPlaceholder': 'Le statut apparaîtra dans votre profil une fois Discord connecté',
+    'discord.previewNote': 'La carte se met à jour en direct au changement de morceau, en pause et au défilement.',
+    'discord.previewOnline': 'En ligne',
+    'discord.previewEmptyTrack': 'Rien en lecture',
     'crumb.collection': 'Collection',
     'search.placeholder': 'Recherche…',
     'search.artistPlaceholder': 'Rechercher un artiste…',
@@ -1289,6 +1493,47 @@ const I18N = {
     'report.mShort': 'хв',
     'report.empty.title': 'Тут зʼявиться твоя статистика',
     'report.empty.text': 'Слухай музику — звіт збереться з історії прослуховування на цьому пристрої.',
+    'section.discord': 'Discord Rich Presence',
+    'discord.subtitle': 'Показуйте друзям, що ви слухаєте, прямо в профілі Discord — з обкладинкою, таймером і кнопками для переходу до треку.',
+    'discord.statusConnected': 'Підключено',
+    'discord.statusDisconnected': 'Не підключено',
+    'discord.connect': 'Підключити Discord',
+    'discord.disconnect': 'Відключити',
+    'discord.connectHint': "Прив'яжіть акаунт, щоб транслювати прослуховування у профіль.",
+    'discord.sessionActive': 'сесія активна',
+    'discord.connecting': 'Підключення…',
+    'discord.connectError': 'Не вдалося підключитися. Переконайтеся, що Discord запущено.',
+    'discord.waitingForDiscord': 'Discord не запущено — підключуся автоматично, коли він відкриється.',
+    'discord.noClientId': 'Не задано Discord Client ID. Вкажіть його в DISCORD_CLIENT_ID у renderer.js.',
+    'discord.show': 'Що показувати',
+    'discord.showTitle': 'Назва треку',
+    'discord.showTitleDesc': 'Основний рядок активності.',
+    'discord.showArtist': 'Виконавець та альбом',
+    'discord.showArtistDesc': 'Другий рядок під назвою.',
+    'discord.showCover': 'Обкладинка альбому',
+    'discord.showCoverDesc': 'Велике зображення картки.',
+    'discord.showTimer': 'Таймер треку',
+    'discord.showTimerDesc': 'Минулий і загальний час із прогресом.',
+    'discord.showPaused': 'Показувати на паузі',
+    'discord.showPausedDesc': 'Залишати статус, коли відтворення зупинено.',
+    'discord.buttons': 'Кнопки у профілі',
+    'discord.buttonsHint': 'Discord дозволяє не більше двох кнопок в активності. Посилання мають починатися з http(s)://',
+    'discord.btnLabel': 'Підпис',
+    'discord.btnUrl': 'Посилання',
+    'discord.btnLabelPh': 'Текст кнопки',
+    'discord.btnUrlPh': 'https://…',
+    'discord.privacy': 'Приватність',
+    'discord.privacyInvisible': 'Приховувати в режимі «Невидимий»',
+    'discord.privacyInvisibleDesc': 'Не транслювати статус, коли ви офлайн у Discord.',
+    'discord.privacyPrivate': 'Вимикати для приватних плейлистів',
+    'discord.privacyPrivateDesc': 'Треки із закритих плейлистів не потраплять у профіль.',
+    'discord.preview': 'Як бачать друзі',
+    'discord.previewListening': 'Слухає Audex',
+    'discord.previewPaused': 'Слухав · на паузі',
+    'discord.previewPlaceholder': 'Статус з’явиться у профілі після підключення Discord',
+    'discord.previewNote': 'Картка оновлюється в реальному часі при зміні треку, паузі та перемотуванні.',
+    'discord.previewOnline': 'У мережі',
+    'discord.previewEmptyTrack': 'Нічого не грає',
     'crumb.collection': 'Колекція',
     'search.placeholder': 'Пошук…',
     'search.artistPlaceholder': 'Пошук виконавця…',
@@ -3554,6 +3799,8 @@ function updateNowPlayingUI(track) {
   updatePlayButtonUI();
   updateFullscreenQueue();
   updateMediaSessionMetadata(track);
+  pushDiscordActivity(true);
+  if (currentView === 'settings') renderDiscordPreviewOnly();
 }
 
 function updatePlayButtonUI() {
@@ -4249,8 +4496,9 @@ function renderReport() {
 }
 
 // ── Audio events ──
-audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); plStartIfNeeded(); });
-audio.addEventListener('pause', () => { plTick(); isPlaying = false; updatePlayButtonUI(); savePlayLog(); });
+audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); plStartIfNeeded(); pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
+audio.addEventListener('pause', () => { plTick(); isPlaying = false; updatePlayButtonUI(); savePlayLog(); pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
+audio.addEventListener('seeked', () => { pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
 audio.addEventListener('timeupdate', () => {
   const cur = audio.currentTime, dur = audio.duration;
   $('time-current').textContent = formatTime(cur);
@@ -4264,6 +4512,11 @@ audio.addEventListener('timeupdate', () => {
   }
   plTick();
   if (plSaveAccum >= 15) { plSaveAccum = 0; savePlayLog(); }   // persist periodically, not every tick
+  // Keep the Discord preview timer ticking (once per second, settings view only).
+  if (currentView === 'settings' && settings.discord.showTimer) {
+    const sec = Math.floor(cur);
+    if (sec !== discordPreviewSec) { discordPreviewSec = sec; renderDiscordPreviewOnly(); }
+  }
 });
 audio.addEventListener('ended', () => {
   plFinalize();
@@ -5058,6 +5311,7 @@ function renderSettings() {
   const inc = $('scale-inc');
   if (dec) dec.disabled = settings.uiScale <= UI_SCALE_STEPS[0] + 1e-6;
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
+  renderDiscord();
 }
 
 const themeSelect = $('theme-select');
@@ -5187,6 +5441,353 @@ function applyDownloadsVisibility() {
   if (!settings.downloads && currentView === 'downloads') setView('library');
 }
 applyDownloadsVisibility();
+
+// ── Discord Rich Presence ─────────────────────────────────────────────────────
+// Renders the Settings → Discord panel and keeps the activity in sync with
+// playback. The live preview mirrors what friends see in the Discord profile.
+function discordUserName() {
+  if (!discordUser) return '';
+  return discordUser.global_name || discordUser.username || '';
+}
+
+function dcToggleHtml(key, label, desc) {
+  const on = !!settings.discord[key];
+  const disabled = !discordConnected;
+  return `<div class="setting-row${disabled ? ' is-dimmed' : ''}">
+    <div class="setting-text">
+      <div class="setting-label">${escapeHtml(tr(label))}</div>
+      <div class="setting-desc">${escapeHtml(tr(desc))}</div>
+    </div>
+    <button class="toggle${on ? ' on' : ''}${disabled ? ' is-disabled' : ''}" data-dsetting="${key}"><div class="toggle-knob"></div></button>
+  </div>`;
+}
+
+function renderDiscordPreview() {
+  const t = currentTrackIndex >= 0 ? library[currentTrackIndex] : null;
+  const d = settings.discord;
+  const placeholder = !discordConnected;
+  const paused = !!t && !isPlaying;
+  const eyebrow = placeholder ? tr('discord.previewListening')
+    : (paused && d.showPaused ? tr('discord.previewPaused') : tr('discord.previewListening'));
+  const cover = t && t.cover ? t.cover : null;
+  const coverCss = cover ? `background-image:url('${cover}')` : '';
+  let body;
+  if (placeholder) {
+    body = `<div class="dc-prev-empty">${escapeHtml(tr('discord.previewPlaceholder'))}</div>`;
+  } else if (!t) {
+    body = `<div class="dc-prev-empty">${escapeHtml(tr('discord.previewEmptyTrack'))}</div>`;
+  } else {
+    const sub = [t.artist, t.album].filter(Boolean).join(' · ');
+    const cur = isFinite(audio.currentTime) ? audio.currentTime : 0;
+    const dur = isFinite(audio.duration) ? audio.duration : 0;
+    const pct = dur > 0 ? Math.max(0, Math.min(100, (cur / dur) * 100)) : 0;
+    const timer = (d.showTimer && isPlaying && dur > 0) ? `
+      <div class="dc-prev-bar"><div class="dc-prev-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="dc-prev-times"><span>${formatTime(cur)}</span><span>${formatTime(dur)}</span></div>` : '';
+    body = `<div class="dc-prev-activity">
+      <div class="dc-prev-art ${d.showCover ? '' : 'dc-prev-art-mono'}" style="${d.showCover ? coverCss : ''}">
+        ${d.showCover && !cover ? `<span>${escapeHtml((t.title || '?')[0] || '?')}</span>` : ''}
+        <div class="dc-prev-badge"><svg class="i" width="11" height="11"><use href="#i-discord"/></svg></div>
+      </div>
+      <div class="dc-prev-lines">
+        ${d.showTitle ? `<div class="dc-prev-title">${escapeHtml(t.title || '')}</div>` : ''}
+        ${d.showArtist && sub ? `<div class="dc-prev-sub">${escapeHtml(sub)}</div>` : ''}
+        ${timer}
+      </div>
+    </div>`;
+  }
+  const btns = placeholder ? '' : (settings.discord.buttons || [])
+    .filter(b => b && b.label && /^https?:\/\//i.test(b.url || ''))
+    .slice(0, 2)
+    .map(b => `<div class="dc-prev-btn">${escapeHtml(b.label)}</div>`).join('');
+
+  return `<div class="dc-prev-card">
+    <div class="dc-prev-user">
+      <div class="dc-prev-avatar"></div>
+      <div>
+        <div class="dc-prev-name">${escapeHtml(discordUserName() || 'Discord')}</div>
+        <div class="dc-prev-online">${escapeHtml(tr('discord.previewOnline'))}</div>
+      </div>
+    </div>
+    <div class="dc-prev-divider"></div>
+    <div class="dc-prev-eyebrow">${escapeHtml(eyebrow)}</div>
+    ${body}
+    ${btns ? `<div class="dc-prev-btns">${btns}</div>` : ''}
+  </div>`;
+}
+
+function renderDiscord() {
+  const host = $('discord-body');
+  if (!host) return;
+  const d = settings.discord;
+  const connectLabel = discordConnected ? tr('discord.disconnect') : tr('discord.connect');
+  const statusText = discordConnected ? tr('discord.statusConnected') : tr('discord.statusDisconnected');
+  const sub = discordConnected
+    ? `${escapeHtml(discordUserName())} · ${escapeHtml(tr('discord.sessionActive'))}`
+    : escapeHtml(tr('discord.connectHint'));
+
+  const buttonsRows = (d.buttons || []).slice(0, 2).map((b, i) => `
+    <div class="setting-row dc-btn-row${discordConnected ? '' : ' is-dimmed'}">
+      <div class="dc-btn-field">
+        <div class="dc-btn-cap">${escapeHtml(tr('discord.btnLabel'))}</div>
+        <input class="dc-input" type="text" data-dbtn="${i}" data-dfield="label" value="${escapeHtml(b.label || '')}" placeholder="${escapeHtml(tr('discord.btnLabelPh'))}" ${discordConnected ? '' : 'disabled'} />
+      </div>
+      <div class="dc-btn-field dc-btn-field-wide">
+        <div class="dc-btn-cap">${escapeHtml(tr('discord.btnUrl'))}</div>
+        <input class="dc-input dc-input-mono" type="text" data-dbtn="${i}" data-dfield="url" value="${escapeHtml(b.url || '')}" placeholder="${escapeHtml(tr('discord.btnUrlPh'))}" ${discordConnected ? '' : 'disabled'} />
+      </div>
+    </div>`).join('');
+
+  host.innerHTML = `
+    <div class="setting-card setting-card-tight">
+      <div class="dc-conn${discordConnected ? ' is-connected' : ''}">
+        <div class="dc-conn-icon"><svg class="i" width="22" height="22"><use href="#i-discord"/></svg></div>
+        <div class="dc-conn-main">
+          <div class="dc-conn-title">Discord <span class="dc-conn-status">${discordConnected ? '●' : '○'} ${escapeHtml(statusText)}</span></div>
+          <div class="dc-conn-sub">${sub}</div>
+        </div>
+        <button class="btn-ghost dc-conn-btn${discordConnected ? '' : ' dc-conn-btn-primary'}" id="discord-conn-btn">${escapeHtml(connectLabel)}</button>
+      </div>
+      ${DISCORD_CLIENT_ID ? '' : `<div class="dc-warn">${escapeHtml(tr('discord.noClientId'))}</div>`}
+    </div>
+
+    <div class="dc-grid">
+      <div class="dc-controls">
+        <div class="dc-sublabel">${escapeHtml(tr('discord.show'))}</div>
+        <div class="setting-card">
+          ${dcToggleHtml('showTitle', 'discord.showTitle', 'discord.showTitleDesc')}
+          ${dcToggleHtml('showArtist', 'discord.showArtist', 'discord.showArtistDesc')}
+          ${dcToggleHtml('showCover', 'discord.showCover', 'discord.showCoverDesc')}
+          ${dcToggleHtml('showTimer', 'discord.showTimer', 'discord.showTimerDesc')}
+          ${dcToggleHtml('showPaused', 'discord.showPaused', 'discord.showPausedDesc')}
+        </div>
+
+        <div class="dc-sublabel">${escapeHtml(tr('discord.buttons'))}</div>
+        <div class="setting-card">${buttonsRows}</div>
+        <div class="dc-hint">${escapeHtml(tr('discord.buttonsHint'))}</div>
+
+        <div class="dc-sublabel">${escapeHtml(tr('discord.privacy'))}</div>
+        <div class="setting-card">
+          ${dcToggleHtml('privacyInvisible', 'discord.privacyInvisible', 'discord.privacyInvisibleDesc')}
+          ${dcToggleHtml('privacyPrivate', 'discord.privacyPrivate', 'discord.privacyPrivateDesc')}
+        </div>
+      </div>
+
+      <div class="dc-preview">
+        <div class="dc-sublabel">${escapeHtml(tr('discord.preview'))}</div>
+        ${renderDiscordPreview()}
+        <div class="dc-prev-note"><svg class="i" width="13" height="13"><use href="#i-info"/></svg><span>${escapeHtml(tr('discord.previewNote'))}</span></div>
+      </div>
+    </div>`;
+
+  // Wire connect/disconnect
+  const connBtn = $('discord-conn-btn');
+  if (connBtn) connBtn.addEventListener('click', () => discordConnected ? disconnectDiscord() : connectDiscord());
+
+  // Wire toggles
+  host.querySelectorAll('.toggle[data-dsetting]').forEach(t => {
+    t.addEventListener('click', () => {
+      if (t.classList.contains('is-disabled')) return;
+      const key = t.dataset.dsetting;
+      settings.discord[key] = !settings.discord[key];
+      saveSettings();
+      t.classList.toggle('on', settings.discord[key]);
+      renderDiscordPreviewOnly();
+      pushDiscordActivity(true);
+    });
+  });
+
+  // Wire button inputs
+  host.querySelectorAll('.dc-input[data-dbtn]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const i = Number(inp.dataset.dbtn);
+      const field = inp.dataset.dfield;
+      if (!settings.discord.buttons[i]) settings.discord.buttons[i] = { label: '', url: '' };
+      settings.discord.buttons[i][field] = inp.value;
+      saveSettings();
+      renderDiscordPreviewOnly();
+      pushDiscordActivity(false);
+    });
+  });
+}
+
+// Re-paint only the preview card (cheap path on toggle/seek/track change).
+function renderDiscordPreviewOnly() {
+  const host = $('discord-body');
+  if (!host) return;
+  const card = host.querySelector('.dc-preview');
+  if (!card) return;
+  card.innerHTML = `<div class="dc-sublabel">${escapeHtml(tr('discord.preview'))}</div>${renderDiscordPreview()}<div class="dc-prev-note"><svg class="i" width="13" height="13"><use href="#i-info"/></svg><span>${escapeHtml(tr('discord.previewNote'))}</span></div>`;
+}
+
+function buildDiscordActivity() {
+  const d = settings.discord;
+  const t = currentTrackIndex >= 0 ? library[currentTrackIndex] : null;
+  if (!t) return null;
+  if (!isPlaying && !d.showPaused) return null;
+  // Discord requires details/state to be ≥ 2 chars when present.
+  const fit = (s, max) => { s = (s || '').slice(0, max); return s.length >= 2 ? s : null; };
+  const activity = { instance: false };
+  if (d.showTitle) { const v = fit(t.title || 'Unknown', 128); if (v) activity.details = v; }
+  if (d.showArtist) { const v = fit([t.artist, t.album].filter(Boolean).join(' · '), 128); if (v) activity.state = v; }
+  if (d.showTimer && isPlaying && isFinite(audio.duration) && audio.duration > 0) {
+    const startSec = Math.floor((Date.now() - Math.floor(audio.currentTime * 1000)) / 1000);
+    activity.timestamps = { start: startSec, end: startSec + Math.round(audio.duration) };
+  }
+  // Discord's RPC accepts a raw https URL for large_image (only large_image —
+  // small_image still needs an uploaded asset key). We resolve a public cover
+  // URL per track via the iTunes Search API (see ensureDiscordCover). Until it
+  // resolves, or if there's no match, we send no image rather than a broken one.
+  if (d.showCover) {
+    // Use the resolved iTunes cover; fall back to the Audex logo when there's
+    // no match (or briefly, while the lookup is still in flight).
+    const cover = discordCoverCache[t.path];
+    activity.assets = {
+      large_image: cover || AUDEX_LOGO_URL,
+      large_text: (t.album || t.title || 'Audex').slice(0, 128),
+    };
+  }
+  const btns = (d.buttons || [])
+    .filter(b => b && b.label && /^https?:\/\//i.test(b.url || ''))
+    .slice(0, 2)
+    .map(b => ({ label: b.label.slice(0, 31), url: b.url }));
+  if (btns.length) activity.buttons = btns;
+  return activity;
+}
+
+// Public album-art URLs resolved from the iTunes Search API, keyed by track
+// path. Value is a URL string, or null once looked up with no match. Pending
+// lookups are tracked separately so we never fire duplicate requests.
+const discordCoverCache = {};
+const discordCoverInflight = {};
+async function ensureDiscordCover(track) {
+  if (!track || !settings.discord.showCover) return;
+  if (!window.electronAPI || !window.electronAPI.lookupCover) return;
+  const key = track.path;
+  if (key in discordCoverCache || discordCoverInflight[key]) return;
+  discordCoverInflight[key] = true;
+  let url = null;
+  try {
+    const res = await window.electronAPI.lookupCover({ artist: track.artist, title: track.title, album: track.album });
+    url = res && res.url ? res.url : null;
+  } catch (_) { url = null; }
+  discordCoverCache[key] = url;
+  delete discordCoverInflight[key];
+  // If this track is still the current one, re-push with the artwork attached.
+  if (url && currentTrackIndex >= 0 && library[currentTrackIndex] && library[currentTrackIndex].path === key) {
+    pushDiscordActivity(true);
+  }
+}
+
+let discordPreviewSec = -1;
+let discordPushTimer = null;
+let discordLastPush = 0;
+const DISCORD_PUSH_MIN_MS = 2000; // Discord rate-limits SET_ACTIVITY (~5 / 20s)
+function pushDiscordActivity(immediate) {
+  if (!discordConnected || !window.electronAPI || !window.electronAPI.discordSetActivity) return;
+  const cur = currentTrackIndex >= 0 ? library[currentTrackIndex] : null;
+  if (cur && settings.discord.showCover && !(cur.path in discordCoverCache)) ensureDiscordCover(cur);
+  const send = () => {
+    discordLastPush = Date.now();
+    discordPushTimer = null;
+    try { window.electronAPI.discordSetActivity(buildDiscordActivity()); } catch (_) {}
+  };
+  const since = Date.now() - discordLastPush;
+  if (immediate || since >= DISCORD_PUSH_MIN_MS) {
+    if (discordPushTimer) { clearTimeout(discordPushTimer); discordPushTimer = null; }
+    send();
+  } else if (!discordPushTimer) {
+    discordPushTimer = setTimeout(send, DISCORD_PUSH_MIN_MS - since);
+  }
+}
+
+// Single connect attempt. Updates state + pushes activity on success; returns a
+// boolean so callers (manual button, boot, retry loop) can decide what to do.
+async function tryDiscordConnect() {
+  if (!window.electronAPI || !window.electronAPI.discordConnect || !DISCORD_CLIENT_ID) return false;
+  let res = null;
+  try { res = await window.electronAPI.discordConnect(DISCORD_CLIENT_ID); } catch (_) { res = null; }
+  if (res && res.ok) {
+    discordConnected = true;
+    discordUser = res.user || null;
+    pushDiscordActivity(true);
+    return true;
+  }
+  discordConnected = false;
+  return false;
+}
+
+// Background retry: while the integration is enabled but not connected (Discord
+// client closed, or not yet launched), poll until it's reachable, then connect
+// automatically. Stopped on explicit disconnect.
+let discordReconnectTimer = null;
+const DISCORD_RECONNECT_MS = 10000;
+function stopDiscordReconnect() {
+  if (discordReconnectTimer) { clearTimeout(discordReconnectTimer); discordReconnectTimer = null; }
+}
+function scheduleDiscordReconnect() {
+  if (discordReconnectTimer || discordConnected) return;
+  if (!settings.discord.enabled || !DISCORD_CLIENT_ID) return;
+  discordReconnectTimer = setTimeout(async () => {
+    discordReconnectTimer = null;
+    if (!settings.discord.enabled || discordConnected) return;
+    const ok = await tryDiscordConnect();
+    if (ok) { if (currentView === 'settings') renderDiscord(); }
+    else scheduleDiscordReconnect();
+  }, DISCORD_RECONNECT_MS);
+}
+
+async function connectDiscord() {
+  if (!window.electronAPI || !window.electronAPI.discordConnect) return;
+  if (!DISCORD_CLIENT_ID) { renderDiscord(); return; }
+  // Record the intent first so it survives a restart even if Discord isn't up.
+  settings.discord.enabled = true;
+  saveSettings();
+  stopDiscordReconnect();
+  const btn = $('discord-conn-btn');
+  if (btn) { btn.disabled = true; btn.textContent = tr('discord.connecting'); }
+  const ok = await tryDiscordConnect();
+  renderDiscord();
+  if (!ok) {
+    // Discord client not reachable — keep the intent and connect in the
+    // background as soon as Discord launches.
+    const w = document.querySelector('#discord-body .dc-conn-sub');
+    if (w) { w.textContent = tr('discord.waitingForDiscord'); w.classList.add('dc-error'); }
+    scheduleDiscordReconnect();
+  }
+}
+
+async function disconnectDiscord() {
+  stopDiscordReconnect();
+  if (window.electronAPI && window.electronAPI.discordDisconnect) {
+    try { await window.electronAPI.discordDisconnect(); } catch (_) {}
+  }
+  discordConnected = false;
+  discordUser = null;
+  settings.discord.enabled = false;
+  saveSettings();
+  renderDiscord();
+}
+
+// Main process pushes status changes (e.g. Discord client quit drops the socket).
+// If we still want to be connected, start polling to reconnect automatically.
+if (window.electronAPI && window.electronAPI.onDiscordStatus) {
+  window.electronAPI.onDiscordStatus(({ connected, user }) => {
+    discordConnected = !!connected;
+    discordUser = user || null;
+    if (currentView === 'settings') renderDiscord();
+    if (!connected && settings.discord.enabled) scheduleDiscordReconnect();
+  });
+}
+
+// On boot, restore the connection if the user had it enabled. If Discord isn't
+// running yet, the retry loop keeps trying until it launches.
+if (settings.discord.enabled && DISCORD_CLIENT_ID) {
+  tryDiscordConnect().then(ok => {
+    if (ok) { if (currentView === 'settings') renderDiscord(); }
+    else scheduleDiscordReconnect();
+  });
+}
 
 // Covers for recents (sidebar) and the now-playing track are loaded eagerly,
 // since they're always visible. Library/favorites/playlist covers load lazily

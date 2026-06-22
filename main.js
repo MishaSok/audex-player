@@ -1,12 +1,29 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, screen, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const net = require('net');
 const { spawn } = require('child_process');
 const https = require('https');
 const musicMetadata = require('music-metadata');
 const NodeID3 = require('node-id3');
 
 app.setName('Audex');
+
+// Single-instance lock. Two Electron processes pointed at the same userData
+// directory can both open the localStorage LevelDB and corrupt it (lost library
+// + settings). If another instance already holds the lock, quit immediately and
+// just focus the existing window instead of opening a second one.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      if (!mainWindow.isVisible()) mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
 
 // ── GPU / hardware-acceleration fallback ──
 // Some Windows 10 GPU drivers make Electron hang on launch ("not responding").
@@ -1258,5 +1275,187 @@ ipcMain.handle('yandex:parsePlaylist', async (event, payload) => {
   } finally {
     try { if (yandexBrowser) await yandexBrowser.close(); } catch (_) {}
     yandexBrowser = null;
+  }
+});
+
+// ── Discord Rich Presence ────────────────────────────────────────────────────
+// Self-contained client for Discord's local IPC protocol — no external npm
+// dependency (keeps the vanilla-everything / careful-packaging philosophy).
+// A frame is <4-byte LE opcode><4-byte LE length><utf8 JSON payload>. Discord
+// exposes up to ten sockets named discord-ipc-0 … discord-ipc-9.
+const DISCORD_OP = { HANDSHAKE: 0, FRAME: 1, CLOSE: 2, PING: 3, PONG: 4 };
+let discordSock = null;
+let discordReady = false;
+let discordUser = null;
+let discordClientId = null;
+let discordReadBuf = Buffer.alloc(0);
+let discordReadyResolve = null;
+let discordActivityNonce = 0;
+
+function discordIpcCandidates() {
+  if (process.platform === 'win32') {
+    const out = [];
+    for (let i = 0; i < 10; i++) out.push('\\\\?\\pipe\\discord-ipc-' + i);
+    return out;
+  }
+  // Linux/macOS: the socket lives in a runtime/temp dir. Flatpak and Snap
+  // builds of Discord nest it under app-specific subdirectories.
+  const roots = [process.env.XDG_RUNTIME_DIR, process.env.TMPDIR, process.env.TMP, process.env.TEMP, '/tmp']
+    .filter(Boolean);
+  const dirs = [];
+  for (const r of roots) {
+    dirs.push(r);
+    dirs.push(path.join(r, 'app', 'com.discordapp.Discord'));
+    dirs.push(path.join(r, 'snap.discord'));
+  }
+  const out = [];
+  for (let i = 0; i < 10; i++) for (const d of dirs) out.push(path.join(d, 'discord-ipc-' + i));
+  return out;
+}
+
+function discordEncode(op, dataObj) {
+  const json = Buffer.from(JSON.stringify(dataObj), 'utf8');
+  const header = Buffer.alloc(8);
+  header.writeInt32LE(op, 0);
+  header.writeInt32LE(json.length, 4);
+  return Buffer.concat([header, json]);
+}
+
+function discordConnectSocket(paths) {
+  return new Promise((resolve, reject) => {
+    let idx = 0;
+    const tryNext = () => {
+      if (idx >= paths.length) { reject(new Error('Discord не запущен (IPC-сокет не найден)')); return; }
+      const p = paths[idx++];
+      const sock = net.createConnection(p);
+      sock.once('connect', () => { sock.removeAllListeners('error'); resolve(sock); });
+      sock.once('error', () => { try { sock.destroy(); } catch (_) {} tryNext(); });
+    };
+    tryNext();
+  });
+}
+
+function discordOnData(chunk) {
+  discordReadBuf = Buffer.concat([discordReadBuf, chunk]);
+  while (discordReadBuf.length >= 8) {
+    const op = discordReadBuf.readInt32LE(0);
+    const len = discordReadBuf.readInt32LE(4);
+    if (discordReadBuf.length < 8 + len) break;
+    const payload = discordReadBuf.slice(8, 8 + len).toString('utf8');
+    discordReadBuf = discordReadBuf.slice(8 + len);
+    let msg = null;
+    try { msg = JSON.parse(payload); } catch (_) { continue; }
+    if (op === DISCORD_OP.PING) { try { discordSock.write(discordEncode(DISCORD_OP.PONG, msg)); } catch (_) {} continue; }
+    if (op === DISCORD_OP.CLOSE) { discordTeardown(); notifyDiscordStatus(); continue; }
+    if (msg && msg.cmd === 'DISPATCH' && msg.evt === 'READY') {
+      const u = msg.data && msg.data.user;
+      discordUser = u ? { id: u.id, username: u.username, global_name: u.global_name || null } : null;
+      discordReady = true;
+      if (discordReadyResolve) { const r = discordReadyResolve; discordReadyResolve = null; r(discordUser); }
+      notifyDiscordStatus();
+    }
+  }
+}
+
+function discordTeardown() {
+  discordReady = false;
+  discordUser = null;
+  discordReadBuf = Buffer.alloc(0);
+  if (discordSock) { try { discordSock.destroy(); } catch (_) {} discordSock = null; }
+}
+
+function notifyDiscordStatus() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try { mainWindow.webContents.send('discord:status', { connected: discordReady, user: discordUser }); } catch (_) {}
+}
+
+async function discordConnect(clientId) {
+  if (!clientId) throw new Error('Не задан Discord Client ID');
+  if (discordSock && discordReady && discordClientId === clientId) return discordUser;
+  discordTeardown();
+  discordClientId = clientId;
+  const sock = await discordConnectSocket(discordIpcCandidates());
+  discordSock = sock;
+  sock.on('data', discordOnData);
+  sock.on('close', () => { discordTeardown(); notifyDiscordStatus(); });
+  sock.on('error', () => { /* 'close' fires right after and handles cleanup */ });
+  return await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      if (!discordReady) { discordReadyResolve = null; discordTeardown(); reject(new Error('Discord не ответил (таймаут рукопожатия)')); }
+    }, 8000);
+    discordReadyResolve = (u) => { clearTimeout(timer); resolve(u); };
+    try { sock.write(discordEncode(DISCORD_OP.HANDSHAKE, { v: 1, client_id: clientId })); }
+    catch (err) { clearTimeout(timer); discordReadyResolve = null; discordTeardown(); reject(err); }
+  });
+}
+
+function discordSetActivity(activity) {
+  if (!discordSock || !discordReady) return false;
+  const frame = {
+    cmd: 'SET_ACTIVITY',
+    args: { pid: process.pid, activity: activity || null },
+    nonce: String(++discordActivityNonce),
+  };
+  try { discordSock.write(discordEncode(DISCORD_OP.FRAME, frame)); return true; } catch (_) { return false; }
+}
+
+ipcMain.handle('discord:connect', async (event, payload) => {
+  try { const user = await discordConnect(payload && payload.clientId); return { ok: true, user }; }
+  catch (err) { return { ok: false, error: String(err && err.message || err) }; }
+});
+ipcMain.handle('discord:disconnect', () => { discordTeardown(); notifyDiscordStatus(); return { ok: true }; });
+ipcMain.handle('discord:setActivity', (event, payload) => ({ ok: discordSetActivity(payload && payload.activity) }));
+ipcMain.handle('discord:getStatus', () => ({ connected: discordReady, user: discordUser }));
+
+app.on('before-quit', () => discordTeardown());
+
+// ── Album-cover lookup (iTunes Search API) ───────────────────────────────────
+// Discord rich presence can show a large image only from an art-asset key or a
+// public https URL — not local/embedded artwork. We resolve a public cover URL
+// from Apple's free, key-less iTunes Search API and hand it to the renderer,
+// which passes it straight into the activity's large_image. Results are cached
+// in-process so each track is looked up at most once per session.
+const itunesCoverCache = new Map(); // term (lowercased) -> url | null
+
+function httpsGetJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'Audex' } }, (res) => {
+      if (res.statusCode !== 200) { res.resume(); reject(new Error('HTTP ' + res.statusCode)); return; }
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', (c) => {
+        data += c;
+        if (data.length > 4_000_000) { req.destroy(); reject(new Error('response too large')); }
+      });
+      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
+    });
+    req.on('error', reject);
+    req.setTimeout(8000, () => { req.destroy(new Error('timeout')); });
+  });
+}
+
+ipcMain.handle('music:lookupCover', async (event, query) => {
+  try {
+    const artist = String(query && query.artist || '').trim();
+    const title = String(query && query.title || '').trim();
+    const album = String(query && query.album || '').trim();
+    // Prefer artist+title (most specific); fall back to artist+album.
+    const term = ([artist, title].filter(Boolean).join(' ').trim())
+      || ([artist, album].filter(Boolean).join(' ').trim());
+    if (!term) return { url: null };
+    const cacheKey = term.toLowerCase();
+    if (itunesCoverCache.has(cacheKey)) return { url: itunesCoverCache.get(cacheKey) };
+    const api = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=1`;
+    let url = null;
+    try {
+      const json = await httpsGetJson(api);
+      const r = json && Array.isArray(json.results) && json.results[0];
+      // artworkUrl100 looks like ".../100x100bb.jpg" — upscale to 512 for Discord.
+      if (r && r.artworkUrl100) url = r.artworkUrl100.replace(/\/\d+x\d+bb\./, '/512x512bb.');
+    } catch (_) { url = null; }
+    itunesCoverCache.set(cacheKey, url);
+    return { url };
+  } catch (err) {
+    return { url: null, error: String(err && err.message || err) };
   }
 });

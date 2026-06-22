@@ -3243,6 +3243,209 @@ input { font-family: inherit; color: inherit; }
 }
 .rep-rank-empty { font-size: 12px; color: var(--text-dim); }
 
+/* ─── Discord Rich Presence (Settings) ─── */
+.dc-blurple { color: #5865f2; }
+.dc-conn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 2px;
+}
+.dc-conn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #5865f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dc-conn.is-connected .dc-conn-icon { box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.18); }
+.dc-conn-main { flex: 1; min-width: 0; }
+.dc-conn-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dc-conn-status {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.dc-conn.is-connected .dc-conn-status { color: var(--accent-ok); }
+.dc-conn-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dc-conn-sub.dc-error { color: var(--danger); }
+.dc-conn-btn { flex-shrink: 0; }
+.dc-conn-btn-primary {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
+}
+.dc-conn-btn-primary:hover { background: #4d59e0; }
+.dc-warn {
+  margin-top: 10px;
+  padding: 9px 12px;
+  font-size: 11.5px;
+  color: var(--accent-warn);
+  background: color-mix(in srgb, var(--accent-warn) 10%, transparent);
+  border-radius: 6px;
+}
+.dc-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 26px;
+  align-items: start;
+  margin-top: 18px;
+}
+.dc-controls { display: flex; flex-direction: column; }
+.dc-sublabel {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+  font-weight: 500;
+  margin: 18px 0 9px;
+}
+.dc-controls .dc-sublabel:first-child { margin-top: 0; }
+.dc-hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; line-height: 1.5; }
+.setting-row.is-dimmed { opacity: 0.5; }
+.dc-btn-row { align-items: flex-end; gap: 12px; }
+.dc-btn-field { flex: 0 0 150px; min-width: 0; }
+.dc-btn-field-wide { flex: 1; }
+.dc-btn-cap {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+.dc-input {
+  width: 100%;
+  padding: 7px 10px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  color: var(--text-strong);
+  font-size: 12.5px;
+  outline: none;
+}
+.dc-input:focus { border-color: var(--accent); }
+.dc-input-mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text-muted); }
+.dc-input:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Live preview card — mimics the Discord activity panel */
+.dc-preview { position: static; }
+.dc-prev-card {
+  background: #2b2d31;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  font-family: inherit;
+}
+.dc-prev-user { display: flex; align-items: center; gap: 10px; padding: 12px 14px 10px; }
+.dc-prev-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4377a, #2a1a3d);
+  flex-shrink: 0;
+}
+.dc-prev-name { font-size: 13.5px; font-weight: 600; color: #f2f3f5; }
+.dc-prev-online { font-size: 11px; color: #949ba4; }
+.dc-prev-divider { height: 1px; background: rgba(255, 255, 255, 0.06); margin: 0 14px; }
+.dc-prev-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #949ba4;
+  text-transform: uppercase;
+  padding: 12px 14px 10px;
+}
+.dc-prev-activity { display: flex; gap: 12px; padding: 0 14px; }
+.dc-prev-art {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.dc-prev-art.dc-prev-art-mono,
+.dc-prev-art:not([style*="url"]) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e1f22;
+  color: #b5bac1;
+  font-size: 22px;
+  font-weight: 600;
+}
+.dc-prev-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #5865f2;
+  border: 2px solid #2b2d31;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.dc-prev-lines { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.dc-prev-title { font-size: 13.5px; font-weight: 600; color: #f2f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc-prev-sub { font-size: 12px; color: #b5bac1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc-prev-bar { height: 4px; background: rgba(255, 255, 255, 0.12); border-radius: 3px; margin-top: 4px; position: relative; }
+.dc-prev-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #f2f3f5; border-radius: 3px; }
+.dc-prev-times { display: flex; justify-content: space-between; font-size: 10.5px; color: #949ba4; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.dc-prev-btns { display: flex; flex-direction: column; gap: 8px; padding: 14px; }
+.dc-prev-btn {
+  padding: 9px 12px;
+  background: #4e5058;
+  border-radius: 5px;
+  color: #f2f3f5;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: center;
+}
+.dc-prev-empty {
+  margin: 0 14px 14px;
+  padding: 26px 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: #949ba4;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+.dc-prev-card .dc-prev-activity { padding-bottom: 14px; }
+.dc-prev-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.dc-prev-note .i { color: var(--text-dim); flex-shrink: 0; margin-top: 1px; }
+
 /* ─── Responsive: narrow desktop windows ───
    Min window is 1024×700 (main.js). Everything below kicks in at ≤1100px so
    the cramped 1024–1100 range stays usable. All rules are inside the media
@@ -3309,4 +3512,8 @@ input { font-family: inherit; color: inherit; }
   .rep-hero { flex: 0 0 auto; }
   .rep-lower { grid-template-columns: 1fr; }
   .rep-title { font-size: 28px; }
+
+  /* Discord — stack controls above the preview card. */
+  .dc-grid { grid-template-columns: 1fr; }
+  .dc-preview { position: static; }
 }
