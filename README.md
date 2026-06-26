@@ -8,7 +8,7 @@
 
 Built with Electron and vanilla JS — no frameworks, no bloat, just a clean charcoal-and-amber player that scans your files, downloads new tracks, and stays out of your way.
 
-[![Version](https://img.shields.io/badge/version-1.1.3-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.1.4-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-2b2b2b)](https://github.com/MishaSok/audex-player/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-42-47848f)](https://www.electronjs.org/)
@@ -55,11 +55,20 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 - **Filters & sorting** — sort the library by title, artist, album, and more.
 - **Playback controls** — shuffle, repeat (off / all / one), seek, volume.
 - **Fullscreen "now playing"** view with cover art, full transport controls, volume slider, and an upcoming-queue panel.
+- **Real-waveform progress bar** — the seek bar renders the track's actual audio peaks, in both the bottom playbar and the fullscreen player.
 - **Resume on launch** — the last track is restored when you reopen the app.
+
+### 📊 Listening Report
+
+- A dedicated **Report** tab that turns your listening history into stats — **computed entirely on your device**, nothing leaves your machine.
+- Switch between **Day / Month / Year / All-time** periods, each with **listening time** and a comparison against the previous period.
+- At-a-glance stats: **tracks played**, **artists**, **additions to your collection**, and your current **listening streak**.
+- A **"when you listen"** clock visualizing your activity across the 24 hours of the day.
+- **Top Artists** and **Top Tracks** cards with play counts and album art.
 
 ### ⬇️ Download from the internet
 
-- **YouTube** — search and download tracks by query straight from the app (`yt-dlp`), with automatic import into your library, embedded cover art and metadata.
+- **YouTube** — search and download tracks by query straight from the app (`yt-dlp`), with automatic import into your library, embedded cover art and metadata. **ffmpeg is bundled**, so audio extraction and cover embedding work out of the box on every platform.
 - **Yandex Music** — parse playlists and albums via a bundled headless Chromium. Your login session persists between runs; the browser window can be shown for sign-in / captcha or hidden for silent background parsing.
 - **Download queue** with live progress, pause and resume. Queue state survives restarts.
 - **Configurable download folder** — choose where new tracks land, or fall back to a dedicated `Audex Downloads` folder.
@@ -83,6 +92,7 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 
 - **System tray** — controls playback (play / pause, previous / next) right from the tray menu, and closing the window keeps the app running in the background so music never stops.
 - **MPRIS / Media Session** — now-playing metadata and transport controls appear in the GNOME top bar (and other OS media widgets).
+- **Discord Rich Presence** — show what you're listening to on your Discord profile, with track, artist and **album cover** (resolved via the iTunes Search API, so even tracks without embedded art get a picture), an optional elapsed/remaining **timer**, and up to two custom **buttons**. Cover, timer and buttons are each toggleable in **Settings → Discord**.
 - **Update notifications** — on launch the app checks GitHub for a newer release and shows a dismissible in-app banner when one is available, with a one-click link to the download page.
 - **Mini-player navigation** — click the cover to open fullscreen, click the title/artist to jump to the library or artist page.
 
@@ -107,9 +117,9 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 
 | Platform | File |
 | --- | --- |
-| **Linux** | `Audex-1.1.3.AppImage` (portable) or `audex-player_1.1.3_amd64.deb` |
-| **macOS** (Apple Silicon) | `Audex-1.1.3-arm64.dmg` |
-| **Windows** | `Audex.Setup.1.1.3.exe` |
+| **Linux** | `Audex-1.1.4.AppImage` (portable) or `audex-player_1.1.4_amd64.deb` |
+| **macOS** (Apple Silicon) | `Audex-1.1.4-arm64.dmg` |
+| **Windows** | `Audex.Setup.1.1.4.exe` |
 
 > **Note:** builds are unsigned.
 > - **macOS** — right-click the app → **Open**, or run `xattr -d com.apple.quarantine /Applications/Audex.app`.
@@ -121,6 +131,7 @@ None — the release builds bundle everything they need:
 
 - The YouTube downloader ships a standalone [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) binary, so no `pip install` is required.
 - The Yandex Music parser uses a Chromium build bundled with the app.
+- `ffmpeg` ships with the app (via `ffmpeg-static`), so YouTube audio extraction works without a system install.
 
 If a bundled `yt-dlp` is somehow missing, the app falls back to a system-installed one (`pip install -U yt-dlp`).
 
@@ -155,6 +166,7 @@ This builds a Linux AppImage and `.deb` into `release/`. macOS and Windows build
 - **[node-id3](https://github.com/Zazama/node-id3)** — write ID3v2 tags back to MP3 files.
 - **[Puppeteer](https://pptr.dev/)** — drives the bundled Chromium for the Yandex Music parser.
 - **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube search and download backend.
+- **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** — bundled ffmpeg binary for audio extraction and cover embedding.
 
 ---
 
