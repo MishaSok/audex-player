@@ -4356,10 +4356,10 @@ function computeReport(period) {
         const cover = coverCache[e.p] || null;
         if (e.a) artistsSet.add(e.a);
         const ak = e.a || '—';
-        const a = artistAgg.get(ak) || { name: e.a || '—', plays: 0, cover: null };
-        a.plays++; if (!a.cover) a.cover = cover;
+        const a = artistAgg.get(ak) || { name: e.a || '—', plays: 0, cover: null, path: e.p };
+        a.plays++; if (!a.cover) { a.cover = cover; a.path = e.p; }
         artistAgg.set(ak, a);
-        const t = trackAgg.get(e.p) || { title: e.n || '—', artist: e.a || '', plays: 0, cover: null };
+        const t = trackAgg.get(e.p) || { title: e.n || '—', artist: e.a || '', plays: 0, cover: null, path: e.p };
         t.plays++; if (!t.cover) t.cover = cover;
         trackAgg.set(e.p, t);
       }
@@ -4383,6 +4383,30 @@ function computeReport(period) {
     topArtists: [...artistAgg.values()].sort((a, b) => b.plays - a.plays).slice(0, 5),
     topTracks: [...trackAgg.values()].sort((a, b) => b.plays - a.plays).slice(0, 5),
   };
+}
+
+// Report items come from the play log, whose tracks are frequently files that
+// were never rendered as a visible library row — so their cover was never parsed
+// into coverCache and `computeReport` returns cover:null. Parse those covers on
+// demand here and re-render the report once they land. Keyed by path; idempotent
+// via pendingCoverLoad so repeated renders don't re-spawn parses.
+async function ensureReportCovers(r) {
+  const paths = [];
+  for (const it of [...r.topArtists, ...r.topTracks]) {
+    if (!it.cover && it.path && !coverCache[it.path] && !pendingCoverLoad.has(it.path)) {
+      paths.push(it.path);
+    }
+  }
+  if (!paths.length) return;
+  let gotAny = false;
+  await Promise.all(paths.map(async (path) => {
+    pendingCoverLoad.add(path);
+    try {
+      const md = await window.electronAPI.parseMetadata(path);
+      if (md && md.cover) { coverCache[path] = md.cover; gotAny = true; }
+    } catch (e) { /* file moved / unreadable */ }
+  }));
+  if (gotAny && currentView === 'report') renderReport();
 }
 
 function repCoverHtml(cover, label, round) {
@@ -4493,6 +4517,8 @@ function renderReport() {
     </div>`;
 
   el.querySelectorAll('.rep-tab').forEach(b => { b.onclick = () => { reportPeriod = b.dataset.period; renderReport(); }; });
+
+  ensureReportCovers(r);
 }
 
 // ── Audio events ──
