@@ -5337,7 +5337,27 @@ function renderSettings() {
   const inc = $('scale-inc');
   if (dec) dec.disabled = settings.uiScale <= UI_SCALE_STEPS[0] + 1e-6;
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
+  // Discord section starts collapsed (it's large); state persists in settings.
+  const dcSection = $('discord-section');
+  if (dcSection) dcSection.classList.toggle('is-collapsed', settings.discordCollapsed !== false);
   renderDiscord();
+}
+
+// Collapse/expand the Discord Rich Presence settings section (wired once).
+const discordToggle = $('discord-toggle');
+if (discordToggle) {
+  const toggleDiscordSection = () => {
+    const sec = $('discord-section');
+    if (!sec) return;
+    const collapsed = !sec.classList.contains('is-collapsed');
+    sec.classList.toggle('is-collapsed', collapsed);
+    settings.discordCollapsed = collapsed;
+    saveSettings();
+  };
+  discordToggle.addEventListener('click', toggleDiscordSection);
+  discordToggle.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDiscordSection(); }
+  });
 }
 
 const themeSelect = $('theme-select');

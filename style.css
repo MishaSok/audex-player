@@ -395,6 +395,18 @@ input { font-family: inherit; color: inherit; }
 .nav-section {
   margin-bottom: 22px;
 }
+/* Recents is the flexible scroll region so the bottom actions stay pinned
+   inside the sidebar (at high UI scale they'd otherwise overflow the playbar). */
+.nav-section.recents {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.nav-section.recents #recents-list {
+  overflow-y: auto;
+  min-height: 0;
+}
 .nav-label {
   font-size: 10.5px;
   color: var(--text-dim);
@@ -1485,6 +1497,11 @@ input { font-family: inherit; color: inherit; }
   gap: 8px;
 }
 .lang-glyph { font-size: 13px; font-weight: 700; letter-spacing: 0; }
+.section-label-toggle { cursor: pointer; user-select: none; }
+.section-label-toggle:hover { color: var(--text); }
+.section-chevron { margin-left: auto; transition: transform .2s ease; }
+.setting-section.is-collapsed .section-chevron { transform: rotate(-90deg); }
+.setting-section.is-collapsed #discord-body { display: none; }
 
 .setting-card {
   background: var(--panel);
