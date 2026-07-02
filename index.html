@@ -52,6 +52,11 @@
       <symbol id="i-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
       <symbol id="i-report" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="0.6"/><rect x="12.5" y="7" width="3" height="10" rx="0.6"/><rect x="18" y="13.5" width="3" height="3.5" rx="0.6"/></symbol>
       <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M4 18l5-5 4 4 3-3 4 4"/></symbol>
       <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
       <!-- Audex logomark: geometric A with 3-bar equalizer -->
       <symbol id="audex-mark" viewBox="0 0 100 100">
@@ -110,6 +115,10 @@
         <a href="#" class="nav-item" data-view="report">
           <svg class="i" width="14" height="14"><use href="#i-report"/></svg>
           <span data-i18n="nav.report">Отчёт</span>
+        </a>
+        <a href="#" class="nav-item" data-view="health">
+          <svg class="i" width="14" height="14"><use href="#i-shield"/></svg>
+          <span data-i18n="nav.health">Состояние</span>
         </a>
         <a href="#" class="nav-item nav-downloads" data-view="downloads" id="nav-downloads" hidden>
           <svg class="i" width="14" height="14"><use href="#i-download"/></svg>
@@ -184,12 +193,24 @@
           </div>
         </div>
 
+        <div class="quality-note">
+          <svg class="i" width="11" height="11"><use href="#i-activity"/></svg>
+          <span data-i18n="quality.note">Бейдж качества у каждого трека · </span><span class="quality-note-amber" data-i18n="quality.noteAmber">янтарный = подозрительная перекодировка</span>
+        </div>
+
+        <div id="library-health-filter" class="health-filter-bar" hidden>
+          <svg class="i" width="12" height="12"><use href="#i-shield"/></svg>
+          <span id="library-health-filter-label"></span>
+          <button type="button" id="library-health-filter-clear" class="health-filter-clear" data-i18n="health.clearFilter">Сбросить</button>
+        </div>
+
         <div class="track-table">
           <div class="thead">
             <div>#</div>
             <div data-i18n="table.title">Название</div>
             <div data-i18n="table.artist">Исполнитель</div>
             <div data-i18n="table.album">Альбом</div>
+            <div data-i18n="table.quality">Качество</div>
             <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
@@ -272,6 +293,7 @@
             <div data-i18n="table.title">Название</div>
             <div data-i18n="table.artist">Исполнитель</div>
             <div data-i18n="table.album">Альбом</div>
+            <div data-i18n="table.quality">Качество</div>
             <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
@@ -374,6 +396,7 @@
             <div data-i18n="table.title">Название</div>
             <div data-i18n="table.artist">Исполнитель</div>
             <div data-i18n="table.album">Альбом</div>
+            <div data-i18n="table.quality">Качество</div>
             <div class="ta-right" data-i18n="table.time">Время</div>
             <div></div>
           </div>
@@ -400,6 +423,25 @@
           </div>
         </header>
         <div id="report-content"></div>
+      </section>
+
+      <!-- Library Health-check (quality scan + transcode detector) -->
+      <section id="view-health" class="view-section">
+        <header class="topbar">
+          <div class="crumb">
+            <span class="crumb-item link" data-view="library" data-i18n="crumb.collection">Коллекция</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-item active" data-i18n="health.crumb">Состояние библиотеки</span>
+          </div>
+          <div class="health-topbar-right">
+            <span class="health-lastscan" id="health-lastscan"></span>
+            <button class="btn-primary" id="health-rescan-btn">
+              <svg class="i" width="13" height="13"><use href="#i-shield"/></svg>
+              <span data-i18n="health.rescan">Пересканировать</span>
+            </button>
+          </div>
+        </header>
+        <div id="health-content"></div>
       </section>
 
       <!-- Downloads -->
@@ -546,7 +588,7 @@
           <div class="crumb">
             <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
           </div>
-          <div class="version-tag">Audex 1.1.4</div>
+          <div class="version-tag">Audex 1.2.0</div>
         </header>
 
         <div class="settings-page">
@@ -757,7 +799,7 @@
               <div class="setting-row">
                 <div class="setting-text">
                   <div class="setting-label" data-i18n="setting.version">Версия</div>
-                  <div class="setting-desc">1.1.4 · Electron · Linux</div>
+                  <div class="setting-desc">1.2.0 · Electron · Linux</div>
                 </div>
               </div>
             </div>

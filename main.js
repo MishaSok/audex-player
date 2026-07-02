@@ -365,6 +365,59 @@ ipcMain.handle('music:scanFolder', async (event, folderPath) => {
   return scanDir(folderPath);
 });
 
+// Tier 1 quality — everything derivable from the file header at parse time
+// (no audio decoding). music-metadata's `format` block already exposes the
+// codec, true average bitrate (Xing/Info for VBR), sample rate, the LAME
+// preset via `codecProfile`, and the encoder tool. The Tier 2 spectral
+// transcode detector (in the renderer) fills in `cutoffKHz` and may upgrade
+// `tier` to 'suspicious' later. See design_handoff_track_quality/README.md.
+function buildQuality(format) {
+  if (!format) return null;
+  const codec = String(format.codec || '').toUpperCase();
+  const container = String(format.container || '').toUpperCase();
+  const both = codec + ' ' + container;
+  const lossless = !!format.lossless;
+
+  let fmt;
+  if (/FLAC/.test(both)) fmt = 'FLAC';
+  else if (/ALAC/.test(both)) fmt = 'ALAC';
+  else if (/AAC|MP4|M4A|MPEG-4/.test(both)) fmt = 'AAC';
+  else if (/VORBIS|OPUS|OGG/.test(both)) fmt = 'OGG';
+  else if (/WAV|PCM|WAVE/.test(both)) fmt = 'WAV';
+  else if (/MPEG|MP3|LAYER 3/.test(both)) fmt = 'MP3';
+  else fmt = codec || container || '—';
+
+  const bitrate = format.bitrate ? Math.round(format.bitrate / 1000) : 0;
+  const sampleRate = format.sampleRate || 0;
+  const encoder = format.tool || '';
+  const hasLame = /LAME/i.test(encoder);
+
+  // codecProfile is the LAME preset for MP3: "V0".."V9" (VBR) or "CBR"/"CVBR".
+  const profile = String(format.codecProfile || '').trim();
+  const vbrMatch = profile.match(/^V\s*([0-9])/i);
+  let mode;
+  if (lossless) mode = 'Lossless';
+  else if (vbrMatch || /VBR/i.test(profile)) mode = 'VBR';
+  else mode = 'CBR';
+
+  let preset = '';
+  if (vbrMatch) preset = '-V ' + vbrMatch[1];
+  else if (mode === 'CBR' && bitrate) preset = '-b ' + bitrate;
+
+  // Tier 1 classification (spectral analysis may later flag 'suspicious').
+  let tier;
+  const vLevel = vbrMatch ? parseInt(vbrMatch[1], 10) : null;
+  if (lossless) tier = 'lossless';
+  else if (bitrate >= 320 || vLevel === 0 || vLevel === 1) tier = 'high';
+  else if (bitrate >= 192 || (vLevel !== null && vLevel <= 4)) tier = 'good';
+  else tier = 'low';
+
+  return { format: fmt, bitrate, mode, sampleRate,
+    channels: format.numberOfChannels || 0,
+    bitsPerSample: format.bitsPerSample || 0,
+    encoder, preset, hasLame, lossless, tier, cutoffKHz: null };
+}
+
 ipcMain.handle('music:parseMetadata', async (event, filePath) => {
   try {
     const metadata = await musicMetadata.parseFile(filePath);
@@ -388,6 +441,8 @@ ipcMain.handle('music:parseMetadata', async (event, filePath) => {
       discNo: metadata.common.disk && metadata.common.disk.no ? String(metadata.common.disk.no) : '',
       comment: (metadata.common.comment && metadata.common.comment[0]) || '',
       duration: metadata.format.duration || 0,
+      quality: buildQuality(metadata.format),
+      hasCover: !!(metadata.common.picture && metadata.common.picture.length > 0),
       cover: coverBase64 ? `data:${coverFormat};base64,${coverBase64}` : null,
       path: filePath
     };
@@ -404,6 +459,8 @@ ipcMain.handle('music:parseMetadata', async (event, filePath) => {
       discNo: '',
       comment: '',
       duration: 0,
+      quality: null,
+      hasCover: false,
       cover: null,
       path: filePath
     };

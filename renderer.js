@@ -14,6 +14,8 @@ const LS = {
   queue: 'audex-dl-queue',
   wavePeaks: 'audex-wave-peaks',
   playLog: 'audex-play-log',
+  qualityCache: 'audex-quality-cache',
+  healthReport: 'audex-health-report',
 };
 
 // State
@@ -301,6 +303,46 @@ const I18N = {
     'report.mShort': 'м',
     'report.empty.title': 'Здесь появится твоя статистика',
     'report.empty.text': 'Слушай музыку — отчёт соберётся из истории прослушивания на этом устройстве.',
+    'table.quality': 'Качество',
+    'quality.kbps': 'кбит/с',
+    'quality.note': 'Бейдж качества у каждого трека · ',
+    'quality.noteAmber': 'янтарный = подозрительная перекодировка',
+    'quality.cutoffMarker': 'срез',
+    'health.khz': 'кГц',
+    'nav.health': 'Состояние',
+    'health.crumb': 'Состояние библиотеки',
+    'health.lastScan': 'Последняя проверка:',
+    'health.never': 'ещё не проверялось',
+    'health.rescan': 'Пересканировать',
+    'health.scanning': 'Проверка {n} из {m}…',
+    'health.scoreLabel': 'Здоровье коллекции',
+    'health.ok': 'в порядке',
+    'health.okLegend': 'в порядке',
+    'health.flaggedLegend': 'требуют внимания',
+    'health.transcodeTitle': 'Похоже на перекодировку',
+    'health.claimed': 'Заявлено',
+    'health.real': 'реально ≈',
+    'health.spectrumCaption': 'Спектр обрывается на {cut} кГц, хотя высокий битрейт держит частоты до ~20 кГц.{lame}',
+    'health.noLame': ' LAME-тег отсутствует.',
+    'health.issuesLabel': 'Найденные проблемы',
+    'health.show': 'Показать',
+    'health.fix': 'Починить',
+    'health.allGood': 'Проблем не найдено',
+    'health.allGoodText': 'Коллекция в отличном состоянии.',
+    'health.noData': 'Запусти проверку, чтобы оценить состояние библиотеки.',
+    'health.analyzing': 'Анализ спектра…',
+    'health.filterNote': 'Результат проверки: {label}',
+    'health.clearFilter': 'Сбросить',
+    'issue.transcode.title': 'Подозрительная перекодировка',
+    'issue.transcode.desc': 'Битрейт заявлен высоким, но спектр обрывается рано — вероятно, перекодировано из низкого качества.',
+    'issue.lowbitrate.title': 'Низкий битрейт (< 192 кбит/с)',
+    'issue.lowbitrate.desc': 'Файлы 128 кбит/с и ниже. Можно заменить на версии получше.',
+    'issue.nocover.title': 'Без обложки',
+    'issue.nocover.desc': 'Треки без встроенного изображения альбома.',
+    'issue.tags.title': 'Неполные теги',
+    'issue.tags.desc': 'Пустые поля исполнителя, альбома или года.',
+    'issue.dupes.title': 'Возможные дубликаты',
+    'issue.dupes.desc': 'Совпадают исполнитель и название при разных файлах.',
     'section.discord': 'Discord Rich Presence',
     'discord.subtitle': 'Показывайте друзьям, что вы слушаете, прямо в профиле Discord — с обложкой, таймером и кнопками для перехода к треку.',
     'discord.statusConnected': 'Подключено',
@@ -599,6 +641,46 @@ const I18N = {
     'report.mShort': 'm',
     'report.empty.title': 'Your stats will appear here',
     'report.empty.text': 'Play some music — the report builds from listening history kept on this device.',
+    'table.quality': 'Quality',
+    'quality.kbps': 'kbps',
+    'quality.note': 'A quality badge on every track · ',
+    'quality.noteAmber': 'amber = suspicious transcode',
+    'quality.cutoffMarker': 'cutoff',
+    'health.khz': 'kHz',
+    'nav.health': 'Health',
+    'health.crumb': 'Library health',
+    'health.lastScan': 'Last check:',
+    'health.never': 'not checked yet',
+    'health.rescan': 'Rescan',
+    'health.scanning': 'Checking {n} of {m}…',
+    'health.scoreLabel': 'Collection health',
+    'health.ok': 'healthy',
+    'health.okLegend': 'healthy',
+    'health.flaggedLegend': 'need attention',
+    'health.transcodeTitle': 'Looks like a transcode',
+    'health.claimed': 'Claimed',
+    'health.real': 'really ≈',
+    'health.spectrumCaption': 'The spectrum cuts off at {cut} kHz, though a real high bitrate holds frequencies up to ~20 kHz.{lame}',
+    'health.noLame': ' No LAME tag present.',
+    'health.issuesLabel': 'Issues found',
+    'health.show': 'Show',
+    'health.fix': 'Fix',
+    'health.allGood': 'No issues found',
+    'health.allGoodText': 'Your collection is in great shape.',
+    'health.noData': 'Run a check to assess your library health.',
+    'health.analyzing': 'Analyzing spectrum…',
+    'health.filterNote': 'Health filter: {label}',
+    'health.clearFilter': 'Clear',
+    'issue.transcode.title': 'Suspicious transcode',
+    'issue.transcode.desc': 'Bitrate is claimed high, but the spectrum cuts off early — likely upsampled from a low-quality source.',
+    'issue.lowbitrate.title': 'Low bitrate (< 192 kbps)',
+    'issue.lowbitrate.desc': 'Files at 128 kbps and below. Consider replacing with better versions.',
+    'issue.nocover.title': 'No cover art',
+    'issue.nocover.desc': 'Tracks with no embedded album image.',
+    'issue.tags.title': 'Incomplete tags',
+    'issue.tags.desc': 'Empty artist, album or year fields.',
+    'issue.dupes.title': 'Possible duplicates',
+    'issue.dupes.desc': 'Same artist and title across different files.',
     'section.discord': 'Discord Rich Presence',
     'discord.subtitle': 'Show friends what you are listening to right in your Discord profile — with cover art, a timer and buttons that jump to the track.',
     'discord.statusConnected': 'Connected',
@@ -897,6 +979,46 @@ const I18N = {
     'report.mShort': 'Min',
     'report.empty.title': 'Hier erscheint deine Statistik',
     'report.empty.text': 'Höre Musik — der Bericht entsteht aus dem Verlauf auf diesem Gerät.',
+    'table.quality': 'Qualität',
+    'quality.kbps': 'kbit/s',
+    'quality.note': 'Ein Qualitäts-Badge an jedem Titel · ',
+    'quality.noteAmber': 'bernstein = verdächtige Umkodierung',
+    'quality.cutoffMarker': 'Grenze',
+    'health.khz': 'kHz',
+    'nav.health': 'Zustand',
+    'health.crumb': 'Bibliothekszustand',
+    'health.lastScan': 'Letzte Prüfung:',
+    'health.never': 'noch nicht geprüft',
+    'health.rescan': 'Neu scannen',
+    'health.scanning': 'Prüfe {n} von {m}…',
+    'health.scoreLabel': 'Zustand der Sammlung',
+    'health.ok': 'in Ordnung',
+    'health.okLegend': 'in Ordnung',
+    'health.flaggedLegend': 'brauchen Aufmerksamkeit',
+    'health.transcodeTitle': 'Sieht nach Umkodierung aus',
+    'health.claimed': 'Angegeben',
+    'health.real': 'real ≈',
+    'health.spectrumCaption': 'Das Spektrum bricht bei {cut} kHz ab, obwohl eine echte hohe Bitrate Frequenzen bis ~20 kHz hält.{lame}',
+    'health.noLame': ' Kein LAME-Tag vorhanden.',
+    'health.issuesLabel': 'Gefundene Probleme',
+    'health.show': 'Anzeigen',
+    'health.fix': 'Beheben',
+    'health.allGood': 'Keine Probleme gefunden',
+    'health.allGoodText': 'Deine Sammlung ist in bestem Zustand.',
+    'health.noData': 'Starte eine Prüfung, um den Zustand zu beurteilen.',
+    'health.analyzing': 'Spektrum wird analysiert…',
+    'health.filterNote': 'Zustandsfilter: {label}',
+    'health.clearFilter': 'Zurücksetzen',
+    'issue.transcode.title': 'Verdächtige Umkodierung',
+    'issue.transcode.desc': 'Die Bitrate ist hoch angegeben, aber das Spektrum bricht früh ab — wahrscheinlich aus geringer Qualität hochgerechnet.',
+    'issue.lowbitrate.title': 'Niedrige Bitrate (< 192 kbit/s)',
+    'issue.lowbitrate.desc': 'Dateien mit 128 kbit/s und weniger. Durch bessere Versionen ersetzbar.',
+    'issue.nocover.title': 'Ohne Cover',
+    'issue.nocover.desc': 'Titel ohne eingebettetes Albumbild.',
+    'issue.tags.title': 'Unvollständige Tags',
+    'issue.tags.desc': 'Leere Felder für Interpret, Album oder Jahr.',
+    'issue.dupes.title': 'Mögliche Duplikate',
+    'issue.dupes.desc': 'Gleicher Interpret und Titel in verschiedenen Dateien.',
     'section.discord': 'Discord Rich Presence',
     'discord.subtitle': 'Zeige Freunden direkt im Discord-Profil, was du hörst — mit Cover, Timer und Buttons zum Titel.',
     'discord.statusConnected': 'Verbunden',
@@ -1195,6 +1317,46 @@ const I18N = {
     'report.mShort': 'm',
     'report.empty.title': 'Tes statistiques apparaîtront ici',
     'report.empty.text': "Écoute de la musique — le rapport se construit à partir de l'historique conservé sur cet appareil.",
+    'table.quality': 'Qualité',
+    'quality.kbps': 'kbit/s',
+    'quality.note': 'Un badge de qualité sur chaque piste · ',
+    'quality.noteAmber': 'ambre = transcodage suspect',
+    'quality.cutoffMarker': 'coupure',
+    'health.khz': 'kHz',
+    'nav.health': 'État',
+    'health.crumb': 'État de la bibliothèque',
+    'health.lastScan': 'Dernière vérification :',
+    'health.never': 'pas encore vérifié',
+    'health.rescan': 'Rescanner',
+    'health.scanning': 'Vérification {n} sur {m}…',
+    'health.scoreLabel': 'Santé de la collection',
+    'health.ok': 'en bon état',
+    'health.okLegend': 'en bon état',
+    'health.flaggedLegend': "demandent de l'attention",
+    'health.transcodeTitle': 'Ressemble à un transcodage',
+    'health.claimed': 'Annoncé',
+    'health.real': 'réel ≈',
+    'health.spectrumCaption': 'Le spectre se coupe à {cut} kHz, alors qu’un vrai débit élevé tient les fréquences jusqu’à ~20 kHz.{lame}',
+    'health.noLame': ' Aucune balise LAME présente.',
+    'health.issuesLabel': 'Problèmes détectés',
+    'health.show': 'Afficher',
+    'health.fix': 'Réparer',
+    'health.allGood': 'Aucun problème détecté',
+    'health.allGoodText': 'Votre collection est en excellent état.',
+    'health.noData': "Lance une vérification pour évaluer l'état de la bibliothèque.",
+    'health.analyzing': 'Analyse du spectre…',
+    'health.filterNote': 'Filtre d’état : {label}',
+    'health.clearFilter': 'Effacer',
+    'issue.transcode.title': 'Transcodage suspect',
+    'issue.transcode.desc': 'Le débit est annoncé élevé, mais le spectre se coupe tôt — probablement suréchantillonné depuis une source de faible qualité.',
+    'issue.lowbitrate.title': 'Faible débit (< 192 kbit/s)',
+    'issue.lowbitrate.desc': 'Fichiers à 128 kbit/s et moins. À remplacer par de meilleures versions.',
+    'issue.nocover.title': 'Sans pochette',
+    'issue.nocover.desc': 'Pistes sans image d’album intégrée.',
+    'issue.tags.title': 'Tags incomplets',
+    'issue.tags.desc': 'Champs artiste, album ou année vides.',
+    'issue.dupes.title': 'Doublons possibles',
+    'issue.dupes.desc': 'Même artiste et titre sur des fichiers différents.',
     'section.discord': 'Discord Rich Presence',
     'discord.subtitle': 'Montrez à vos amis ce que vous écoutez directement dans votre profil Discord — avec pochette, minuteur et boutons vers le morceau.',
     'discord.statusConnected': 'Connecté',
@@ -1493,6 +1655,46 @@ const I18N = {
     'report.mShort': 'хв',
     'report.empty.title': 'Тут зʼявиться твоя статистика',
     'report.empty.text': 'Слухай музику — звіт збереться з історії прослуховування на цьому пристрої.',
+    'table.quality': 'Якість',
+    'quality.kbps': 'кбіт/с',
+    'quality.note': 'Бейдж якості на кожному треку · ',
+    'quality.noteAmber': 'бурштиновий = підозра на перекодування',
+    'quality.cutoffMarker': 'зріз',
+    'health.khz': 'кГц',
+    'nav.health': 'Стан',
+    'health.crumb': 'Стан бібліотеки',
+    'health.lastScan': 'Остання перевірка:',
+    'health.never': 'ще не перевірялося',
+    'health.rescan': 'Пересканувати',
+    'health.scanning': 'Перевірка {n} з {m}…',
+    'health.scoreLabel': "Здоров'я колекції",
+    'health.ok': 'у порядку',
+    'health.okLegend': 'у порядку',
+    'health.flaggedLegend': 'потребують уваги',
+    'health.transcodeTitle': 'Схоже на перекодування',
+    'health.claimed': 'Заявлено',
+    'health.real': 'реально ≈',
+    'health.spectrumCaption': 'Спектр обривається на {cut} кГц, хоча високий бітрейт тримає частоти до ~20 кГц.{lame}',
+    'health.noLame': ' LAME-тег відсутній.',
+    'health.issuesLabel': 'Знайдені проблеми',
+    'health.show': 'Показати',
+    'health.fix': 'Виправити',
+    'health.allGood': 'Проблем не знайдено',
+    'health.allGoodText': 'Колекція у чудовому стані.',
+    'health.noData': 'Запусти перевірку, щоб оцінити стан бібліотеки.',
+    'health.analyzing': 'Аналіз спектра…',
+    'health.filterNote': 'Фільтр стану: {label}',
+    'health.clearFilter': 'Скинути',
+    'issue.transcode.title': 'Підозра на перекодування',
+    'issue.transcode.desc': 'Бітрейт заявлено високим, але спектр обривається рано — імовірно, перекодовано з низької якості.',
+    'issue.lowbitrate.title': 'Низький бітрейт (< 192 кбіт/с)',
+    'issue.lowbitrate.desc': 'Файли 128 кбіт/с і нижче. Можна замінити на кращі версії.',
+    'issue.nocover.title': 'Без обкладинки',
+    'issue.nocover.desc': 'Треки без вбудованого зображення альбому.',
+    'issue.tags.title': 'Неповні теги',
+    'issue.tags.desc': 'Порожні поля виконавця, альбому або року.',
+    'issue.dupes.title': 'Можливі дублікати',
+    'issue.dupes.desc': 'Збігаються виконавець і назва за різних файлів.',
     'section.discord': 'Discord Rich Presence',
     'discord.subtitle': 'Показуйте друзям, що ви слухаєте, прямо в профілі Discord — з обкладинкою, таймером і кнопками для переходу до треку.',
     'discord.statusConnected': 'Підключено',
@@ -2001,19 +2203,40 @@ function scheduleCoverRefresh() {
   });
 }
 async function ensureCoverFor(track) {
-  if (!track || track.cover || pendingCoverLoad.has(track.path)) return;
+  if (!track || pendingCoverLoad.has(track.path)) return;
+  const needCover = !track.cover;
+  const needQuality = track.quality === undefined || track.hasCover === undefined;
+  if (!needCover && !needQuality) return;
   pendingCoverLoad.add(track.path);
   try {
     const md = await window.electronAPI.parseMetadata(track.path);
-    if (md && md.cover) {
-      track.cover = md.cover;
-      coverCache[track.path] = md.cover;
-      scheduleCoverRefresh();
-      if (currentTrackIndex >= 0 && library[currentTrackIndex] && library[currentTrackIndex].path === track.path) {
-        updateNowPlayingUI(library[currentTrackIndex]);
+    if (md) {
+      let touched = false;
+      if (needQuality) {
+        track.quality = md.quality;
+        track.hasCover = md.hasCover;
+        touched = true;
+        scheduleLibrarySave();
       }
+      if (md.cover) {
+        track.cover = md.cover;
+        coverCache[track.path] = md.cover;
+        touched = true;
+        if (currentTrackIndex >= 0 && library[currentTrackIndex] && library[currentTrackIndex].path === track.path) {
+          updateNowPlayingUI(library[currentTrackIndex]);
+        }
+      }
+      if (touched) scheduleCoverRefresh();
     }
   } catch (e) { /* file moved / unreadable */ }
+}
+
+// Coalesce the many small library writes from lazy quality/cover backfill into
+// one localStorage write.
+let _libSaveTimer = null;
+function scheduleLibrarySave() {
+  clearTimeout(_libSaveTimer);
+  _libSaveTimer = setTimeout(() => { _libSaveTimer = null; saveLibrary(); }, 1500);
 }
 
 // ── Library track helpers ──
@@ -2069,6 +2292,7 @@ function setView(view) {
   else if (view === 'artists') renderArtists();
   else if (view === 'artist-detail') renderArtistDetail(activeArtistName);
   else if (view === 'report') renderReport();
+  else if (view === 'health') renderHealth();
   else if (view === 'settings') renderSettings();
 }
 
@@ -2083,11 +2307,19 @@ document.querySelectorAll('.nav-item').forEach(item => {
       setTimeout(() => item.classList.remove('is-pinging'), 600);
       return openPalette();
     }
-    if (item.dataset.view) setView(item.dataset.view);
+    if (item.dataset.view) {
+      // A direct click on the Library nav item shows the full library, not a
+      // lingering Health-check result filter.
+      if (item.dataset.view === 'library') clearHealthFilter();
+      setView(item.dataset.view);
+    }
   });
 });
 document.querySelectorAll('.crumb-item.link').forEach(el => {
-  el.addEventListener('click', () => setView(el.dataset.view));
+  el.addEventListener('click', () => {
+    if (el.dataset.view === 'library') clearHealthFilter();
+    setView(el.dataset.view);
+  });
 });
 
 // ── Downloads tabs ──
@@ -3102,9 +3334,534 @@ function renderRecents() {
   });
 }
 
+// ── Track quality ──
+// Two-tier quality info per track. Tier 1 (`track.quality`) is decoded from the
+// file header in main.js at parse time. Tier 2 (spectral transcode detection)
+// runs in the renderer and is cached here per path; it can upgrade a track's
+// tier to 'suspicious'. See design_handoff_track_quality/README.md.
+const QUALITY_TIER_CLASS = {
+  lossless: 'q-lossless', high: 'q-high', good: 'q-good', low: 'q-low', suspicious: 'q-suspicious',
+};
+
+let qualityCache = (() => {
+  try { return JSON.parse(localStorage.getItem(LS.qualityCache) || '{}'); }
+  catch (_) { return {}; }
+})();
+function saveQualityCache() {
+  try { localStorage.setItem(LS.qualityCache, JSON.stringify(qualityCache)); }
+  catch (e) { console.warn('quality cache save failed:', e); }
+}
+
+// Combine a track's Tier-1 header quality with any cached Tier-2 spectral result.
+function qualityFor(track) {
+  const q = track && track.quality;
+  if (!q) return null;
+  const spec = qualityCache[track.path];
+  if (!spec) return q;
+  return { ...q, cutoffKHz: spec.cutoffKHz, tier: spec.tier || q.tier,
+    claimed: spec.claimed, estReal: spec.estReal };
+}
+
+// Short label inside the badge: FLAC/ALAC/WAV keep the format; VBR shows the
+// LAME preset (V0/V1/V2…); everything else shows the bitrate number.
+function qualityBadgeLabel(q) {
+  if (q.format === 'FLAC') return 'FLAC';
+  if (q.format === 'ALAC' || q.format === 'WAV') return q.format;
+  if (q.preset && q.preset.startsWith('-V')) return 'V' + q.preset.replace('-V', '').trim();
+  return q.bitrate ? String(q.bitrate) : (q.format || '—');
+}
+
+function qualityBadgeHtml(q) {
+  if (!q) return '';
+  const cls = QUALITY_TIER_CLASS[q.tier] || 'q-good';
+  const label = escapeHtml(qualityBadgeLabel(q));
+  const warn = q.tier === 'suspicious'
+    ? `<svg class="i" width="10.5" height="10.5"><use href="#i-alert-triangle"/></svg>` : '';
+  const suffix = q.tier === 'suspicious' ? `<span class="q-badge-q">?</span>` : '';
+  const bits = q.bitrate ? `${q.bitrate} ${tr('quality.kbps')} · ` : '';
+  const title = escapeHtml(`${q.format} · ${bits}${q.mode}`);
+  return `<span class="q-badge ${cls}" title="${title}">${warn}${label}${suffix}</span>`;
+}
+
+// ── Track quality: spectral analysis (Tier 2) ──
+// The transcode detector. Decodes a window of PCM at full rate, runs an FFT
+// over overlapping Hann-windowed frames, averages the magnitude spectra, and
+// finds the frequency where energy drops into the noise floor. A file that
+// *claims* 320 kbps but whose spectrum dies at ~16 kHz was almost certainly
+// upsampled from a ~128 kbps source. See design_handoff_track_quality/README.md.
+const SPEC_FFT = 4096;                 // FFT window size (power of two)
+const SPEC_SR = 44100;                 // force decode sample rate → Nyquist 22.05 kHz
+const SPEC_WIN_SEC = 25;               // analyse a ~25 s loud middle section
+const SPEC_POINTS = 128;               // spectrum points stored for the graph
+
+let specDecodeCtx = null;
+function getSpecCtx() {
+  if (!specDecodeCtx) {
+    const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Ctx) throw new Error('OfflineAudioContext unavailable');
+    specDecodeCtx = new Ctx(1, 1, SPEC_SR);
+  }
+  return specDecodeCtx;
+}
+
+// In-place iterative radix-2 Cooley–Tukey FFT.
+function fftRadix2(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      const tr = re[i]; re[i] = re[j]; re[j] = tr;
+      const ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len;
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    const half = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < half; k++) {
+        const a = i + k, b = a + half;
+        const xr = cr * re[b] - ci * im[b];
+        const xi = cr * im[b] + ci * re[b];
+        re[b] = re[a] - xr; im[b] = im[a] - xi;
+        re[a] += xr; im[a] += xi;
+        const ncr = cr * wr - ci * wi;
+        ci = cr * wi + ci * wr; cr = ncr;
+      }
+    }
+  }
+}
+
+// Estimate the true source bitrate from the spectral cutoff (README table).
+function estBitrateFromCutoff(cutoffKHz) {
+  if (cutoffKHz <= 16.5) return 128;
+  if (cutoffKHz <= 18) return 192;
+  if (cutoffKHz <= 19.5) return 256;
+  return 320;
+}
+
+// Analyse one track. Returns { cutoffKHz, tier, claimed?, estReal?, spectrum? }
+// or null if it couldn't be decoded. Does not touch the cache; caller stores it.
+async function analyzeSpectrum(track) {
+  if (!window.electronAPI || !window.electronAPI.readAudioFile) return null;
+  const q = track.quality;
+  if (!q) return null;
+  const bytes = await window.electronAPI.readAudioFile(track.path);
+  const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  const buf = await getSpecCtx().decodeAudioData(ab);
+  const sr = buf.sampleRate;
+  const data = buf.getChannelData(0);
+  const total = data.length;
+  if (total < SPEC_FFT) return null;
+
+  const N = SPEC_FFT, half = N >> 1;
+  const hann = new Float64Array(N);
+  for (let i = 0; i < N; i++) hann[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (N - 1));
+
+  const winLen = Math.min(total, Math.floor(SPEC_WIN_SEC * sr));
+  const start = Math.max(0, Math.floor((total - winLen) / 2));
+  const end = Math.min(total, start + winLen);
+  const hop = N >> 1; // 50% overlap
+
+  const mag = new Float64Array(half);
+  const re = new Float64Array(N), im = new Float64Array(N);
+  let frames = 0;
+  for (let off = start; off + N <= end; off += hop) {
+    for (let i = 0; i < N; i++) { re[i] = data[off + i] * hann[i]; im[i] = 0; }
+    fftRadix2(re, im);
+    for (let k = 0; k < half; k++) mag[k] += Math.hypot(re[k], im[k]);
+    frames++;
+  }
+  if (frames === 0) return null;
+  for (let k = 0; k < half; k++) mag[k] /= frames;
+
+  // dB spectrum, smoothed over a few bins to suppress lone spikes.
+  const eps = 1e-9;
+  const db = new Float64Array(half);
+  for (let k = 0; k < half; k++) db[k] = 20 * Math.log10(mag[k] + eps);
+  const sm = new Float64Array(half);
+  for (let k = 0; k < half; k++) {
+    let s = 0, c = 0;
+    for (let d = -2; d <= 2; d++) { const j = k + d; if (j >= 0 && j < half) { s += db[j]; c++; } }
+    sm[k] = s / c;
+  }
+
+  // Reference level = mean dB in the 300 Hz .. 2 kHz band.
+  const binHz = sr / N;
+  const lo = Math.max(1, Math.floor(300 / binHz));
+  const hi = Math.min(half - 1, Math.floor(2000 / binHz));
+  let ref = 0, rc = 0;
+  for (let k = lo; k <= hi; k++) { ref += sm[k]; rc++; }
+  ref = rc ? ref / rc : 0;
+  const thr = ref - 40; // within ~40 dB of the reference = still real signal
+
+  // Walk down from Nyquist; cutoff = highest freq with 3 consecutive bins above thr.
+  let cutBin = half - 1;
+  for (let k = half - 1; k >= 2; k--) {
+    if (sm[k] > thr && sm[k - 1] > thr && sm[k - 2] > thr) { cutBin = k; break; }
+  }
+  const nyquist = sr / 2;
+  const cutoffKHz = Math.min(nyquist, cutBin * binHz) / 1000;
+
+  // Downsampled spectrum (0..1) for the graph, normalised to the reference peak.
+  const spectrum = new Array(SPEC_POINTS);
+  const peak = Math.max(...mag) || 1;
+  for (let p = 0; p < SPEC_POINTS; p++) {
+    const k = Math.min(half - 1, Math.floor((p / (SPEC_POINTS - 1)) * (half - 1)));
+    spectrum[p] = Math.round(Math.min(1, mag[k] / peak) * 1000) / 1000;
+  }
+
+  // Classify.
+  const roundCut = Math.round(cutoffKHz * 10) / 10;
+  const result = { cutoffKHz: roundCut, tier: q.tier, analyzedAt: Date.now() };
+  const claimedHigh = q.lossless || q.bitrate >= 256;
+  if (claimedHigh && roundCut <= 16.6) {
+    result.tier = 'suspicious';
+    result.claimed = q.lossless ? q.bitrate : q.bitrate;
+    result.estReal = estBitrateFromCutoff(roundCut);
+    result.spectrum = spectrum; // keep the real curve for the inspector graph
+  }
+  return result;
+}
+
+// ── Health-check ──
+// Library-scanning dashboard. Cheap issues (bitrate, missing cover, incomplete
+// tags, duplicates) are computed instantly from Tier-1 metadata every render;
+// the transcode count comes from the cached Tier-2 spectral verdicts and is
+// (re)populated by the on-demand "Пересканировать" scan.
+let healthReport = (() => {
+  try { return JSON.parse(localStorage.getItem(LS.healthReport) || 'null'); }
+  catch (_) { return null; }
+})();
+let healthScanning = false;
+let healthFilterPaths = null;   // Set<path> when the library is filtered to a result
+let healthFilterLabel = '';
+
+function saveHealthReport() {
+  try { localStorage.setItem(LS.healthReport, JSON.stringify(healthReport)); }
+  catch (e) { console.warn('health report save failed:', e); }
+}
+
+function normDupKey(t) {
+  return `${(t.artist || '').trim().toLowerCase()}|${(t.title || '').trim().toLowerCase()}`;
+}
+
+// Compute the five issue buckets from the current library + spectral cache.
+function computeHealthIssues() {
+  const unknownArtist = tr('label.unknownArtist');
+  const transcode = [], lowbitrate = [], nocover = [], tags = [], dupes = [];
+  const dupMap = new Map();
+  for (const t of library) {
+    const q = qualityFor(t);
+    if (q && q.tier === 'suspicious') transcode.push(t.path);
+    if (q && !q.lossless && q.bitrate > 0 && q.bitrate < 192) lowbitrate.push(t.path);
+    // Only count a missing cover when we actually know the file has none
+    // (hasCover backfilled). Unknown (pre-scan) tracks aren't flagged.
+    if (typeof t.hasCover === 'boolean' && !t.hasCover && !coverCache[t.path]) nocover.push(t.path);
+    const artistBad = !t.artist || t.artist === 'Unknown Artist' || t.artist === unknownArtist;
+    const albumBad = !t.album || t.album === 'Unknown Album';
+    if (artistBad || albumBad || !t.year) tags.push(t.path);
+    const key = normDupKey(t);
+    if (!dupMap.has(key)) dupMap.set(key, []);
+    dupMap.get(key).push(t.path);
+  }
+  for (const paths of dupMap.values()) {
+    if (paths.length >= 2) dupes.push(...paths);
+  }
+  return [
+    { id: 'transcode', tone: 'alert', icon: 'i-alert-triangle', paths: transcode },
+    { id: 'lowbitrate', tone: 'warn', icon: 'i-activity', paths: lowbitrate },
+    { id: 'nocover', tone: 'warn', icon: 'i-image', paths: nocover },
+    { id: 'tags', tone: 'warn', icon: 'i-edit', paths: tags },
+    { id: 'dupes', tone: 'neutral', icon: 'i-copy', paths: dupes },
+  ];
+}
+
+// SVG area chart of the frequency spectrum. Feeds on a real spectrum (0..1
+// array) when available, else synthesises the envelope from the cutoff.
+function buildSpectrumSvg({ spectrum, cutoffKHz = 20, suspicious = false, width = 296, height = 130 }) {
+  const nyq = SPEC_SR / 2000;          // ~22.05 kHz on the X axis
+  const pad = { l: 6, r: 6, t: 8, b: 20 };
+  const w = width - pad.l - pad.r;
+  const h = height - pad.t - pad.b;
+  const N = SPEC_POINTS - 1;
+  const accent = suspicious ? '#e8a045' : '#8fd6c4';
+  const gid = 'spec-' + (suspicious ? 's' : 'h');
+
+  // Deterministic jitter so the synthetic fallback isn't a dead-flat line.
+  let seed = Math.round(cutoffKHz * 97) >>> 0;
+  const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const f = (i / N) * nyq;
+    let e;
+    if (spectrum && spectrum.length) {
+      e = spectrum[Math.min(spectrum.length - 1, i)];
+    } else {
+      e = Math.pow(1 - f / (nyq + 4), 0.75) * (0.72 + 0.28 * rand());
+      if (f > cutoffKHz) {
+        const over = f - cutoffKHz;
+        e *= suspicious ? Math.exp(-over * 4.5) : Math.exp(-over * 1.1);
+        e = Math.max(e, 0.02 + 0.015 * rand());
+      }
+    }
+    const x = pad.l + (f / nyq) * w;
+    const y = pad.t + h - Math.max(0.015, Math.min(1, e)) * h;
+    pts.push([x, y]);
+  }
+
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const area = `${line} L${(pad.l + w).toFixed(1)},${pad.t + h} L${pad.l},${pad.t + h} Z`;
+  const cutX = pad.l + (cutoffKHz / nyq) * w;
+  const ticks = [0, 5, 10, 15, 20];
+  const grid = ticks.map(k => {
+    const x = pad.l + (k / nyq) * w;
+    return `<line x1="${x.toFixed(1)}" y1="${pad.t}" x2="${x.toFixed(1)}" y2="${pad.t + h}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+  }).join('');
+  const axis = ticks.map(k => {
+    const x = pad.l + (k / nyq) * w;
+    return `<text x="${x.toFixed(1)}" y="${height - 6}" fill="var(--text-faint)" font-size="9.5" font-family="ui-monospace, monospace" text-anchor="middle">${k}</text>`;
+  }).join('');
+  const unit = tr('health.khz');
+  const marker = suspicious ? `
+    <line x1="${cutX.toFixed(1)}" y1="${pad.t}" x2="${cutX.toFixed(1)}" y2="${pad.t + h}" stroke="#e8a045" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <rect x="${(cutX + 4).toFixed(1)}" y="${pad.t + 2}" width="88" height="18" rx="4" fill="rgba(232,160,69,0.15)"/>
+    <text x="${(cutX + 10).toFixed(1)}" y="${pad.t + 14.5}" fill="#e8a045" font-size="10.5" font-family="ui-monospace, monospace" font-weight="600">${escapeHtml(tr('quality.cutoffMarker'))} ${cutoffKHz} ${escapeHtml(unit)}</text>` : '';
+
+  return `<svg class="spectrum" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${accent}" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="${accent}" stop-opacity="0.02"/>
+    </linearGradient></defs>
+    ${grid}
+    <path d="${area}" fill="url(#${gid})"/>
+    <path d="${line}" fill="none" stroke="${accent}" stroke-width="1.5" stroke-linejoin="round"/>
+    ${marker}
+    <text x="${(pad.l + w).toFixed(1)}" y="${height - 6}" fill="var(--text-faint)" font-size="9.5" font-family="ui-monospace, monospace" text-anchor="end">${escapeHtml(unit)}</text>
+    ${axis}
+  </svg>`;
+}
+
+function firstSuspicious() {
+  for (const t of library) {
+    const q = qualityFor(t);
+    if (q && q.tier === 'suspicious') return { track: t, q };
+  }
+  return null;
+}
+
+function renderHealth() {
+  const el = $('health-content');
+  if (!el) return;
+  // Topbar bits.
+  const lastEl = $('health-lastscan');
+  if (lastEl) {
+    if (healthScanning) lastEl.textContent = '';
+    else if (healthReport && healthReport.lastScan) {
+      lastEl.textContent = `${tr('health.lastScan')} ${formatScanDate(healthReport.lastScan)}`;
+    } else lastEl.textContent = `${tr('health.lastScan')} ${tr('health.never')}`;
+  }
+
+  if (library.length === 0) {
+    el.innerHTML = `<div class="health-nodata">${escapeHtml(tr('health.noData'))}</div>`;
+    return;
+  }
+
+  const issues = computeHealthIssues();
+  const total = library.length;
+  const flaggedSet = new Set();
+  issues.forEach(i => i.paths.forEach(p => flaggedSet.add(p)));
+  const flagged = flaggedSet.size;
+  const ok = Math.max(0, total - flagged);
+  const okPct = total ? Math.round((ok / total) * 100) : 100;
+
+  // Featured inspector: the first suspicious track, else a healthy/prompt card.
+  const sus = firstSuspicious();
+  let inspector;
+  if (sus) {
+    const spec = qualityCache[sus.track.path] || {};
+    const claimed = sus.q.claimed || sus.q.bitrate;
+    const estReal = sus.q.estReal || estBitrateFromCutoff(sus.q.cutoffKHz || 16);
+    const cut = sus.q.cutoffKHz != null ? sus.q.cutoffKHz : 16;
+    const lame = sus.q.hasLame ? '' : tr('health.noLame');
+    inspector = `
+      <div class="health-inspector">
+        <div class="health-inspector-head">
+          <svg class="i" width="14" height="14"><use href="#i-alert-triangle"/></svg>
+          <span>${escapeHtml(tr('health.transcodeTitle'))}</span>
+        </div>
+        <div class="health-inspector-track">${escapeHtml(sus.track.title)} — ${escapeHtml(sus.track.artist)}</div>
+        <div class="health-inspector-nums">${escapeHtml(tr('health.claimed'))} ${claimed} ${tr('quality.kbps')} · ${escapeHtml(tr('health.real'))} ${estReal} ${tr('quality.kbps')}</div>
+        ${buildSpectrumSvg({ spectrum: spec.spectrum, cutoffKHz: cut, suspicious: true })}
+        <div class="health-inspector-caption">${escapeHtml(tr('health.spectrumCaption', { cut, lame })).replace(String(cut), `<b>${cut}</b>`)}</div>
+      </div>`;
+  } else {
+    const scanned = healthReport && healthReport.lastScan;
+    inspector = `
+      <div class="health-inspector" style="border-color:var(--border-strong)">
+        <div class="health-inspector-head" style="color:var(--text-strong)">
+          <svg class="i" width="14" height="14" style="color:#8fd6c4"><use href="#i-shield"/></svg>
+          <span>${escapeHtml(scanned ? tr('health.allGood') : tr('health.transcodeTitle'))}</span>
+        </div>
+        ${buildSpectrumSvg({ cutoffKHz: 20.5, suspicious: false })}
+        <div class="health-inspector-caption">${escapeHtml(scanned ? tr('health.allGoodText') : tr('health.noData'))}</div>
+      </div>`;
+  }
+
+  const issuesHtml = issues.map(iss => {
+    const count = iss.paths.length;
+    const fixable = iss.id === 'tags' || iss.id === 'nocover';
+    const btn = fixable
+      ? `<svg class="i" width="11" height="11"><use href="#i-sparkle"/></svg> ${escapeHtml(tr('health.fix'))}`
+      : escapeHtml(tr('health.show'));
+    return `
+      <div class="health-issue tone-${iss.tone}" data-issue="${iss.id}" ${count === 0 ? 'style="opacity:0.5"' : ''}>
+        <div class="health-issue-icon"><svg class="i" width="15" height="15"><use href="#${iss.icon}"/></svg></div>
+        <div class="health-issue-body">
+          <div class="health-issue-top">
+            <span class="health-issue-title">${escapeHtml(tr('issue.' + iss.id + '.title'))}</span>
+            <span class="health-issue-count">${count}</span>
+          </div>
+          <div class="health-issue-desc">${escapeHtml(tr('issue.' + iss.id + '.desc'))}</div>
+        </div>
+        <button class="health-issue-btn" data-issue-action="${iss.id}" ${count === 0 ? 'disabled style="opacity:0.4;cursor:default"' : ''}>${btn}</button>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="health-grid">
+      <div class="health-left">
+        <div class="health-score">
+          <div class="health-score-label">${escapeHtml(tr('health.scoreLabel'))}</div>
+          <div class="health-score-big">
+            <span class="health-score-pct">${okPct}%</span>
+            <span class="health-score-cap">${escapeHtml(tr('health.ok'))}</span>
+          </div>
+          <div class="health-bar">
+            <div class="health-bar-ok" style="width:${okPct}%"></div>
+            <div class="health-bar-flag"></div>
+          </div>
+          <div class="health-legend">
+            <span><span class="dot-ok">●</span> ${ok} ${escapeHtml(tr('health.okLegend'))}</span>
+            <span><span class="dot-flag">●</span> ${flagged} ${escapeHtml(tr('health.flaggedLegend'))}</span>
+          </div>
+        </div>
+        ${inspector}
+      </div>
+      <div class="health-issues">
+        <div class="health-issues-label">${escapeHtml(tr('health.issuesLabel'))}</div>
+        ${issuesHtml}
+      </div>
+    </div>`;
+
+  // Wire issue action buttons.
+  el.querySelectorAll('[data-issue-action]').forEach(btn => {
+    if (btn.disabled) return;
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.issueAction;
+      const iss = issues.find(x => x.id === id);
+      if (!iss || iss.paths.length === 0) return;
+      const fixable = id === 'tags' || id === 'nocover';
+      applyHealthFilter(iss.paths, tr('issue.' + id + '.title'));
+      if (fixable && iss.paths[0]) openMetadataEditor(iss.paths[0]);
+    });
+  });
+}
+
+function formatScanDate(ts) {
+  try {
+    const d = new Date(ts);
+    const today = new Date();
+    const sameDay = d.toDateString() === today.toDateString();
+    const time = d.toLocaleTimeString(currentLang, { hour: '2-digit', minute: '2-digit' });
+    if (sameDay) return `${tr('report.today').toLowerCase()}, ${time}`;
+    return `${d.toLocaleDateString(currentLang)}, ${time}`;
+  } catch (_) { return ''; }
+}
+
+// Filter the library view to a set of paths (from a Health-check issue).
+function applyHealthFilter(paths, label) {
+  healthFilterPaths = new Set(paths);
+  healthFilterLabel = label || '';
+  setView('library');
+}
+function clearHealthFilter() {
+  healthFilterPaths = null;
+  healthFilterLabel = '';
+  const bar = $('library-health-filter');
+  if (bar) bar.hidden = true;
+}
+function updateHealthFilterBar() {
+  const bar = $('library-health-filter');
+  if (!bar) return;
+  if (healthFilterPaths) {
+    bar.hidden = false;
+    const lbl = $('library-health-filter-label');
+    if (lbl) lbl.textContent = tr('health.filterNote', { label: healthFilterLabel });
+  } else {
+    bar.hidden = true;
+  }
+}
+
+// On-demand full scan: refresh Tier 1 (cover/tags/bitrate) then run Tier 2
+// spectral analysis on every track, reporting progress on the button.
+async function runHealthScan() {
+  if (healthScanning || library.length === 0) return;
+  healthScanning = true;
+  const btn = $('health-rescan-btn');
+  const label = btn ? btn.querySelector('span') : null;
+  const origLabel = label ? label.textContent : '';
+  if (btn) btn.classList.add('is-scanning');
+
+  const snapshot = library.slice();
+  let done = 0;
+  for (const track of snapshot) {
+    done++;
+    if (label) label.textContent = tr('health.scanning', { n: done, m: snapshot.length });
+    // Refresh Tier 1 so cover/tag/bitrate issues reflect the file on disk.
+    try {
+      const fresh = await window.electronAPI.parseMetadata(track.path);
+      if (fresh) {
+        const live = trackByPath(track.path);
+        if (live) {
+          live.quality = fresh.quality;
+          live.hasCover = fresh.hasCover;
+          if (fresh.cover) coverCache[track.path] = fresh.cover;
+        }
+      }
+    } catch (_) { /* file may be gone; skip */ }
+    // Tier 2 spectral.
+    try {
+      const live = trackByPath(track.path);
+      if (live && live.quality) {
+        const res = await analyzeSpectrum(live);
+        if (res) { qualityCache[track.path] = res; }
+      }
+    } catch (e) { console.warn('spectral analysis failed for', track.path, e); }
+    // Yield so the UI can paint the progress label.
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  saveQualityCache();
+  saveLibrary();
+  healthReport = { lastScan: Date.now(), total: library.length };
+  saveHealthReport();
+  healthScanning = false;
+  if (btn) { btn.classList.remove('is-scanning'); }
+  if (label) label.textContent = origLabel || tr('health.rescan');
+  refreshCurrentViewRows();
+  if (currentView === 'health') renderHealth();
+}
+
 // ── Render: track row ──
 function renderTrackRow(track, displayIndex, queue) {
-  if (!track.cover) ensureCoverFor(track);
+  // Backfill covers and (for libraries saved before this feature) Tier-1 quality
+  // lazily as rows scroll into view.
+  if (!track.cover || track.quality === undefined) ensureCoverFor(track);
   const realIndex = trackIndexByPath(track.path);
   const isPlayingRow = currentTrackIndex >= 0
     && library[currentTrackIndex]
@@ -3124,6 +3881,7 @@ function renderTrackRow(track, displayIndex, queue) {
     </div>
     <div class="trow-muted">${escapeHtml(track.artist)}</div>
     <div class="trow-muted">${escapeHtml(track.album)}</div>
+    <div class="trow-quality">${qualityBadgeHtml(qualityFor(track))}</div>
     <div class="trow-dur">${formatTime(track.duration)}</div>
     <div class="trow-more"><svg class="i" width="13" height="13"><use href="#i-more"/></svg></div>
   `;
@@ -3145,18 +3903,24 @@ function renderTrackRow(track, displayIndex, queue) {
 // ── Render: library ──
 function currentLibraryTracks() {
   const q = ($('library-search').value || '').trim().toLowerCase();
+  // A Health-check result filter narrows the library to a specific set of files,
+  // preserving library order; a search box query narrows within it.
+  const base = healthFilterPaths
+    ? library.filter(t => healthFilterPaths.has(t.path))
+    : sortedFilteredLibrary();
   if (q) {
-    return library.filter(t =>
+    return base.filter(t =>
       t.title.toLowerCase().includes(q) ||
       t.artist.toLowerCase().includes(q) ||
       t.album.toLowerCase().includes(q));
   }
-  return sortedFilteredLibrary();
+  return base;
 }
 
 function renderLibrary() {
   const list = $('library-list');
   const empty = $('library-empty');
+  updateHealthFilterBar();
   const tracks = currentLibraryTracks();
   $('library-count-label').textContent = `${library.length} ${pluralTracks(library.length)}`;
   if (library.length === 0) {
@@ -3943,6 +4707,17 @@ $('btn-add-files').addEventListener('click', async () => {
   if (!paths || paths.length === 0) return;
   await importPaths(paths);
 });
+
+// Health-check controls.
+{
+  const rescanBtn = $('health-rescan-btn');
+  if (rescanBtn) rescanBtn.addEventListener('click', () => runHealthScan());
+  const clearBtn = $('library-health-filter-clear');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    clearHealthFilter();
+    if (currentView === 'library') renderLibrary();
+  });
+}
 
 async function importPaths(paths) {
   let added = 0;
