@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   getDownloadsDir: (targetDir) => ipcRenderer.invoke('downloads:getDir', { targetDir }),
   yandexParse: (payload) => ipcRenderer.invoke('yandex:parsePlaylist', payload),
+  ytMusicParse: (payload) => ipcRenderer.invoke('downloads:ytMusicParse', payload),
   onYandexParseProgress: (cb) => {
     const listener = (_e, data) => cb(data);
     ipcRenderer.on('yandex:parseProgress', listener);

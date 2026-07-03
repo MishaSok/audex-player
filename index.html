@@ -112,11 +112,11 @@
           <span data-i18n="nav.favorites">Избранное</span>
           <span class="nav-meta" id="count-favorites">0</span>
         </a>
-        <a href="#" class="nav-item" data-view="report">
+        <a href="#" class="nav-item" data-view="report" id="nav-report" hidden>
           <svg class="i" width="14" height="14"><use href="#i-report"/></svg>
           <span data-i18n="nav.report">Отчёт</span>
         </a>
-        <a href="#" class="nav-item" data-view="health">
+        <a href="#" class="nav-item" data-view="health" id="nav-health" hidden>
           <svg class="i" width="14" height="14"><use href="#i-shield"/></svg>
           <span data-i18n="nav.health">Состояние</span>
         </a>
@@ -508,6 +508,7 @@
         <div class="dl-pane" data-dl-pane="parsing" hidden>
           <div class="dl-subtabs" role="tablist">
             <button type="button" class="dl-subtab is-active" data-dl-subtab="yandex" role="tab" aria-selected="true" data-i18n="downloads.parsing.subtab.yandex">Яндекс.Музыка</button>
+            <button type="button" class="dl-subtab" data-dl-subtab="ytmusic" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.ytmusic">YouTube Music</button>
           </div>
 
           <div class="dl-subpane" data-dl-subpane="yandex">
@@ -549,6 +550,49 @@
               <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-link"/></svg></div>
               <div class="empty-title-lg" data-i18n="downloads.parsing.idle.title">Парсинг Яндекс.Музыки</div>
               <div class="empty-text" data-i18n="downloads.parsing.idle.text">Вставьте ссылку на плейлист или альбом из «Яндекс.Музыки». Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.</div>
+            </div>
+          </div>
+
+          <div class="dl-subpane" data-dl-subpane="ytmusic" hidden>
+            <div class="dl-search">
+              <div class="dl-search-row">
+                <label class="dl-search-field" for="dl-ytm-url">
+                  <svg class="i" width="13" height="13"><use href="#i-link"/></svg>
+                  <input type="text" id="dl-ytm-url" class="dl-search-input" data-i18n-placeholder="downloads.ytm.urlPlaceholder" placeholder="https://music.youtube.com/playlist?list=…">
+                </label>
+                <button type="button" id="dl-ytm-parse-btn" class="dl-search-btn">
+                  <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
+                  <span data-i18n="downloads.parsing.start">Парсить</span>
+                </button>
+              </div>
+              <div class="dl-search-hint" data-i18n="downloads.ytm.hint">Ссылка на альбом, сингл или исполнителя из YouTube Music. Логин и браузер не нужны.</div>
+            </div>
+
+            <div id="dl-ytm-status" class="dl-status" hidden></div>
+
+            <button type="button" id="dl-ytm-queue-all" class="dl-search-btn dl-search-btn-secondary dl-ym-queue-all" hidden>
+              <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+              <span data-i18n="downloads.queue.addAll">Все треки в очередь</span>
+            </button>
+
+            <div id="dl-ytm-results" class="dl-results" hidden>
+              <div class="dl-results-head dl-results-head-ym dl-results-head-ytm">
+                <div class="dl-col-num">#</div>
+                <div class="dl-col-cover"></div>
+                <div class="dl-col-artist" data-i18n="downloads.parsing.col.artist">Исполнитель</div>
+                <div class="dl-col-title" data-i18n="downloads.parsing.col.title">Название</div>
+                <div class="dl-col-duration" data-i18n="downloads.parsing.col.duration">Длит.</div>
+                <div class="dl-col-action"></div>
+              </div>
+              <div id="dl-ytm-rows" class="dl-results-body"></div>
+            </div>
+
+            <div id="dl-ytm-tag-note" class="dl-tag-note" hidden data-i18n="downloads.yt.tagNote">После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.</div>
+
+            <div id="dl-ytm-empty" class="empty-block show">
+              <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-link"/></svg></div>
+              <div class="empty-title-lg" data-i18n="downloads.ytm.idle.title">Парсинг YouTube Music</div>
+              <div class="empty-text" data-i18n="downloads.ytm.idle.text">Вставьте ссылку на альбом, сингл или страницу исполнителя из YouTube Music. Приложение соберёт список треков, и вы сможете скачать любой одним кликом.</div>
             </div>
           </div>
         </div>
@@ -681,6 +725,20 @@
                   <div class="setting-desc" data-i18n="setting.scanSubdirsDesc">Учитывать вложенные директории при индексации.</div>
                 </div>
                 <button class="toggle" data-setting="scan-subdirs"><div class="toggle-knob"></div></button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-text">
+                  <div class="setting-label" data-i18n="setting.healthCheck">Проверка качества (Health-check)</div>
+                  <div class="setting-desc" data-i18n="setting.healthCheckDesc">Раздел «Состояние библиотеки» и столбец «Качество» в списках треков. Выключено — колонка и раздел скрыты полностью.</div>
+                </div>
+                <button class="toggle" data-setting="health-check"><div class="toggle-knob"></div></button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-text">
+                  <div class="setting-label" data-i18n="setting.reports">Отчёт о прослушивании</div>
+                  <div class="setting-desc" data-i18n="setting.reportsDesc">Раздел «Отчёт» со статистикой прослушивания. Статистика собирается всегда, даже когда раздел скрыт.</div>
+                </div>
+                <button class="toggle" data-setting="reports"><div class="toggle-knob"></div></button>
               </div>
             </div>
           </section>

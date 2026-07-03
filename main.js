@@ -101,6 +101,9 @@ function createWindow() {
     }
   });
 
+  // Remove the application menu entirely so Alt / Shift+Alt can't reveal the
+  // (File/Edit/View/Window) menu bar. autoHideMenuBar only hides it until Alt.
+  Menu.setApplicationMenu(null);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.autoHideMenuBar = true;
 
@@ -781,6 +784,100 @@ ipcMain.handle('downloads:ytSearch', async (event, query, count) => {
     return { success: false, error: (stderr.trim().split('\n').pop() || 'yt-dlp error').slice(0, 300) };
   }
   return { success: true, results };
+});
+
+// ── YouTube Music parser ──────────────────────────────────────────────────────
+// Enumerates an album / single / artist page on music.youtube.com into a flat
+// track list via yt-dlp's --flat-playlist. Unlike the Yandex parser this needs
+// no browser/login/captcha: yt-dlp's youtube:tab extractor reads these URLs
+// directly. Downloading each track reuses the existing downloads:ytDownload
+// handler (by video id), so the MP3 gets its thumbnail + tags embedded just like
+// the YouTube search downloader. Flat mode keeps it fast on large artist pages at
+// the cost of sparse per-track artist data — the embedded tags fill that in.
+ipcMain.handle('downloads:ytMusicParse', async (event, payload) => {
+  const url = String((payload && payload.url) || '').trim();
+  if (!url) return { success: false, error: 'No URL' };
+  const isYtUrl = /^https?:\/\/([\w-]+\.)*youtube\.com\//i.test(url) || /^https?:\/\/youtu\.be\//i.test(url);
+  if (!isYtUrl) return { success: false, error: 'Not a YouTube / YouTube Music URL' };
+  const args = [
+    '--flat-playlist',
+    '--dump-json',
+    '--no-warnings',
+    '--ignore-errors',
+    '--socket-timeout', '20',
+    url,
+  ];
+  const { stdout, stderr, spawnError, killed } = await runYtDlp(args, { timeoutMs: 120000 });
+  if (spawnError) return { success: false, error: 'yt-dlp not found. Install it: pip install -U yt-dlp' };
+  if (killed) return { success: false, error: 'Timed out while reading the page.' };
+
+  const lines = stdout.split('\n').map(l => l.trim()).filter(Boolean);
+  const tracks = [];
+  let playlistTitle = '';
+  // The playlist uploader can be trusted as the track artist only for an artist's
+  // own channel/topic page — NOT for user-curated playlists, where the uploader is
+  // whoever built the playlist (e.g. "Adrian"), not the performer. Auto-generated
+  // album/single releases (OLAK5uy_… list ids) are handled per-entry below.
+  const urlListId = (String(url).match(/[?&]list=([^&#]+)/) || [])[1] || '';
+  const isArtistPage = /\/channel\/|\/@|\/browse\/(UC|MPAD)/i.test(url);
+  for (const line of lines) {
+    let j;
+    try { j = JSON.parse(line); } catch (_) { continue; }
+    if (!j || !j.id) continue;
+    // Some artist pages list nested playlists among the entries — keep only tracks.
+    if (j._type === 'playlist') continue;
+    // Bare channel URLs also surface Shorts (no duration, not music) — skip them.
+    const entryUrl = j.url || j.webpage_url || '';
+    if (/\/shorts\//i.test(entryUrl)) continue;
+    if (!playlistTitle) playlistTitle = j.playlist_title || j.playlist || '';
+
+    let title = j.title || '';
+    let artist = '';
+    if (Array.isArray(j.artists) && j.artists.length) artist = j.artists.filter(Boolean).join(', ');
+    else artist = j.channel || j.uploader || j.artist || '';
+    // In --flat-playlist mode album/single/artist pages give no per-track artist,
+    // but there the playlist-level uploader/channel *is* the release artist. Use it
+    // only for releases (OLAK5uy_… list ids) and artist pages — never for
+    // user-curated playlists, where it would wrongly show the playlist's owner.
+    if (!artist) {
+      const listId = urlListId || j.playlist_id || '';
+      const isRelease = /^OLAK5uy_/i.test(listId);
+      if (isRelease || isArtistPage) artist = j.playlist_uploader || j.playlist_channel || '';
+    }
+    artist = artist.replace(/\s*-\s*topic\s*$/i, '').trim(); // strip auto-channel " - Topic"
+    // Last resort: recover an artist from a "Artist - Title" title (used for bare
+    // channel feeds). Only when nothing above worked, to avoid mis-splitting titles
+    // like "Song - Radio Edit" when we already know the real artist.
+    if (!artist && title.includes(' - ')) {
+      const parts = title.split(' - ');
+      artist = parts.shift().trim();
+      title = parts.join(' - ').trim();
+    }
+    // Drop a redundant leading "Artist - " from the title when we already know it.
+    if (artist) {
+      const pfx = (artist + ' - ').toLowerCase();
+      if (title.toLowerCase().startsWith(pfx)) title = title.slice(pfx.length).trim();
+    }
+    const dur = typeof j.duration === 'number' ? j.duration : 0;
+    const thumbs = Array.isArray(j.thumbnails) ? j.thumbnails : [];
+    // Highest-res thumbnail; fall back to the always-available ytimg cover for the id.
+    const cover = (thumbs.length && thumbs[thumbs.length - 1].url)
+      ? thumbs[thumbs.length - 1].url
+      : `https://i.ytimg.com/vi/${j.id}/mqdefault.jpg`;
+    tracks.push({
+      id: j.id,
+      title,
+      artist,
+      duration: fmtDuration(dur),
+      cover,
+      url: entryUrl || `https://music.youtube.com/watch?v=${j.id}`,
+    });
+  }
+  if (tracks.length === 0) {
+    const msg = (stderr.trim().split('\n').pop() || 'No tracks found').slice(0, 300);
+    return { success: false, error: msg };
+  }
+  return { success: true, tracks, title: playlistTitle };
 });
 
 function sanitizeFsName(name) {

@@ -57,10 +57,12 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 - **Fullscreen "now playing"** view with cover art, full transport controls, volume slider, and an upcoming-queue panel.
 - **Real-waveform progress bar** — the seek bar renders the track's actual audio peaks, in both the bottom playbar and the fullscreen player.
 - **Resume on launch** — the last track is restored when you reopen the app.
+- **Library health-check** *(optional)* — a **Health** tab that scans your collection for quality problems such as suspected transcodes, alongside a per-track **quality badge** column showing real bitrate/sample-rate. Off by default; enable it in **Settings → Music** (it hides the badge column and tab completely when off).
 
 ### 📊 Listening Report
 
 - A dedicated **Report** tab that turns your listening history into stats — **computed entirely on your device**, nothing leaves your machine.
+- *(Optional)* Off by default — enable it in **Settings → Music**. Listening statistics are always recorded regardless, so your history is already there the moment you turn the tab on.
 - Switch between **Day / Month / Year / All-time** periods, each with **listening time** and a comparison against the previous period.
 - At-a-glance stats: **tracks played**, **artists**, **additions to your collection**, and your current **listening streak**.
 - A **"when you listen"** clock visualizing your activity across the 24 hours of the day.
@@ -69,6 +71,7 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 ### ⬇️ Download from the internet
 
 - **YouTube** — search and download tracks by query straight from the app (`yt-dlp`), with automatic import into your library, embedded cover art and metadata. **ffmpeg is bundled**, so audio extraction and cover embedding work out of the box on every platform.
+- **YouTube Music** — paste an **album, single, or artist** link and parse its full track list (`yt-dlp`, no browser or login needed). Download any track individually or queue the whole release at once; cover art and tags are embedded automatically.
 - **Yandex Music** — parse playlists and albums via a bundled headless Chromium. Your login session persists between runs; the browser window can be shown for sign-in / captcha or hidden for silent background parsing.
 - **Download queue** with live progress, pause and resume. Queue state survives restarts.
 - **Configurable download folder** — choose where new tracks land, or fall back to a dedicated `Audex Downloads` folder.
@@ -129,7 +132,7 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 
 None — the release builds bundle everything they need:
 
-- The YouTube downloader ships a standalone [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) binary, so no `pip install` is required.
+- The YouTube / YouTube Music downloader and parser ship a standalone [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) binary, so no `pip install` is required.
 - The Yandex Music parser uses a Chromium build bundled with the app.
 - `ffmpeg` ships with the app (via `ffmpeg-static`), so YouTube audio extraction works without a system install.
 
@@ -165,7 +168,7 @@ This builds a Linux AppImage and `.deb` into `release/`. macOS and Windows build
 - **[music-metadata](https://github.com/borewit/music-metadata)** — read tags and embedded artwork.
 - **[node-id3](https://github.com/Zazama/node-id3)** — write ID3v2 tags back to MP3 files.
 - **[Puppeteer](https://pptr.dev/)** — drives the bundled Chromium for the Yandex Music parser.
-- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube search and download backend.
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube / YouTube Music search, parsing and download backend.
 - **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** — bundled ffmpeg binary for audio extraction and cover embedding.
 
 ---

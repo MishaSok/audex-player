@@ -11,6 +11,7 @@ const LS = {
   updateDismiss: 'audex-update-dismiss',
   ytState: 'audex-dl-yt-state',
   ymState: 'audex-dl-ym-state',
+  ytmState: 'audex-dl-ytm-state',
   queue: 'audex-dl-queue',
   wavePeaks: 'audex-wave-peaks',
   playLog: 'audex-play-log',
@@ -28,6 +29,8 @@ let settings = Object.assign({
   language: 'en',
   defaultFolder: '',
   scanSubdirs: true,
+  healthCheck: false,
+  reports: false,
   downloads: false,
   showParserBrowser: true,
   uiScale: 1,
@@ -485,6 +488,11 @@ const I18N = {
     'downloads.parsing.col.duration': 'Длит.',
     'downloads.parsing.idle.title': 'Парсинг Яндекс.Музыки',
     'downloads.parsing.idle.text': 'Вставьте ссылку на плейлист или альбом из «Яндекс.Музыки». Приложение соберёт список треков в фоне, и вы сможете скачать любой одним кликом.',
+    'downloads.parsing.subtab.ytmusic': 'YouTube Music',
+    'downloads.ytm.urlPlaceholder': 'https://music.youtube.com/playlist?list=…',
+    'downloads.ytm.hint': 'Ссылка на альбом, сингл или исполнителя из YouTube Music. Логин и браузер не нужны.',
+    'downloads.ytm.idle.title': 'Парсинг YouTube Music',
+    'downloads.ytm.idle.text': 'Вставьте ссылку на альбом, сингл или страницу исполнителя из YouTube Music. Приложение соберёт список треков, и вы сможете скачать любой одним кликом.',
     'downloads.parsing.starting': 'Запускаем парсер…',
     'downloads.parsing.done': 'Готово — собрано треков: {n}',
     'downloads.parsing.error': 'Ошибка парсинга: {e}',
@@ -516,6 +524,10 @@ const I18N = {
     'setting.uiScaleReset': 'Сбросить',
     'setting.scanSubdirs': 'Сканировать подпапки',
     'setting.scanSubdirsDesc': 'Учитывать вложенные директории при индексации.',
+    'setting.healthCheck': 'Проверка качества (Health-check)',
+    'setting.healthCheckDesc': 'Раздел «Состояние библиотеки» и столбец «Качество» в списках треков. Выключено — колонка и раздел скрыты полностью.',
+    'setting.reports': 'Отчёт о прослушивании',
+    'setting.reportsDesc': 'Раздел «Отчёт» со статистикой прослушивания. Статистика собирается всегда, даже когда раздел скрыт.',
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
@@ -823,6 +835,11 @@ const I18N = {
     'downloads.parsing.col.duration': 'Dur.',
     'downloads.parsing.idle.title': 'Parse Yandex Music',
     'downloads.parsing.idle.text': 'Paste a playlist or album link from Yandex Music. The app will collect the track list in the background, and let you download any of them in one click.',
+    'downloads.parsing.subtab.ytmusic': 'YouTube Music',
+    'downloads.ytm.urlPlaceholder': 'https://music.youtube.com/playlist?list=…',
+    'downloads.ytm.hint': 'Link to an album, single, or artist on YouTube Music. No login or browser needed.',
+    'downloads.ytm.idle.title': 'YouTube Music parsing',
+    'downloads.ytm.idle.text': 'Paste a link to an album, single, or artist page from YouTube Music. The app will collect the track list and you can download any of them in one click.',
     'downloads.parsing.starting': 'Starting parser…',
     'downloads.parsing.done': 'Done — {n} tracks collected',
     'downloads.parsing.error': 'Parsing error: {e}',
@@ -854,6 +871,10 @@ const I18N = {
     'setting.uiScaleReset': 'Reset',
     'setting.scanSubdirs': 'Scan subfolders',
     'setting.scanSubdirsDesc': 'Include nested directories during indexing.',
+    'setting.healthCheck': 'Quality check (Health-check)',
+    'setting.healthCheckDesc': 'The “Library health” section and the “Quality” column in track lists. When off, the column and section are hidden entirely.',
+    'setting.reports': 'Listening report',
+    'setting.reportsDesc': 'The “Report” section with listening statistics. Stats are always collected, even while the section is hidden.',
     'setting.showDownloads': 'Show the “Downloads” tab',
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
@@ -1161,6 +1182,11 @@ const I18N = {
     'downloads.parsing.col.duration': 'Dauer',
     'downloads.parsing.idle.title': 'Yandex Music parsen',
     'downloads.parsing.idle.text': 'Füge einen Playlist- oder Album-Link von Yandex Music ein. Die App sammelt die Titelliste im Hintergrund, und du kannst jeden mit einem Klick herunterladen.',
+    'downloads.parsing.subtab.ytmusic': 'YouTube Music',
+    'downloads.ytm.urlPlaceholder': 'https://music.youtube.com/playlist?list=…',
+    'downloads.ytm.hint': 'Link zu einem Album, einer Single oder einem Interpreten auf YouTube Music. Kein Login oder Browser nötig.',
+    'downloads.ytm.idle.title': 'YouTube-Music-Parsing',
+    'downloads.ytm.idle.text': 'Füge einen Link zu einem Album, einer Single oder einer Interpretenseite von YouTube Music ein. Die App sammelt die Titelliste, und du kannst jeden Titel mit einem Klick herunterladen.',
     'downloads.parsing.starting': 'Parser wird gestartet…',
     'downloads.parsing.done': 'Fertig — {n} Titel gesammelt',
     'downloads.parsing.error': 'Parsing-Fehler: {e}',
@@ -1192,6 +1218,10 @@ const I18N = {
     'setting.uiScaleReset': 'Zurücksetzen',
     'setting.scanSubdirs': 'Unterordner durchsuchen',
     'setting.scanSubdirsDesc': 'Verschachtelte Verzeichnisse beim Indizieren einbeziehen.',
+    'setting.healthCheck': 'Qualitätsprüfung (Health-check)',
+    'setting.healthCheckDesc': 'Der Bereich „Bibliothekszustand“ und die Spalte „Qualität“ in den Titellisten. Wenn deaktiviert, sind Spalte und Bereich vollständig ausgeblendet.',
+    'setting.reports': 'Hörbericht',
+    'setting.reportsDesc': 'Der Bereich „Bericht“ mit Hörstatistiken. Statistiken werden immer erfasst, auch wenn der Bereich ausgeblendet ist.',
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
@@ -1499,6 +1529,11 @@ const I18N = {
     'downloads.parsing.col.duration': 'Durée',
     'downloads.parsing.idle.title': 'Analyser Yandex Music',
     'downloads.parsing.idle.text': "Collez un lien de playlist ou d'album depuis Yandex Music. L'app récupérera la liste des pistes en arrière-plan, et vous pourrez en télécharger n'importe laquelle en un clic.",
+    'downloads.parsing.subtab.ytmusic': 'YouTube Music',
+    'downloads.ytm.urlPlaceholder': 'https://music.youtube.com/playlist?list=…',
+    'downloads.ytm.hint': 'Lien vers un album, un single ou un artiste sur YouTube Music. Aucune connexion ni navigateur requis.',
+    'downloads.ytm.idle.title': 'Analyse YouTube Music',
+    'downloads.ytm.idle.text': "Collez un lien vers un album, un single ou une page d'artiste de YouTube Music. L'application récupérera la liste des pistes et vous pourrez en télécharger n'importe laquelle en un clic.",
     'downloads.parsing.starting': "Démarrage de l'analyseur…",
     'downloads.parsing.done': 'Terminé — {n} pistes collectées',
     'downloads.parsing.error': "Erreur d'analyse : {e}",
@@ -1530,6 +1565,10 @@ const I18N = {
     'setting.uiScaleReset': 'Réinitialiser',
     'setting.scanSubdirs': 'Analyser les sous-dossiers',
     'setting.scanSubdirsDesc': "Inclure les répertoires imbriqués lors de l'indexation.",
+    'setting.healthCheck': 'Contrôle de qualité (Health-check)',
+    'setting.healthCheckDesc': 'La section « État de la bibliothèque » et la colonne « Qualité » dans les listes de pistes. Désactivé, la colonne et la section sont entièrement masquées.',
+    'setting.reports': "Rapport d'écoute",
+    'setting.reportsDesc': "La section « Rapport » avec les statistiques d'écoute. Les statistiques sont toujours collectées, même lorsque la section est masquée.",
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
@@ -1837,6 +1876,11 @@ const I18N = {
     'downloads.parsing.col.duration': 'Трив.',
     'downloads.parsing.idle.title': 'Парсинг Яндекс.Музики',
     'downloads.parsing.idle.text': 'Вставте посилання на плейлист або альбом з «Яндекс.Музики». Застосунок збере список треків у фоні, і ви зможете завантажити будь-який одним кліком.',
+    'downloads.parsing.subtab.ytmusic': 'YouTube Music',
+    'downloads.ytm.urlPlaceholder': 'https://music.youtube.com/playlist?list=…',
+    'downloads.ytm.hint': 'Посилання на альбом, сингл або виконавця з YouTube Music. Логін і браузер не потрібні.',
+    'downloads.ytm.idle.title': 'Парсинг YouTube Music',
+    'downloads.ytm.idle.text': 'Вставте посилання на альбом, сингл або сторінку виконавця з YouTube Music. Застосунок збере список треків, і ви зможете завантажити будь-який одним кліком.',
     'downloads.parsing.starting': 'Запускаємо парсер…',
     'downloads.parsing.done': 'Готово — зібрано треків: {n}',
     'downloads.parsing.error': 'Помилка парсингу: {e}',
@@ -1868,6 +1912,10 @@ const I18N = {
     'setting.uiScaleReset': 'Скинути',
     'setting.scanSubdirs': 'Сканувати підтеки',
     'setting.scanSubdirsDesc': 'Враховувати вкладені каталоги під час індексації.',
+    'setting.healthCheck': 'Перевірка якості (Health-check)',
+    'setting.healthCheckDesc': 'Розділ «Стан бібліотеки» та стовпець «Якість» у списках треків. Коли вимкнено — стовпець і розділ повністю приховані.',
+    'setting.reports': 'Звіт про прослуховування',
+    'setting.reportsDesc': 'Розділ «Звіт» зі статистикою прослуховування. Статистика збирається завжди, навіть коли розділ прихований.',
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
@@ -2779,6 +2827,268 @@ async function runYmParse() {
   }
 })();
 
+// ── Downloads: YouTube Music parsing ──
+// Mirrors the Yandex parser UI, but enumeration goes through yt-dlp (no browser)
+// and downloads use the exact video id via the shared 'youtube' queue source, so
+// dedup and progress routing are shared with the YouTube search tab.
+let ytmParseActive = false;
+let ytmTracks = [];
+let ytmDownloadReqSeq = 0;
+const ytmActiveDownloads = new Map(); // requestId -> rowEl (direct, non-queue downloads)
+
+function setYtmStatus(text, kind) {
+  const el = $('dl-ytm-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function saveYtmState() {
+  try {
+    const u = $('dl-ytm-url');
+    localStorage.setItem(LS.ytmState, JSON.stringify({
+      url: u ? u.value : '',
+      tracks: ytmTracks,
+    }));
+  } catch (_) { /* ignore */ }
+}
+
+function isYtmTrackInQueue(t) {
+  return t ? isYtResultInQueue({ id: t.id, url: t.url }) : false;
+}
+
+function renderYtmResults(tracks) {
+  ytmTracks = tracks || [];
+  saveYtmState();
+  const wrap = $('dl-ytm-results');
+  const rows = $('dl-ytm-rows');
+  const empty = $('dl-ytm-empty');
+  const note = $('dl-ytm-tag-note');
+  const queueAllBtn = $('dl-ytm-queue-all');
+  if (!wrap || !rows) return;
+  if (!ytmTracks.length) {
+    wrap.hidden = true;
+    if (note) note.hidden = true;
+    if (empty) empty.classList.add('show');
+    if (queueAllBtn) queueAllBtn.hidden = true;
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  if (note) note.hidden = false;
+  if (queueAllBtn) {
+    queueAllBtn.hidden = false;
+    queueAllBtn.disabled = ytmParseActive;
+  }
+  const disabledAttr = ytmParseActive ? ' disabled' : '';
+  rows.innerHTML = ytmTracks.map((t, i) => {
+    const queued = isYtmTrackInQueue(t);
+    const queuedCls = queued ? ' is-done' : '';
+    const queueDis = ytmParseActive || queued ? ' disabled' : '';
+    const queueLabel = queued ? tr('downloads.queue.queued') : tr('downloads.queue.add');
+    const coverStyle = t.cover ? `background-image:url('${escapeHtml(t.cover)}')` : '';
+    return `
+      <div class="dl-row-ym dl-row-ytm" data-ytm-row="${i}">
+        <div class="num">${i + 1}</div>
+        <div class="cover" style="${coverStyle}"></div>
+        <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+        <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
+        <div class="duration">${escapeHtml(t.duration || '')}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn dl-queue-btn${queuedCls}" data-ytm-queue="${i}"${queueDis} title="${escapeHtml(queueLabel)}">
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span>${escapeHtml(queueLabel)}</span>
+          </button>
+          <button type="button" class="dl-download-btn" data-ytm-dl="${i}"${disabledAttr}>
+            <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+            <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-ytm-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-ytm-dl'), 10);
+      if (!isNaN(idx)) downloadYtmTrack(idx, btn);
+    });
+  });
+  rows.querySelectorAll('[data-ytm-queue]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-ytm-queue'), 10);
+      if (!isNaN(idx)) enqueueYtmTrack(idx);
+    });
+  });
+}
+
+function restoreYtmDownloadButton(actionEl, idx, labelKey, cls) {
+  actionEl.innerHTML = `
+    <button type="button" class="dl-download-btn ${cls || ''}" data-ytm-dl="${idx}">
+      <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+      <span>${escapeHtml(tr(labelKey))}</span>
+    </button>
+  `;
+  const newBtn = actionEl.querySelector('[data-ytm-dl]');
+  if (newBtn) newBtn.addEventListener('click', () => downloadYtmTrack(idx, newBtn));
+  return newBtn;
+}
+
+async function downloadYtmTrack(idx, btn) {
+  const t = ytmTracks[idx];
+  if (!t || !btn) return;
+  if (btn.classList.contains('is-done')) return;
+  const rowEl = btn.closest('.dl-row-ym');
+  if (!rowEl) return;
+  const actionEl = rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  const requestId = 'ytm-' + (++ytmDownloadReqSeq);
+  rowEl.dataset.requestId = requestId;
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>
+  `;
+  ytmActiveDownloads.set(requestId, rowEl);
+
+  const suggestedName = t.artist ? `${t.artist} - ${t.title}` : t.title;
+
+  try {
+    const res = await window.electronAPI.ytDownload({ videoId: t.id, url: t.url, suggestedName, requestId, targetDir: settings.defaultFolder || '' });
+    ytmActiveDownloads.delete(requestId);
+    if (!res || !res.success) {
+      restoreYtmDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+      setYtmStatus(tr('downloads.yt.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    const doneBtn = restoreYtmDownloadButton(actionEl, idx, 'downloads.yt.action.done', 'is-done');
+    if (doneBtn) doneBtn.disabled = true;
+    setYtmStatus(tr('downloads.yt.downloadOk', { t: suggestedName }), 'ok');
+  } catch (err) {
+    ytmActiveDownloads.delete(requestId);
+    restoreYtmDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+    setYtmStatus(tr('downloads.yt.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  window.electronAPI.onYtDownloadProgress(({ requestId, phase, percent }) => {
+    if (!requestId) return;
+    const rowEl = ytmActiveDownloads.get(requestId);
+    if (!rowEl) return;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      fill.style.width = percent.toFixed(1) + '%';
+      pct.textContent = Math.round(percent) + '%';
+    }
+  });
+}
+
+function buildQueueItemFromYtm(t) {
+  return {
+    id: 'q-' + (++queueIdSeq),
+    source: 'youtube',
+    key: ytTrackKey({ id: t.id, url: t.url }),
+    artist: t.artist || '',
+    title: t.title || '',
+    duration: t.duration || '',
+    query: t.artist ? `${t.artist} ${t.title}` : (t.title || ''),
+    suggestedName: t.artist ? `${t.artist} - ${t.title}` : (t.title || ''),
+    videoId: t.id || '',
+    url: t.url || '',
+    status: 'queued',
+    percent: 0,
+    indeterminate: false,
+    filePath: '',
+    error: '',
+    requestId: '',
+  };
+}
+
+function enqueueYtmTrack(idx) {
+  const t = ytmTracks[idx];
+  if (!t || isYtmTrackInQueue(t)) return;
+  downloadQueue.push(buildQueueItemFromYtm(t));
+  renderQueue();
+  renderYtmResults(ytmTracks);
+  updateQueueTabBadge();
+  startQueueWorker();
+}
+
+function enqueueAllYtmTracks() {
+  if (!ytmTracks || !ytmTracks.length) return;
+  let added = 0;
+  for (const t of ytmTracks) {
+    if (isYtmTrackInQueue(t)) continue;
+    downloadQueue.push(buildQueueItemFromYtm(t));
+    added++;
+  }
+  if (added > 0) {
+    renderQueue();
+    renderYtmResults(ytmTracks);
+    updateQueueTabBadge();
+    startQueueWorker();
+    activateDlTab('queue');
+  }
+}
+
+async function runYtmParse() {
+  if (ytmParseActive) return;
+  const urlEl = $('dl-ytm-url');
+  const startBtn = $('dl-ytm-parse-btn');
+  if (!urlEl) return;
+  const url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  ytmParseActive = true;
+  if (startBtn) startBtn.disabled = true;
+  renderYtmResults([]);
+  setYtmStatus(tr('downloads.parsing.starting'));
+  try {
+    const res = await window.electronAPI.ytMusicParse({ url });
+    if (!res || !res.success) {
+      setYtmStatus(tr('downloads.parsing.error', { e: (res && res.error) || 'unknown' }), 'error');
+    } else {
+      setYtmStatus(tr('downloads.parsing.done', { n: res.tracks.length }), 'ok');
+      renderYtmResults(res.tracks);
+    }
+  } catch (err) {
+    setYtmStatus(tr('downloads.parsing.error', { e: String(err) }), 'error');
+  } finally {
+    ytmParseActive = false;
+    if (startBtn) startBtn.disabled = false;
+    if (ytmTracks && ytmTracks.length) renderYtmResults(ytmTracks);
+  }
+}
+
+(function wireYtmControls() {
+  const start = $('dl-ytm-parse-btn');
+  const url = $('dl-ytm-url');
+  const queueAll = $('dl-ytm-queue-all');
+  if (start) start.addEventListener('click', runYtmParse);
+  if (queueAll) queueAll.addEventListener('click', enqueueAllYtmTracks);
+  if (url) {
+    url.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); runYtmParse(); }
+    });
+    url.addEventListener('input', saveYtmState);
+  }
+})();
+
 // ── Downloads: Queue ──
 // In-memory queue (per session). Items move queued → downloading → done|error.
 // One concurrent download keeps things simple and predictable.
@@ -2975,6 +3285,7 @@ async function processQueueItem(item) {
   }
   renderQueue();
   renderYmResults(ymTracks);
+  renderYtmResults(ytmTracks);
   renderYtResults(ytLastResults);
   updateQueueTabBadge();
 }
@@ -3110,6 +3421,7 @@ function renderQueue() {
       downloadQueue.splice(idx, 1);
       renderQueue();
       renderYmResults(ymTracks);
+      renderYtmResults(ytmTracks);
       updateQueueTabBadge();
     });
   });
@@ -3201,6 +3513,7 @@ function clearFinishedFromQueue() {
   }
   renderQueue();
   renderYmResults(ymTracks);
+  renderYtmResults(ytmTracks);
   updateQueueTabBadge();
 }
 
@@ -3215,6 +3528,7 @@ function clearAllFromQueue() {
   }
   renderQueue();
   renderYmResults(ymTracks);
+  renderYtmResults(ytmTracks);
   updateQueueTabBadge();
 }
 
@@ -3265,6 +3579,15 @@ function restoreDownloadsState() {
     }
   } catch (_) { /* ignore */ }
   try {
+    const raw = localStorage.getItem(LS.ytmState);
+    if (raw) {
+      const ytm = JSON.parse(raw);
+      const urlEl = $('dl-ytm-url');
+      if (urlEl && typeof ytm.url === 'string') urlEl.value = ytm.url;
+      if (Array.isArray(ytm.tracks) && ytm.tracks.length) renderYtmResults(ytm.tracks);
+    }
+  } catch (_) { /* ignore */ }
+  try {
     const raw = localStorage.getItem(LS.queue);
     if (!raw) return;
     const parsed = JSON.parse(raw);
@@ -3298,6 +3621,7 @@ function restoreDownloadsState() {
     renderQueue();
     // Re-render result rows so any "В очереди" badges reflect the restored queue.
     if (ymTracks && ymTracks.length) renderYmResults(ymTracks);
+    if (ytmTracks && ytmTracks.length) renderYtmResults(ytmTracks);
     if (ytLastResults && ytLastResults.length) renderYtResults(ytLastResults);
     updateQueueTabBadge();
     startQueueWorker();
@@ -4572,6 +4896,10 @@ function updatePlayButtonUI() {
   const fsPlayBtn = $('fs-btn-play').querySelector('use');
   playBtn.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
   fsPlayBtn.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
+  // Gate the equalizer animation on actual playback (see CSS). Without this the
+  // now-playing row's bars keep animating while paused, holding the compositor
+  // awake indefinitely (Chromium's "CompositorAnimationObserver active too long").
+  document.documentElement.classList.toggle('is-playing', isPlaying);
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }
@@ -6023,6 +6351,8 @@ $('artist-detail-search').addEventListener('input', () => {
 // ── Settings UI ──
 const TOGGLE_KEY_MAP = {
   'scan-subdirs': 'scanSubdirs',
+  'health-check': 'healthCheck',
+  'reports': 'reports',
   'downloads': 'downloads',
   'show-parser-browser': 'showParserBrowser',
 };
@@ -6161,6 +6491,8 @@ document.querySelectorAll('.toggle').forEach(t => {
     saveSettings();
     t.classList.toggle('on', settings[key]);
     if (key === 'downloads') applyDownloadsVisibility();
+    if (key === 'healthCheck') applyHealthCheckVisibility();
+    if (key === 'reports') applyReportsVisibility();
   });
 });
 
@@ -6262,6 +6594,36 @@ function applyDownloadsVisibility() {
   if (!settings.downloads && currentView === 'downloads') setView('library');
 }
 applyDownloadsVisibility();
+
+// Master switch for the Library Health-check feature: hides the Health nav item,
+// the Quality column across every track table, the quality note, and any active
+// health filter. Driven by a `quality-off` class on <html> so the CSS collapses
+// the grid; JS just keeps the nav + current view consistent.
+function applyHealthCheckVisibility(reflow = true) {
+  const on = !!settings.healthCheck;
+  document.documentElement.classList.toggle('quality-off', !on);
+  const navHealth = $('nav-health');
+  if (navHealth) navHealth.hidden = !on;
+  if (!on) {
+    clearHealthFilter();
+    if (reflow) {
+      if (currentView === 'health') setView('library');
+      else refreshCurrentViewRows();
+    }
+  }
+}
+applyHealthCheckVisibility(false); // boot: set class/nav only; renderLibrary() runs later
+
+// Toggle for the Listening Report feature: hides only the Report nav item and
+// redirects away from the view when off. Play-history logging keeps running
+// regardless (plStartIfNeeded/plTick/savePlayLog are playback-driven), so stats
+// accumulate silently and are ready the moment the user re-enables the report.
+function applyReportsVisibility() {
+  const navReport = $('nav-report');
+  if (navReport) navReport.hidden = !settings.reports;
+  if (!settings.reports && currentView === 'report') setView('library');
+}
+applyReportsVisibility();
 
 // ── Discord Rich Presence ─────────────────────────────────────────────────────
 // Renders the Settings → Discord panel and keeps the activity in sync with
