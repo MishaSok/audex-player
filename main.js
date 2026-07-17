@@ -1432,6 +1432,244 @@ ipcMain.handle('yandex:parsePlaylist', async (event, payload) => {
   }
 });
 
+// ── Spotify playlist parser (Puppeteer) ───────────────────────────────────────
+// Same machinery as the Yandex parser (bundled Chromium, scroll-and-collect over
+// a virtualized list), but with Spotify-specific extraction: open.spotify.com
+// uses hashed class names, so rows are located via data-testid attributes and
+// href patterns instead of class fragments. Spotify has no yt-dlp extractor, so
+// downloading goes through ytsearch1:"artist title" like Yandex tracks do.
+
+let spotifyBrowser = null;
+
+const SPOTIFY_TRACK_SEL = '[data-testid="tracklist-row"]';
+
+async function dismissSpotifyOverlays(page) {
+  // Cookie consent (OneTrust) and the occasional promo dialog.
+  for (const sel of ['#onetrust-accept-btn-handler', 'button[data-testid="close-button"]']) {
+    try {
+      const h = await page.$(sel);
+      if (h) { await h.click({ delay: 30 }).catch(() => {}); await new Promise(r => setTimeout(r, 300)); }
+    } catch (_) {}
+  }
+  try { await page.keyboard.press('Escape'); } catch (_) {}
+}
+
+async function extractSpotifyTracksFromDom(page) {
+  return await page.evaluate((TRACK_SEL) => {
+    // Artist links that live outside any track row belong to the page header
+    // (album artist / artist page name). Used as fallback for rows that omit
+    // the artist (album pages, artist "Popular" sections).
+    function getPageArtist() {
+      const rows = Array.from(document.querySelectorAll(TRACK_SEL));
+      const links = Array.from(document.querySelectorAll("a[href*='/artist/']"));
+      const names = [];
+      for (const a of links) {
+        if (rows.some(r => r.contains(a))) continue;
+        const t = (a.textContent || '').trim();
+        if (t && !names.includes(t)) names.push(t);
+      }
+      // Artist pages: the header h1 is the artist itself and has no /artist/ link.
+      if (!names.length && /\/artist\//.test(location.pathname)) {
+        const h1 = document.querySelector('h1');
+        const t = h1 ? (h1.textContent || '').trim() : '';
+        if (t) names.push(t);
+      }
+      return names.join(' & ');
+    }
+    function getPageCover() {
+      const imgs = document.querySelectorAll("img[src*='i.scdn.co/image']");
+      for (const img of imgs) {
+        const row = img.closest(TRACK_SEL);
+        if (!row) return img.getAttribute('src') || '';
+      }
+      return '';
+    }
+    // Spotify encodes the thumbnail size in the image id prefix — swap the
+    // 64px / 300px variants for the 640px one.
+    function upscaleCover(src) {
+      return String(src || '').replace('ab67616d00004851', 'ab67616d0000b273').replace('ab67616d00001e02', 'ab67616d0000b273');
+    }
+    const pageArtist = getPageArtist();
+    const pageCover = getPageCover();
+    const out = [];
+    document.querySelectorAll(TRACK_SEL).forEach(row => {
+      let title = '';
+      const titleLink = row.querySelector("a[data-testid='internal-track-link']");
+      if (titleLink) title = (titleLink.textContent || '').trim();
+      if (!title) {
+        // Album pages: the title is plain text, the first div[dir=auto] that
+        // isn't inside an artist/album link.
+        const divs = row.querySelectorAll("div[dir='auto']");
+        for (const d of divs) {
+          if (d.closest('a')) continue;
+          const t = (d.textContent || '').trim();
+          if (t) { title = t; break; }
+        }
+      }
+      if (!title) return;
+
+      const artistNames = [];
+      row.querySelectorAll("a[href*='/artist/']").forEach(a => {
+        const t = (a.textContent || '').trim();
+        if (t && !artistNames.includes(t)) artistNames.push(t);
+      });
+      const artist = artistNames.join(' & ') || pageArtist;
+
+      let dur = '';
+      row.querySelectorAll('div').forEach(d => {
+        if (dur) return;
+        const t = (d.textContent || '').trim();
+        if (/^\d+:\d{2}$/.test(t) && d.childElementCount === 0) dur = t;
+      });
+
+      const img = row.querySelector("img[src*='i.scdn.co/image']");
+      const cover = upscaleCover(img ? img.getAttribute('src') : pageCover);
+
+      out.push({
+        title,
+        artist: artist || '—',
+        duration: dur || '—',
+        cover_url: cover || '',
+      });
+    });
+    return out;
+  }, SPOTIFY_TRACK_SEL);
+}
+
+ipcMain.handle('spotify:parsePlaylist', async (event, payload) => {
+  const url = (payload && payload.url) ? String(payload.url).trim() : '';
+  const showBrowser = !payload || payload.showBrowser !== false;
+  if (!url || !/^https?:\/\/open\.spotify\.com\//i.test(url)) {
+    return { success: false, error: 'Invalid Spotify URL' };
+  }
+
+  const send = (data) => {
+    try {
+      if (event && event.sender && !event.sender.isDestroyed()) {
+        event.sender.send('spotify:parseProgress', data);
+      }
+    } catch (_) {}
+  };
+
+  let puppeteer;
+  try { puppeteer = require('puppeteer'); } catch (err) {
+    return { success: false, error: 'puppeteer not installed' };
+  }
+
+  const executablePath = resolveBundledChromium();
+  if (!executablePath || !fs.existsSync(executablePath)) {
+    return { success: false, error: 'Bundled Chromium not found. Run "npm install puppeteer" before packaging.' };
+  }
+
+  const userDataDir = path.join(app.getPath('userData'), 'spotify-profile');
+  try { fs.mkdirSync(userDataDir, { recursive: true }); } catch (_) {}
+
+  send({ phase: 'launching', message: showBrowser ? 'Запуск браузера…' : 'Запускаем парсер…' });
+
+  try {
+    spotifyBrowser = await puppeteer.launch({
+      executablePath,
+      headless: !showBrowser,
+      userDataDir,
+      args: [
+        '--no-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-notifications',
+        ...(showBrowser ? ['--window-size=1440,900'] : []),
+      ],
+      defaultViewport: showBrowser ? null : { width: 1440, height: 900 },
+    });
+  } catch (err) {
+    return { success: false, error: 'Failed to launch Chromium: ' + String(err).slice(0, 200) };
+  }
+
+  const collected = new Map();
+
+  try {
+    const pages = await spotifyBrowser.pages();
+    const page = pages[0] || await spotifyBrowser.newPage();
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
+
+    send({ phase: 'loading', message: 'Открываем страницу…' });
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    } catch (navErr) {
+      // Same rationale as the Yandex parser: the "wait for tracks" loop below is
+      // the real gate, DOMContentLoaded on heavy SPAs is unreliable.
+      send({ phase: 'loading', message: 'Страница грузится дольше обычного, продолжаем…' });
+    }
+    await new Promise(r => setTimeout(r, 2500));
+
+    await dismissSpotifyOverlays(page);
+
+    send({
+      phase: 'loading',
+      message: showBrowser
+        ? 'Ждём загрузку треков (вход в Spotify — в окне браузера, если нужно)…'
+        : 'Ждём загрузку треков…',
+    });
+    const deadline = Date.now() + 90_000;
+    let appeared = false;
+    while (Date.now() < deadline) {
+      await dismissSpotifyOverlays(page);
+      const count = await page.$$eval(SPOTIFY_TRACK_SEL, els => els.length).catch(() => 0);
+      if (count > 0) { appeared = true; break; }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    if (!appeared) throw new Error('Tracks did not appear (private playlist or wrong URL?)');
+
+    send({ phase: 'scrolling', message: 'Собираем треки…', total: 0 });
+
+    let noNew = 0;
+    const SCROLL_RETRIES = 6;
+    while (noNew < SCROLL_RETRIES) {
+      const tracks = await extractSpotifyTracksFromDom(page);
+      let added = 0;
+      for (const t of tracks) {
+        const key = `${t.title}|${t.artist}`;
+        if (!collected.has(key)) {
+          collected.set(key, { ...t, index: collected.size + 1, duration_sec: durationToSeconds(t.duration) });
+          added++;
+        }
+      }
+      if (added === 0) noNew++; else noNew = 0;
+      send({
+        phase: 'scrolling',
+        message: 'Собираем треки…',
+        total: collected.size,
+        added,
+        tracks: Array.from(collected.values()),
+      });
+      try {
+        // Spotify virtualizes the list inside its own scroll container —
+        // scrollIntoView on the last visible row advances it reliably.
+        await page.evaluate((sel) => {
+          const els = document.querySelectorAll(sel);
+          if (els.length) { els[els.length - 1].scrollIntoView({ block: 'center' }); return; }
+          const sc = document.querySelector('[data-overlayscrollbars-viewport], .main-view-container__scroll-node');
+          if (sc) sc.scrollBy(0, 800); else window.scrollBy(0, 600);
+        }, SPOTIFY_TRACK_SEL);
+      } catch (_) {
+        await page.evaluate(() => window.scrollBy(0, 600));
+      }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+
+    const tracks = Array.from(collected.values());
+    send({ phase: 'done', message: `Готово — ${tracks.length} треков`, total: tracks.length, tracks });
+    return { success: true, tracks };
+  } catch (err) {
+    const msg = String(err && err.message || err).slice(0, 300);
+    send({ phase: 'error', message: msg });
+    return { success: false, error: msg, tracks: Array.from(collected.values()) };
+  } finally {
+    try { if (spotifyBrowser) await spotifyBrowser.close(); } catch (_) {}
+    spotifyBrowser = null;
+  }
+});
+
 // ── Discord Rich Presence ────────────────────────────────────────────────────
 // Self-contained client for Discord's local IPC protocol — no external npm
 // dependency (keeps the vanilla-everything / careful-packaging philosophy).

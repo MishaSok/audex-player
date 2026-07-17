@@ -517,6 +517,7 @@
           <div class="dl-subtabs" role="tablist">
             <button type="button" class="dl-subtab is-active" data-dl-subtab="yandex" role="tab" aria-selected="true" data-i18n="downloads.parsing.subtab.yandex">Яндекс.Музыка</button>
             <button type="button" class="dl-subtab" data-dl-subtab="ytmusic" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.ytmusic">YouTube Music</button>
+            <button type="button" class="dl-subtab" data-dl-subtab="spotify" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.spotify">Spotify</button>
           </div>
 
           <div class="dl-subpane" data-dl-subpane="yandex">
@@ -603,6 +604,49 @@
               <div class="empty-text" data-i18n="downloads.ytm.idle.text">Вставьте ссылку на альбом, сингл или страницу исполнителя из YouTube Music. Приложение соберёт список треков, и вы сможете скачать любой одним кликом.</div>
             </div>
           </div>
+
+          <div class="dl-subpane" data-dl-subpane="spotify" hidden>
+            <div class="dl-search">
+              <div class="dl-search-row">
+                <label class="dl-search-field" for="dl-sp-url">
+                  <svg class="i" width="13" height="13"><use href="#i-link"/></svg>
+                  <input type="text" id="dl-sp-url" class="dl-search-input" data-i18n-placeholder="downloads.sp.urlPlaceholder" placeholder="https://open.spotify.com/playlist/…">
+                </label>
+                <button type="button" id="dl-sp-parse-btn" class="dl-search-btn">
+                  <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
+                  <span data-i18n="downloads.parsing.start">Парсить</span>
+                </button>
+              </div>
+              <div class="dl-search-hint" data-i18n="downloads.sp.hint">Вставьте ссылку на плейлист, альбом или исполнителя из Spotify. Парсер работает в фоне.</div>
+            </div>
+
+            <div id="dl-sp-status" class="dl-status" hidden></div>
+
+            <button type="button" id="dl-sp-queue-all" class="dl-search-btn dl-search-btn-secondary dl-ym-queue-all" hidden>
+              <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+              <span data-i18n="downloads.queue.addAll">Все треки в очередь</span>
+            </button>
+
+            <div id="dl-sp-results" class="dl-results" hidden>
+              <div class="dl-results-head dl-results-head-ym dl-results-head-ytm">
+                <div class="dl-col-num">#</div>
+                <div class="dl-col-cover"></div>
+                <div class="dl-col-artist" data-i18n="downloads.parsing.col.artist">Исполнитель</div>
+                <div class="dl-col-title" data-i18n="downloads.parsing.col.title">Название</div>
+                <div class="dl-col-duration" data-i18n="downloads.parsing.col.duration">Длит.</div>
+                <div class="dl-col-action"></div>
+              </div>
+              <div id="dl-sp-rows" class="dl-results-body"></div>
+            </div>
+
+            <div id="dl-sp-tag-note" class="dl-tag-note" hidden data-i18n="downloads.yt.tagNote">После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.</div>
+
+            <div id="dl-sp-empty" class="empty-block show">
+              <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-link"/></svg></div>
+              <div class="empty-title-lg" data-i18n="downloads.sp.idle.title">Парсинг Spotify</div>
+              <div class="empty-text" data-i18n="downloads.sp.idle.text">Вставьте ссылку на плейлист или альбом из Spotify. Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.</div>
+            </div>
+          </div>
         </div>
 
         <div class="dl-pane" data-dl-pane="queue" hidden>
@@ -640,7 +684,7 @@
           <div class="crumb">
             <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
           </div>
-          <div class="version-tag">Audex 1.1.5</div>
+          <div class="version-tag">Audex 1.1.6</div>
         </header>
 
         <div class="settings-page">
@@ -865,7 +909,7 @@
               <div class="setting-row">
                 <div class="setting-text">
                   <div class="setting-label" data-i18n="setting.version">Версия</div>
-                  <div class="setting-desc">1.1.5 · Electron · Linux</div>
+                  <div class="setting-desc">1.1.6 · Electron · Linux</div>
                 </div>
               </div>
             </div>

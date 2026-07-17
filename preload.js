@@ -36,6 +36,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('yandex:parseProgress', listener);
     return () => ipcRenderer.removeListener('yandex:parseProgress', listener);
   },
+  spotifyParse: (payload) => ipcRenderer.invoke('spotify:parsePlaylist', payload),
+  onSpotifyParseProgress: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('spotify:parseProgress', listener);
+    return () => ipcRenderer.removeListener('spotify:parseProgress', listener);
+  },
   discordConnect: (clientId) => ipcRenderer.invoke('discord:connect', { clientId }),
   discordDisconnect: () => ipcRenderer.invoke('discord:disconnect'),
   discordSetActivity: (activity) => ipcRenderer.invoke('discord:setActivity', { activity }),

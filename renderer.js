@@ -12,6 +12,7 @@ const LS = {
   ytState: 'audex-dl-yt-state',
   ymState: 'audex-dl-ym-state',
   ytmState: 'audex-dl-ytm-state',
+  spState: 'audex-dl-sp-state',
   queue: 'audex-dl-queue',
   wavePeaks: 'audex-wave-peaks',
   playLog: 'audex-play-log',
@@ -498,6 +499,11 @@ const I18N = {
     'downloads.ytm.hint': 'Ссылка на альбом, сингл или исполнителя из YouTube Music. Логин и браузер не нужны.',
     'downloads.ytm.idle.title': 'Парсинг YouTube Music',
     'downloads.ytm.idle.text': 'Вставьте ссылку на альбом, сингл или страницу исполнителя из YouTube Music. Приложение соберёт список треков, и вы сможете скачать любой одним кликом.',
+    'downloads.parsing.subtab.spotify': 'Spotify',
+    'downloads.sp.urlPlaceholder': 'https://open.spotify.com/playlist/…',
+    'downloads.sp.hint': 'Ссылка на плейлист, альбом или исполнителя из Spotify. Парсер работает в фоне.',
+    'downloads.sp.idle.title': 'Парсинг Spotify',
+    'downloads.sp.idle.text': 'Вставьте ссылку на плейлист или альбом из Spotify. Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.',
     'downloads.parsing.starting': 'Запускаем парсер…',
     'downloads.parsing.done': 'Готово — собрано треков: {n}',
     'downloads.parsing.error': 'Ошибка парсинга: {e}',
@@ -536,7 +542,7 @@ const I18N = {
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
-    'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
+    'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс или Spotify при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
     'section.system': 'Система',
     'setting.hardwareAcceleration': 'Аппаратное ускорение',
     'setting.hardwareAccelerationDesc': 'Использует видеокарту для отрисовки интерфейса. Если приложение зависает при запуске или работает с артефактами — выключите. Изменение применится после перезапуска.',
@@ -850,6 +856,11 @@ const I18N = {
     'downloads.ytm.hint': 'Link to an album, single, or artist on YouTube Music. No login or browser needed.',
     'downloads.ytm.idle.title': 'YouTube Music parsing',
     'downloads.ytm.idle.text': 'Paste a link to an album, single, or artist page from YouTube Music. The app will collect the track list and you can download any of them in one click.',
+    'downloads.parsing.subtab.spotify': 'Spotify',
+    'downloads.sp.urlPlaceholder': 'https://open.spotify.com/playlist/…',
+    'downloads.sp.hint': 'Link to a playlist, album, or artist on Spotify. The parser runs in the background.',
+    'downloads.sp.idle.title': 'Spotify parsing',
+    'downloads.sp.idle.text': 'Paste a playlist or album link from Spotify. The app will open a browser, collect the track list, and let you download any of them in one click.',
     'downloads.parsing.starting': 'Starting parser…',
     'downloads.parsing.done': 'Done — {n} tracks collected',
     'downloads.parsing.error': 'Parsing error: {e}',
@@ -888,7 +899,7 @@ const I18N = {
     'setting.showDownloads': 'Show the “Downloads” tab',
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
-    'setting.showParserBrowserDesc': 'Useful for signing in to Yandex on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
+    'setting.showParserBrowserDesc': 'Useful for signing in to Yandex or Spotify on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
     'section.system': 'System',
     'setting.hardwareAcceleration': 'Hardware acceleration',
     'setting.hardwareAccelerationDesc': 'Uses the GPU to render the interface. If the app hangs on launch or shows graphical glitches, turn this off. Takes effect after a restart.',
@@ -1202,6 +1213,11 @@ const I18N = {
     'downloads.ytm.hint': 'Link zu einem Album, einer Single oder einem Interpreten auf YouTube Music. Kein Login oder Browser nötig.',
     'downloads.ytm.idle.title': 'YouTube-Music-Parsing',
     'downloads.ytm.idle.text': 'Füge einen Link zu einem Album, einer Single oder einer Interpretenseite von YouTube Music ein. Die App sammelt die Titelliste, und du kannst jeden Titel mit einem Klick herunterladen.',
+    'downloads.parsing.subtab.spotify': 'Spotify',
+    'downloads.sp.urlPlaceholder': 'https://open.spotify.com/playlist/…',
+    'downloads.sp.hint': 'Link zu einer Playlist, einem Album oder einem Interpreten auf Spotify. Der Parser läuft im Hintergrund.',
+    'downloads.sp.idle.title': 'Spotify-Parsing',
+    'downloads.sp.idle.text': 'Füge einen Playlist- oder Album-Link von Spotify ein. Die App öffnet einen Browser, sammelt die Titelliste, und du kannst jeden Titel mit einem Klick herunterladen.',
     'downloads.parsing.starting': 'Parser wird gestartet…',
     'downloads.parsing.done': 'Fertig — {n} Titel gesammelt',
     'downloads.parsing.error': 'Parsing-Fehler: {e}',
@@ -1240,7 +1256,7 @@ const I18N = {
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
-    'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
+    'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex oder Spotify anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
     'section.system': 'System',
     'setting.hardwareAcceleration': 'Hardwarebeschleunigung',
     'setting.hardwareAccelerationDesc': 'Nutzt die Grafikkarte zum Rendern der Oberfläche. Wenn die App beim Start hängt oder Grafikfehler zeigt, schalten Sie sie aus. Wird nach einem Neustart wirksam.',
@@ -1554,6 +1570,11 @@ const I18N = {
     'downloads.ytm.hint': 'Lien vers un album, un single ou un artiste sur YouTube Music. Aucune connexion ni navigateur requis.',
     'downloads.ytm.idle.title': 'Analyse YouTube Music',
     'downloads.ytm.idle.text': "Collez un lien vers un album, un single ou une page d'artiste de YouTube Music. L'application récupérera la liste des pistes et vous pourrez en télécharger n'importe laquelle en un clic.",
+    'downloads.parsing.subtab.spotify': 'Spotify',
+    'downloads.sp.urlPlaceholder': 'https://open.spotify.com/playlist/…',
+    'downloads.sp.hint': "Lien vers une playlist, un album ou un artiste sur Spotify. L'analyseur fonctionne en arrière-plan.",
+    'downloads.sp.idle.title': 'Analyse Spotify',
+    'downloads.sp.idle.text': "Collez un lien de playlist ou d'album depuis Spotify. L'application ouvrira un navigateur, récupérera la liste des pistes, et vous pourrez en télécharger n'importe laquelle en un clic.",
     'downloads.parsing.starting': "Démarrage de l'analyseur…",
     'downloads.parsing.done': 'Terminé — {n} pistes collectées',
     'downloads.parsing.error': "Erreur d'analyse : {e}",
@@ -1592,7 +1613,7 @@ const I18N = {
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
-    'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
+    'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex ou Spotify au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
     'section.system': 'Système',
     'setting.hardwareAcceleration': 'Accélération matérielle',
     'setting.hardwareAccelerationDesc': "Utilise la carte graphique pour afficher l'interface. Si l'application se bloque au démarrage ou présente des artefacts graphiques, désactivez-la. Prend effet après un redémarrage.",
@@ -1906,6 +1927,11 @@ const I18N = {
     'downloads.ytm.hint': 'Посилання на альбом, сингл або виконавця з YouTube Music. Логін і браузер не потрібні.',
     'downloads.ytm.idle.title': 'Парсинг YouTube Music',
     'downloads.ytm.idle.text': 'Вставте посилання на альбом, сингл або сторінку виконавця з YouTube Music. Застосунок збере список треків, і ви зможете завантажити будь-який одним кліком.',
+    'downloads.parsing.subtab.spotify': 'Spotify',
+    'downloads.sp.urlPlaceholder': 'https://open.spotify.com/playlist/…',
+    'downloads.sp.hint': 'Посилання на плейлист, альбом або виконавця зі Spotify. Парсер працює у фоні.',
+    'downloads.sp.idle.title': 'Парсинг Spotify',
+    'downloads.sp.idle.text': 'Вставте посилання на плейлист або альбом зі Spotify. Застосунок відкриє браузер, збере список треків, і ви зможете завантажити будь-який одним кліком.',
     'downloads.parsing.starting': 'Запускаємо парсер…',
     'downloads.parsing.done': 'Готово — зібрано треків: {n}',
     'downloads.parsing.error': 'Помилка парсингу: {e}',
@@ -1944,7 +1970,7 @@ const I18N = {
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
-    'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
+    'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс або Spotify при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
     'section.system': 'Система',
     'setting.hardwareAcceleration': 'Апаратне прискорення',
     'setting.hardwareAccelerationDesc': 'Використовує відеокарту для відмалювання інтерфейсу. Якщо застосунок зависає при запуску або працює з артефактами — вимкніть. Зміна застосується після перезапуску.',
@@ -3118,6 +3144,286 @@ async function runYtmParse() {
   }
 })();
 
+// ── Downloads: Spotify parsing ──
+// Mirrors the Yandex parser: track lists come from Puppeteer scraping the
+// Spotify web player, downloads go through ytsearch1: by "artist title" query
+// (Spotify itself serves no downloadable audio). Rows reuse the YTM layout
+// because Spotify pages give us per-track covers.
+let spParseActive = false;
+let spTracks = [];
+let spDownloadReqSeq = 0;
+const spActiveDownloads = new Map(); // requestId -> rowEl
+
+function setSpStatus(text, kind) {
+  const el = $('dl-sp-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function saveSpState() {
+  try {
+    const u = $('dl-sp-url');
+    localStorage.setItem(LS.spState, JSON.stringify({
+      url: u ? u.value : '',
+      tracks: spTracks,
+    }));
+  } catch (_) { /* ignore */ }
+}
+
+function renderSpResults(tracks) {
+  spTracks = tracks || [];
+  saveSpState();
+  const wrap = $('dl-sp-results');
+  const rows = $('dl-sp-rows');
+  const empty = $('dl-sp-empty');
+  const note = $('dl-sp-tag-note');
+  const queueAllBtn = $('dl-sp-queue-all');
+  if (!wrap || !rows) return;
+  if (!spTracks.length) {
+    wrap.hidden = true;
+    if (note) note.hidden = true;
+    if (empty) empty.classList.add('show');
+    if (queueAllBtn) queueAllBtn.hidden = true;
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  if (note) note.hidden = false;
+  if (queueAllBtn) {
+    queueAllBtn.hidden = false;
+    queueAllBtn.disabled = spParseActive;
+  }
+  const disabledAttr = spParseActive ? ' disabled' : '';
+  rows.innerHTML = spTracks.map((t, i) => {
+    const queued = isSpTrackInQueue(t);
+    const queuedCls = queued ? ' is-done' : '';
+    const queueDis = spParseActive || queued ? ' disabled' : '';
+    const queueLabel = queued ? tr('downloads.queue.queued') : tr('downloads.queue.add');
+    const coverStyle = t.cover_url ? `background-image:url('${escapeHtml(t.cover_url)}')` : '';
+    return `
+      <div class="dl-row-ym dl-row-ytm" data-sp-row="${i}">
+        <div class="num">${i + 1}</div>
+        <div class="cover" style="${coverStyle}"></div>
+        <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+        <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
+        <div class="duration">${escapeHtml(t.duration || '')}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn dl-queue-btn${queuedCls}" data-sp-queue="${i}"${queueDis} title="${escapeHtml(queueLabel)}">
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span>${escapeHtml(queueLabel)}</span>
+          </button>
+          <button type="button" class="dl-download-btn" data-sp-dl="${i}"${disabledAttr}>
+            <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+            <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-sp-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-sp-dl'), 10);
+      if (!isNaN(idx)) downloadSpTrack(idx, btn);
+    });
+  });
+  rows.querySelectorAll('[data-sp-queue]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-sp-queue'), 10);
+      if (!isNaN(idx)) enqueueSpTrack(idx);
+    });
+  });
+}
+
+function restoreSpDownloadButton(actionEl, idx, labelKey, cls) {
+  actionEl.innerHTML = `
+    <button type="button" class="dl-download-btn ${cls || ''}" data-sp-dl="${idx}">
+      <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+      <span>${escapeHtml(tr(labelKey))}</span>
+    </button>
+  `;
+  const newBtn = actionEl.querySelector('[data-sp-dl]');
+  if (newBtn) newBtn.addEventListener('click', () => downloadSpTrack(idx, newBtn));
+  return newBtn;
+}
+
+async function downloadSpTrack(idx, btn) {
+  const t = spTracks[idx];
+  if (!t || !btn) return;
+  if (btn.classList.contains('is-done')) return;
+  const rowEl = btn.closest('.dl-row-ym');
+  if (!rowEl) return;
+  const actionEl = rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  const requestId = 'sp-' + (++spDownloadReqSeq);
+  rowEl.dataset.requestId = requestId;
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>
+  `;
+  spActiveDownloads.set(requestId, rowEl);
+
+  const query = `${t.artist} ${t.title}`.replace(/—/g, '').trim();
+  const suggestedName = `${t.artist} - ${t.title}`;
+
+  try {
+    const res = await window.electronAPI.ytDownloadByQuery({ query, suggestedName, requestId, targetDir: settings.defaultFolder || '' });
+    spActiveDownloads.delete(requestId);
+    if (!res || !res.success) {
+      restoreSpDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+      setSpStatus(tr('downloads.yt.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    const doneBtn = restoreSpDownloadButton(actionEl, idx, 'downloads.yt.action.done', 'is-done');
+    if (doneBtn) doneBtn.disabled = true;
+    setSpStatus(tr('downloads.yt.downloadOk', { t: suggestedName }), 'ok');
+  } catch (err) {
+    spActiveDownloads.delete(requestId);
+    restoreSpDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+    setSpStatus(tr('downloads.yt.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  window.electronAPI.onYtDownloadProgress(({ requestId, phase, percent }) => {
+    if (!requestId) return;
+    const rowEl = spActiveDownloads.get(requestId);
+    if (!rowEl) return;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      fill.style.width = percent.toFixed(1) + '%';
+      pct.textContent = Math.round(percent) + '%';
+    }
+  });
+}
+
+if (window.electronAPI && window.electronAPI.onSpotifyParseProgress) {
+  window.electronAPI.onSpotifyParseProgress((data) => {
+    if (!data) return;
+    if (data.message) {
+      const total = typeof data.total === 'number' ? ` · ${data.total}` : '';
+      setSpStatus(data.message + total, data.phase === 'error' ? 'error' : null);
+    }
+    if (Array.isArray(data.tracks)) {
+      renderSpResults(data.tracks);
+    }
+  });
+}
+
+function isSpTrackInQueue(t) {
+  if (!t) return false;
+  const key = ymTrackKey(t);
+  return downloadQueue.some(it => it.source === 'spotify' && it.key === key && it.status !== 'error');
+}
+
+function buildQueueItemFromSp(t) {
+  return {
+    id: 'q-' + (++queueIdSeq),
+    source: 'spotify',
+    key: ymTrackKey(t),
+    artist: t.artist || '',
+    title: t.title || '',
+    duration: t.duration || '',
+    query: `${t.artist || ''} ${t.title || ''}`.replace(/—/g, '').trim(),
+    suggestedName: `${t.artist || ''} - ${t.title || ''}`,
+    videoId: '',
+    url: '',
+    status: 'queued',
+    percent: 0,
+    indeterminate: false,
+    filePath: '',
+    error: '',
+    requestId: '',
+  };
+}
+
+function enqueueSpTrack(idx) {
+  const t = spTracks[idx];
+  if (!t || isSpTrackInQueue(t)) return;
+  downloadQueue.push(buildQueueItemFromSp(t));
+  renderQueue();
+  renderSpResults(spTracks);
+  updateQueueTabBadge();
+  startQueueWorker();
+}
+
+function enqueueAllSpTracks() {
+  if (!spTracks || !spTracks.length) return;
+  let added = 0;
+  for (const t of spTracks) {
+    if (isSpTrackInQueue(t)) continue;
+    downloadQueue.push(buildQueueItemFromSp(t));
+    added++;
+  }
+  if (added > 0) {
+    renderQueue();
+    renderSpResults(spTracks);
+    updateQueueTabBadge();
+    startQueueWorker();
+    activateDlTab('queue');
+  }
+}
+
+async function runSpParse() {
+  if (spParseActive) return;
+  const urlEl = $('dl-sp-url');
+  const startBtn = $('dl-sp-parse-btn');
+  if (!urlEl) return;
+  const url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  spParseActive = true;
+  if (startBtn) startBtn.disabled = true;
+  renderSpResults([]);
+  setSpStatus(tr('downloads.parsing.starting'));
+  try {
+    const res = await window.electronAPI.spotifyParse({ url, showBrowser: !!settings.showParserBrowser });
+    if (!res || !res.success) {
+      setSpStatus(tr('downloads.parsing.error', { e: (res && res.error) || 'unknown' }), 'error');
+      if (res && Array.isArray(res.tracks) && res.tracks.length) renderSpResults(res.tracks);
+    } else {
+      setSpStatus(tr('downloads.parsing.done', { n: res.tracks.length }), 'ok');
+      renderSpResults(res.tracks);
+    }
+  } catch (err) {
+    setSpStatus(tr('downloads.parsing.error', { e: String(err) }), 'error');
+  } finally {
+    spParseActive = false;
+    if (startBtn) startBtn.disabled = false;
+    if (spTracks && spTracks.length) renderSpResults(spTracks);
+  }
+}
+
+(function wireSpControls() {
+  const start = $('dl-sp-parse-btn');
+  const url = $('dl-sp-url');
+  const queueAll = $('dl-sp-queue-all');
+  if (start) start.addEventListener('click', runSpParse);
+  if (queueAll) queueAll.addEventListener('click', enqueueAllSpTracks);
+  if (url) {
+    url.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); runSpParse(); }
+    });
+    url.addEventListener('input', saveSpState);
+  }
+})();
+
 // ── Downloads: Queue ──
 // In-memory queue (per session). Items move queued → downloading → done|error.
 // One concurrent download keeps things simple and predictable.
@@ -3315,6 +3621,7 @@ async function processQueueItem(item) {
   renderQueue();
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
+  renderSpResults(spTracks);
   renderYtResults(ytLastResults);
   updateQueueTabBadge();
 }
@@ -3451,6 +3758,7 @@ function renderQueue() {
       renderQueue();
       renderYmResults(ymTracks);
       renderYtmResults(ytmTracks);
+      renderSpResults(spTracks);
       updateQueueTabBadge();
     });
   });
@@ -3543,6 +3851,7 @@ function clearFinishedFromQueue() {
   renderQueue();
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
+  renderSpResults(spTracks);
   updateQueueTabBadge();
 }
 
@@ -3558,6 +3867,7 @@ function clearAllFromQueue() {
   renderQueue();
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
+  renderSpResults(spTracks);
   updateQueueTabBadge();
 }
 
@@ -3617,6 +3927,15 @@ function restoreDownloadsState() {
     }
   } catch (_) { /* ignore */ }
   try {
+    const raw = localStorage.getItem(LS.spState);
+    if (raw) {
+      const sp = JSON.parse(raw);
+      const urlEl = $('dl-sp-url');
+      if (urlEl && typeof sp.url === 'string') urlEl.value = sp.url;
+      if (Array.isArray(sp.tracks) && sp.tracks.length) renderSpResults(sp.tracks);
+    }
+  } catch (_) { /* ignore */ }
+  try {
     const raw = localStorage.getItem(LS.queue);
     if (!raw) return;
     const parsed = JSON.parse(raw);
@@ -3651,6 +3970,7 @@ function restoreDownloadsState() {
     // Re-render result rows so any "В очереди" badges reflect the restored queue.
     if (ymTracks && ymTracks.length) renderYmResults(ymTracks);
     if (ytmTracks && ytmTracks.length) renderYtmResults(ytmTracks);
+    if (spTracks && spTracks.length) renderSpResults(spTracks);
     if (ytLastResults && ytLastResults.length) renderYtResults(ytLastResults);
     updateQueueTabBadge();
     startQueueWorker();
