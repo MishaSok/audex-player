@@ -559,6 +559,9 @@ const I18N = {
     'modal.newPlaylist.title': 'Новый плейлист',
     'modal.newPlaylist.namePh': 'Название плейлиста',
     'modal.newPlaylist.descPh': 'Описание (необязательно)',
+    'modal.editPlaylist.title': 'Изменить плейлист',
+    'cm.plEdit': 'Изменить название и описание…',
+    'cm.plDelete': 'Удалить плейлист',
     'modal.addToPlaylist.title': 'Добавить в плейлист',
     'modal.addToPlaylist.empty': 'Сначала создай плейлист на вкладке «Плейлисты».',
     'modal.addToPlaylist.alreadyAdded': 'уже добавлен',
@@ -916,6 +919,9 @@ const I18N = {
     'modal.newPlaylist.title': 'New playlist',
     'modal.newPlaylist.namePh': 'Playlist name',
     'modal.newPlaylist.descPh': 'Description (optional)',
+    'modal.editPlaylist.title': 'Edit playlist',
+    'cm.plEdit': 'Edit name and description…',
+    'cm.plDelete': 'Delete playlist',
     'modal.addToPlaylist.title': 'Add to playlist',
     'modal.addToPlaylist.empty': 'Create a playlist on the “Playlists” tab first.',
     'modal.addToPlaylist.alreadyAdded': 'already added',
@@ -1273,6 +1279,9 @@ const I18N = {
     'modal.newPlaylist.title': 'Neue Playlist',
     'modal.newPlaylist.namePh': 'Playlist-Name',
     'modal.newPlaylist.descPh': 'Beschreibung (optional)',
+    'modal.editPlaylist.title': 'Playlist bearbeiten',
+    'cm.plEdit': 'Name und Beschreibung bearbeiten…',
+    'cm.plDelete': 'Playlist löschen',
     'modal.addToPlaylist.title': 'Zur Playlist hinzufügen',
     'modal.addToPlaylist.empty': 'Erstelle zuerst eine Playlist im Tab „Playlists“.',
     'modal.addToPlaylist.alreadyAdded': 'bereits hinzugefügt',
@@ -1630,6 +1639,9 @@ const I18N = {
     'modal.newPlaylist.title': 'Nouvelle playlist',
     'modal.newPlaylist.namePh': 'Nom de la playlist',
     'modal.newPlaylist.descPh': 'Description (facultatif)',
+    'modal.editPlaylist.title': 'Modifier la playlist',
+    'cm.plEdit': 'Modifier le nom et la description…',
+    'cm.plDelete': 'Supprimer la playlist',
     'modal.addToPlaylist.title': 'Ajouter à la playlist',
     'modal.addToPlaylist.empty': "Crée d'abord une playlist dans l'onglet « Playlists ».",
     'modal.addToPlaylist.alreadyAdded': 'déjà ajoutée',
@@ -1987,6 +1999,9 @@ const I18N = {
     'modal.newPlaylist.title': 'Новий плейлист',
     'modal.newPlaylist.namePh': 'Назва плейлиста',
     'modal.newPlaylist.descPh': 'Опис (необов\'язково)',
+    'modal.editPlaylist.title': 'Змінити плейлист',
+    'cm.plEdit': 'Змінити назву та опис…',
+    'cm.plDelete': 'Видалити плейлист',
     'modal.addToPlaylist.title': 'Додати до плейлиста',
     'modal.addToPlaylist.empty': 'Спершу створи плейлист на вкладці «Плейлисти».',
     'modal.addToPlaylist.alreadyAdded': 'вже додано',
@@ -4747,6 +4762,10 @@ function renderPlaylists() {
         activePlaylistId = pl.id;
         setView('playlist-detail');
       });
+      card.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        openPlaylistContextMenu(e, pl.id);
+      });
       grid.appendChild(card);
     });
   }
@@ -6440,6 +6459,74 @@ $('btn-create-playlist').addEventListener('click', () => {
   savePlaylists();
   $('new-playlist-modal').classList.remove('active');
   renderPlaylists();
+});
+
+// ── Playlist context menu + edit modal ──
+// Right-clicking a card in the playlists grid opens a small menu: edit the
+// name/description in a modal, or delete via the shared confirm dialog.
+let pendingContextPlaylistId = null;
+let editingPlaylistId = null;
+
+function openPlaylistContextMenu(e, plId) {
+  pendingContextPlaylistId = plId;
+  const menu = $('playlist-context-menu');
+  menu.classList.add('open');
+  const rect = menu.getBoundingClientRect();
+  const w = 240, h = rect.height || 90;
+  let x = e.clientX, y = e.clientY;
+  if (x + w > window.innerWidth) x = window.innerWidth - w - 8;
+  if (y + h > window.innerHeight) y = window.innerHeight - h - 8;
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+}
+function closePlaylistContextMenu() {
+  $('playlist-context-menu').classList.remove('open');
+  pendingContextPlaylistId = null;
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#playlist-context-menu')) closePlaylistContextMenu();
+});
+document.querySelectorAll('#playlist-context-menu .cm-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    const plId = pendingContextPlaylistId;
+    closePlaylistContextMenu();
+    if (!plId) return;
+    const pl = playlists.find(p => p.id === plId);
+    if (!pl) return;
+    if (action === 'edit') openEditPlaylistModal(plId);
+    else if (action === 'delete') confirmDelete({
+      kind: 'playlist', payload: plId,
+      title: tr('modal.deletePlaylist.title'),
+      text: tr('modal.deletePlaylist.text', { name: pl.name }),
+    });
+  });
+});
+
+function openEditPlaylistModal(plId) {
+  const pl = playlists.find(p => p.id === plId);
+  if (!pl) return;
+  editingPlaylistId = plId;
+  $('edit-playlist-name').value = pl.name || '';
+  $('edit-playlist-desc').value = pl.desc || '';
+  $('edit-playlist-modal').classList.add('active');
+  setTimeout(() => $('edit-playlist-name').focus(), 50);
+}
+$('btn-cancel-edit-playlist').addEventListener('click', () => {
+  $('edit-playlist-modal').classList.remove('active');
+  editingPlaylistId = null;
+});
+$('btn-save-edit-playlist').addEventListener('click', () => {
+  const pl = playlists.find(p => p.id === editingPlaylistId);
+  const name = $('edit-playlist-name').value.trim();
+  if (!pl || !name) return;
+  pl.name = name;
+  pl.desc = $('edit-playlist-desc').value.trim();
+  savePlaylists();
+  $('edit-playlist-modal').classList.remove('active');
+  editingPlaylistId = null;
+  if (currentView === 'playlists') renderPlaylists();
+  else if (currentView === 'playlist-detail' && activePlaylistId === pl.id) renderPlaylistDetail(pl.id);
 });
 
 // ── Add-to-playlist modal ──

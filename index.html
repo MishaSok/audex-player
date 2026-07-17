@@ -1060,6 +1060,19 @@
     </div>
   </div>
 
+  <!-- Edit-playlist Modal -->
+  <div id="edit-playlist-modal" class="modal-overlay">
+    <div class="modal-card modal-card-md">
+      <div class="modal-title" data-i18n="modal.editPlaylist.title">Изменить плейлист</div>
+      <input type="text" class="modal-input" id="edit-playlist-name" placeholder="Название плейлиста" data-i18n-placeholder="modal.newPlaylist.namePh">
+      <input type="text" class="modal-input" id="edit-playlist-desc" placeholder="Описание (необязательно)" data-i18n-placeholder="modal.newPlaylist.descPh">
+      <div class="modal-actions">
+        <button id="btn-cancel-edit-playlist" class="btn-ghost" data-i18n="btn.cancel">Отмена</button>
+        <button id="btn-save-edit-playlist" class="btn-solid" data-i18n="btn.save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Add-to-playlist Modal -->
   <div id="add-to-playlist-modal" class="modal-overlay">
     <div class="modal-card modal-card-md">
@@ -1162,6 +1175,13 @@
     <button class="cm-item cm-highlight" data-action="edit-tags"><svg class="i" width="11" height="11"><use href="#i-edit"/></svg><span data-i18n="cm.editTags">Редактировать теги…</span><span class="cm-sh">⌘E</span></button>
     <div class="cm-divider"></div>
     <button class="cm-item cm-danger" data-action="delete"><svg class="i" width="11" height="11"><use href="#i-trash"/></svg><span data-i18n="cm.delete">Удалить из библиотеки</span><span class="cm-sh">⌫</span></button>
+  </div>
+
+  <!-- Playlist Context Menu -->
+  <div id="playlist-context-menu" class="context-menu">
+    <button class="cm-item" data-action="edit"><svg class="i" width="11" height="11"><use href="#i-edit"/></svg><span data-i18n="cm.plEdit">Изменить название и описание…</span></button>
+    <div class="cm-divider"></div>
+    <button class="cm-item cm-danger" data-action="delete"><svg class="i" width="11" height="11"><use href="#i-trash"/></svg><span data-i18n="cm.plDelete">Удалить плейлист</span></button>
   </div>
 
   <!-- Command Palette (⌘K) -->
