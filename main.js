@@ -84,6 +84,63 @@ function scanDir(dirPath) {
   return results;
 }
 
+// ── Boot splash ──
+// Discord-style: a small frameless window appears instantly while the main
+// window boots hidden. The renderer reports progress ('splash:status') and
+// completion ('splash:done'); a fallback timer reveals the main window anyway
+// if the renderer never reports (e.g. a boot-time error).
+let splashWindow = null;
+let splashFinished = false;
+let splashFallbackTimer = null;
+
+function createSplash() {
+  splashWindow = new BrowserWindow({
+    width: 360,
+    height: 440,
+    frame: false,
+    resizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    show: false,
+    backgroundColor: '#0a0a0b',
+    icon: path.join(__dirname, 'build', 'icon.png'),
+    webPreferences: {
+      preload: path.join(__dirname, 'splash-preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    }
+  });
+  splashWindow.setMenuBarVisibility(false);
+  splashWindow.loadFile('splash.html', { query: { v: app.getVersion() } });
+  splashWindow.once('ready-to-show', () => {
+    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.show();
+  });
+  // User closed the splash by hand (Alt+F4) — don't leave the app invisible.
+  splashWindow.on('closed', () => {
+    splashWindow = null;
+    finishSplash();
+  });
+}
+
+function finishSplash() {
+  if (splashFinished) return;
+  splashFinished = true;
+  if (splashFallbackTimer) { clearTimeout(splashFallbackTimer); splashFallbackTimer = null; }
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    const s = splashWindow;
+    splashWindow = null;
+    s.destroy();
+  }
+}
+
+ipcMain.on('splash:status', (_e, text) => {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.webContents.send('splash:status', String(text || ''));
+  }
+});
+ipcMain.on('splash:done', () => finishSplash());
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -107,10 +164,18 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.autoHideMenuBar = true;
 
-  // Show only once the renderer has painted its first frame — avoids the blank
+  // While the splash is up, keep the main window hidden until the renderer
+  // reports boot completion ('splash:done'). Without a splash (or if it was
+  // already dismissed), show on first paint as before — avoids the blank
   // white window that otherwise flashes (and looks like a freeze) on slow boots.
   mainWindow.once('ready-to-show', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+    if (splashFinished || !splashWindow) {
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+      return;
+    }
+    // Safety net: if the renderer errors out before reporting, don't stay
+    // hidden behind the splash forever.
+    splashFallbackTimer = setTimeout(finishSplash, 30000);
   });
 
   // If the renderer hangs (common with broken GPU drivers on Windows 10), drop a
@@ -277,6 +342,7 @@ ipcMain.handle('tray:updateState', (event, state) => {
 });
 
 app.whenReady().then(() => {
+  createSplash();
   createWindow();
   createTray();
 

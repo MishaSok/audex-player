@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     try { return webFrame.getZoomFactor(); } catch (_) { return 1; }
   },
   setPortrait: (on) => ipcRenderer.invoke('window:setPortrait', { on: !!on }),
+  splashStatus: (text) => ipcRenderer.send('splash:status', text),
+  splashDone: () => ipcRenderer.send('splash:done'),
   openFiles: () => ipcRenderer.invoke('dialog:openFiles'),
   chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder'),
   scanFolder: (folderPath) => ipcRenderer.invoke('music:scanFolder', folderPath),

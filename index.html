@@ -1064,6 +1064,14 @@
   <div id="edit-playlist-modal" class="modal-overlay">
     <div class="modal-card modal-card-md">
       <div class="modal-title" data-i18n="modal.editPlaylist.title">Изменить плейлист</div>
+      <div class="pl-avatar-row">
+        <div class="pl-avatar-preview" id="edit-playlist-avatar-preview"></div>
+        <div class="pl-avatar-btns">
+          <button id="btn-edit-playlist-avatar" class="btn-ghost" data-i18n="modal.editPlaylist.avatarChoose">Выбрать изображение</button>
+          <button id="btn-edit-playlist-avatar-remove" class="btn-ghost" data-i18n="modal.editPlaylist.avatarRemove" hidden>Убрать обложку</button>
+        </div>
+        <input type="file" id="edit-playlist-avatar-file" accept="image/*" hidden>
+      </div>
       <input type="text" class="modal-input" id="edit-playlist-name" placeholder="Название плейлиста" data-i18n-placeholder="modal.newPlaylist.namePh">
       <input type="text" class="modal-input" id="edit-playlist-desc" placeholder="Описание (необязательно)" data-i18n-placeholder="modal.newPlaylist.descPh">
       <div class="modal-actions">

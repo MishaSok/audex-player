@@ -22,6 +22,8 @@
       "preload.js",
       "renderer.js",
       "index.html",
+      "splash.html",
+      "splash-preload.js",
       "style.css",
       "LICENSE",
       "package.json",

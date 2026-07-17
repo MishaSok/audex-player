@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Audex</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #0a0a0b;
+      color: #e7e7e8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-feature-settings: "cv01", "ss01";
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      -webkit-app-region: drag;
+      user-select: none;
+      cursor: default;
+    }
+    .vignette {
+      position: absolute; inset: 0;
+      background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.5));
+      pointer-events: none;
+    }
+    .wrap {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      animation: fadeUp 0.6s ease both;
+    }
+    .mark { position: relative; width: 120px; height: 120px; }
+    .halo {
+      position: absolute; inset: 12%; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 145, 46, 0.2), transparent 68%);
+      animation: markPulse 2.4s ease-in-out infinite;
+    }
+    .mark svg { position: relative; display: block; }
+    .eq {
+      transform-origin: var(--ox) 74px;
+      animation: eqBar 1.05s ease-in-out var(--d) infinite;
+    }
+    .wordmark {
+      margin-top: 26px;
+      font-size: 34px; font-weight: 600; letter-spacing: -0.04em;
+      line-height: 1; color: #f5f5f7;
+    }
+    .tagline {
+      margin-top: 10px;
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(231, 231, 232, 0.4);
+    }
+    .rail {
+      margin-top: 40px;
+      width: 240px; height: 3px; border-radius: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      position: relative; overflow: hidden;
+    }
+    .sweep {
+      position: absolute; top: 0; bottom: 0; width: 35%; border-radius: 3px;
+      background: linear-gradient(90deg, transparent, #e8912e, transparent);
+      animation: barSweep 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    }
+    .status {
+      margin-top: 14px; min-height: 16px;
+      font-size: 12.5px; color: rgba(231, 231, 232, 0.55);
+      display: flex; align-items: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .dots { display: none; gap: 3px; margin-left: 4px; }
+    .status.has-text .dots { display: inline-flex; }
+    .dots span {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: rgba(231, 231, 232, 0.55);
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.18s; }
+    .dots span:nth-child(3) { animation-delay: 0.36s; }
+    .footer {
+      position: absolute; bottom: 18px; width: 100%; text-align: center;
+      font-size: 10.5px; letter-spacing: 0.5px;
+      color: rgba(231, 231, 232, 0.3);
+    }
+    @keyframes eqBar {
+      0%, 100% { transform: scaleY(0.32); }
+      50%      { transform: scaleY(1); }
+    }
+    @keyframes markPulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50%      { opacity: 0.9; transform: scale(1.08); }
+    }
+    @keyframes barSweep {
+      0%   { left: -35%; }
+      100% { left: 100%; }
+    }
+    @keyframes dotPulse {
+      0%, 80%, 100% { opacity: 0.2; }
+      40%           { opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="vignette"></div>
+  <div class="wrap">
+    <div class="mark">
+      <div class="halo"></div>
+      <svg width="120" height="120" viewBox="0 0 100 100" fill="none"
+        stroke="#f5f5f7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 18 88 L 50 14 L 82 88"/>
+        <line class="eq" style="--ox: 40px; --d: 0s"    x1="40" y1="74" x2="40" y2="62" stroke="#e8912e"/>
+        <line class="eq" style="--ox: 50px; --d: 0.18s" x1="50" y1="74" x2="50" y2="48" stroke="#e8912e"/>
+        <line class="eq" style="--ox: 60px; --d: 0.36s" x1="60" y1="74" x2="60" y2="56" stroke="#e8912e"/>
+      </svg>
+    </div>
+    <div class="wordmark">Audex</div>
+    <div class="tagline">Local Audio Player</div>
+    <div class="rail"><div class="sweep"></div></div>
+    <div class="status" id="status">
+      <span id="status-text"></span>
+      <span class="dots"><span></span><span></span><span></span></span>
+    </div>
+  </div>
+  <div class="footer" id="footer"></div>
+  <script>
+    const v = new URLSearchParams(location.search).get('v');
+    document.getElementById('footer').textContent =
+      (v ? 'v' + v + ' · ' : '') + 'Audex Audio Engine';
+    if (window.splashAPI) {
+      window.splashAPI.onStatus(text => {
+        document.getElementById('status-text').textContent = text || '';
+        document.getElementById('status').classList.toggle('has-text', !!text);
+      });
+    }
+  </script>
+</body>
+</html>

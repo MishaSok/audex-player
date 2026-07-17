@@ -1733,6 +1733,36 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   color: rgba(255, 255, 255, 0.25);
   line-height: 0.9;
 }
+.pl-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pl-avatar-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: var(--panel-alt);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.pl-avatar-preview span {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 0.9;
+}
+.pl-avatar-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
 .playlist-name {
   font-size: 13px;
   font-weight: 500;

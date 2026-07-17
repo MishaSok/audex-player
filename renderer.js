@@ -32,7 +32,7 @@ let settings = Object.assign({
   scanSubdirs: true,
   healthCheck: false,
   reports: false,
-  downloads: false,
+  downloads: true,
   showParserBrowser: true,
   uiScale: 1,
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
@@ -229,7 +229,11 @@ function saveLibrary() {
   }
 }
 function savePlaylists() {
-  localStorage.setItem(LS.playlists, JSON.stringify(playlists));
+  try {
+    localStorage.setItem(LS.playlists, JSON.stringify(playlists));
+  } catch (e) {
+    console.warn('localStorage full:', e);
+  }
 }
 function saveSettings() {
   localStorage.setItem(LS.settings, JSON.stringify(settings));
@@ -560,7 +564,11 @@ const I18N = {
     'modal.newPlaylist.namePh': 'Название плейлиста',
     'modal.newPlaylist.descPh': 'Описание (необязательно)',
     'modal.editPlaylist.title': 'Изменить плейлист',
-    'cm.plEdit': 'Изменить название и описание…',
+    'modal.editPlaylist.avatarChoose': 'Выбрать изображение',
+    'modal.editPlaylist.avatarRemove': 'Убрать обложку',
+    'cm.plEdit': 'Изменить плейлист…',
+    'splash.loading': 'Загрузка интерфейса',
+    'splash.scanning': 'Сканирование библиотеки',
     'cm.plDelete': 'Удалить плейлист',
     'modal.addToPlaylist.title': 'Добавить в плейлист',
     'modal.addToPlaylist.empty': 'Сначала создай плейлист на вкладке «Плейлисты».',
@@ -920,7 +928,11 @@ const I18N = {
     'modal.newPlaylist.namePh': 'Playlist name',
     'modal.newPlaylist.descPh': 'Description (optional)',
     'modal.editPlaylist.title': 'Edit playlist',
-    'cm.plEdit': 'Edit name and description…',
+    'modal.editPlaylist.avatarChoose': 'Choose image',
+    'modal.editPlaylist.avatarRemove': 'Remove cover',
+    'cm.plEdit': 'Edit playlist…',
+    'splash.loading': 'Loading interface',
+    'splash.scanning': 'Scanning library',
     'cm.plDelete': 'Delete playlist',
     'modal.addToPlaylist.title': 'Add to playlist',
     'modal.addToPlaylist.empty': 'Create a playlist on the “Playlists” tab first.',
@@ -1280,7 +1292,11 @@ const I18N = {
     'modal.newPlaylist.namePh': 'Playlist-Name',
     'modal.newPlaylist.descPh': 'Beschreibung (optional)',
     'modal.editPlaylist.title': 'Playlist bearbeiten',
-    'cm.plEdit': 'Name und Beschreibung bearbeiten…',
+    'modal.editPlaylist.avatarChoose': 'Bild auswählen',
+    'modal.editPlaylist.avatarRemove': 'Cover entfernen',
+    'cm.plEdit': 'Playlist bearbeiten…',
+    'splash.loading': 'Oberfläche wird geladen',
+    'splash.scanning': 'Bibliothek wird durchsucht',
     'cm.plDelete': 'Playlist löschen',
     'modal.addToPlaylist.title': 'Zur Playlist hinzufügen',
     'modal.addToPlaylist.empty': 'Erstelle zuerst eine Playlist im Tab „Playlists“.',
@@ -1640,7 +1656,11 @@ const I18N = {
     'modal.newPlaylist.namePh': 'Nom de la playlist',
     'modal.newPlaylist.descPh': 'Description (facultatif)',
     'modal.editPlaylist.title': 'Modifier la playlist',
-    'cm.plEdit': 'Modifier le nom et la description…',
+    'modal.editPlaylist.avatarChoose': 'Choisir une image',
+    'modal.editPlaylist.avatarRemove': 'Retirer la pochette',
+    'cm.plEdit': 'Modifier la playlist…',
+    'splash.loading': 'Chargement de l\'interface',
+    'splash.scanning': 'Analyse de la bibliothèque',
     'cm.plDelete': 'Supprimer la playlist',
     'modal.addToPlaylist.title': 'Ajouter à la playlist',
     'modal.addToPlaylist.empty': "Crée d'abord une playlist dans l'onglet « Playlists ».",
@@ -2000,7 +2020,11 @@ const I18N = {
     'modal.newPlaylist.namePh': 'Назва плейлиста',
     'modal.newPlaylist.descPh': 'Опис (необов\'язково)',
     'modal.editPlaylist.title': 'Змінити плейлист',
-    'cm.plEdit': 'Змінити назву та опис…',
+    'modal.editPlaylist.avatarChoose': 'Вибрати зображення',
+    'modal.editPlaylist.avatarRemove': 'Прибрати обкладинку',
+    'cm.plEdit': 'Змінити плейлист…',
+    'splash.loading': 'Завантаження інтерфейсу',
+    'splash.scanning': 'Сканування бібліотеки',
     'cm.plDelete': 'Видалити плейлист',
     'modal.addToPlaylist.title': 'Додати до плейлиста',
     'modal.addToPlaylist.empty': 'Спершу створи плейлист на вкладці «Плейлисти».',
@@ -4745,10 +4769,12 @@ function renderPlaylists() {
       const card = document.createElement('div');
       card.className = 'playlist-card';
       const tracks = pl.trackPaths.map(trackByPath).filter(Boolean);
-      const cover = pl.color || PL_COVERS[i % PL_COVERS.length];
+      const coverStyle = pl.cover
+        ? `background:url(${pl.cover}) center/cover`
+        : `background:${pl.color || PL_COVERS[i % PL_COVERS.length]}`;
       card.innerHTML = `
-        <div class="playlist-cover" style="background:${cover}">
-          <span class="playlist-letter">${escapeHtml((pl.name || '?')[0])}</span>
+        <div class="playlist-cover" style="${coverStyle}">
+          ${pl.cover ? '' : `<span class="playlist-letter">${escapeHtml((pl.name || '?')[0])}</span>`}
         </div>
         <div class="playlist-name">${escapeHtml(pl.name)}</div>
         <div class="playlist-desc">${escapeHtml(pl.desc || '')}</div>
@@ -4777,8 +4803,13 @@ function renderPlaylistDetail(plId) {
   if (!pl) { setView('playlists'); return; }
   $('pl-detail-crumb').textContent = pl.name;
   $('pl-detail-title').textContent = pl.name;
-  $('pl-hero-letter').textContent = (pl.name || '?')[0];
-  $('pl-hero-cover').style.background = pl.color || PL_COVERS[0];
+  if (pl.cover) {
+    $('pl-hero-letter').textContent = '';
+    $('pl-hero-cover').style.background = `url(${pl.cover}) center/cover`;
+  } else {
+    $('pl-hero-letter').textContent = (pl.name || '?')[0];
+    $('pl-hero-cover').style.background = pl.color || PL_COVERS[0];
+  }
   const tracks = pl.trackPaths.map(trackByPath).filter(Boolean);
   const meta = $('pl-detail-meta');
   meta.innerHTML = `
@@ -6503,18 +6534,67 @@ document.querySelectorAll('#playlist-context-menu .cm-item').forEach(btn => {
   });
 });
 
+// Avatar staged while the edit modal is open: undefined = keep as-is,
+// '' = remove on save, non-empty string = new downscaled data URL.
+let pendingEditAvatar;
+function renderEditAvatarPreview() {
+  const pl = playlists.find(p => p.id === editingPlaylistId);
+  const preview = $('edit-playlist-avatar-preview');
+  const cover = pendingEditAvatar !== undefined ? pendingEditAvatar : (pl && pl.cover) || '';
+  if (cover) {
+    preview.style.background = `url(${cover}) center/cover`;
+    preview.innerHTML = '';
+  } else {
+    const idx = Math.max(0, playlists.findIndex(p => p.id === editingPlaylistId));
+    preview.style.background = (pl && pl.color) || PL_COVERS[idx % PL_COVERS.length];
+    preview.innerHTML = `<span>${escapeHtml(((pl && pl.name) || '?')[0])}</span>`;
+  }
+  $('btn-edit-playlist-avatar-remove').hidden = !cover;
+}
+$('btn-edit-playlist-avatar').addEventListener('click', () => {
+  $('edit-playlist-avatar-file').click();
+});
+$('edit-playlist-avatar-file').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      // Downscale to keep localStorage usage small (covers persist in audex-playlists).
+      const max = 512;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingEditAvatar = canvas.toDataURL('image/jpeg', 0.85);
+      renderEditAvatarPreview();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+$('btn-edit-playlist-avatar-remove').addEventListener('click', () => {
+  pendingEditAvatar = '';
+  renderEditAvatarPreview();
+});
 function openEditPlaylistModal(plId) {
   const pl = playlists.find(p => p.id === plId);
   if (!pl) return;
   editingPlaylistId = plId;
+  pendingEditAvatar = undefined;
   $('edit-playlist-name').value = pl.name || '';
   $('edit-playlist-desc').value = pl.desc || '';
+  renderEditAvatarPreview();
   $('edit-playlist-modal').classList.add('active');
   setTimeout(() => $('edit-playlist-name').focus(), 50);
 }
 $('btn-cancel-edit-playlist').addEventListener('click', () => {
   $('edit-playlist-modal').classList.remove('active');
   editingPlaylistId = null;
+  pendingEditAvatar = undefined;
 });
 $('btn-save-edit-playlist').addEventListener('click', () => {
   const pl = playlists.find(p => p.id === editingPlaylistId);
@@ -6522,6 +6602,11 @@ $('btn-save-edit-playlist').addEventListener('click', () => {
   if (!pl || !name) return;
   pl.name = name;
   pl.desc = $('edit-playlist-desc').value.trim();
+  if (pendingEditAvatar !== undefined) {
+    if (pendingEditAvatar) pl.cover = pendingEditAvatar;
+    else delete pl.cover;
+  }
+  pendingEditAvatar = undefined;
   savePlaylists();
   $('edit-playlist-modal').classList.remove('active');
   editingPlaylistId = null;
@@ -7613,14 +7698,24 @@ async function checkForUpdates() {
 }
 
 // Boot
+// The splash window (main.js/createSplash) stays up until splashDone() —
+// the main window is revealed only after the async boot work below finishes.
+function splashStatus(key) {
+  try { window.electronAPI.splashStatus(tr(key)); } catch (_) { /* ignore */ }
+}
 applyLanguage(settings.language);
+splashStatus('splash.loading');
 renderSettings();
 renderLibrary();
 renderRecents();
 updateShuffleUI();
 updateRepeatUI();
 loadLastTrack();
-restoreCovers();
-restoreDownloadsState();
-rescanOnBoot();
-checkForUpdates();
+(async () => {
+  splashStatus('splash.scanning');
+  try { await restoreCovers(); } catch (_) { /* ignore */ }
+  restoreDownloadsState();
+  try { await rescanOnBoot(); } catch (_) { /* ignore */ }
+  try { window.electronAPI.splashDone(); } catch (_) { /* ignore */ }
+  checkForUpdates();
+})();
