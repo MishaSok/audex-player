@@ -172,6 +172,7 @@
           <button class="chip active" data-filter="all" data-i18n="filter.all">Все</button>
           <button class="chip" data-filter="recent" data-i18n="filter.recent">Недавно добавленные</button>
           <button class="chip" data-filter="favorites" data-i18n="filter.favorites">Только избранное</button>
+          <button class="chip" id="btn-select-mode" data-i18n="select.enter">Выбрать</button>
           <div class="sort-right">
             <span data-i18n="sort.label">Сортировка:</span>
             <div class="sort-select" id="sort-select">
@@ -196,6 +197,13 @@
         <div class="quality-note">
           <svg class="i" width="11" height="11"><use href="#i-activity"/></svg>
           <span data-i18n="quality.note">Бейдж качества у каждого трека · </span><span class="quality-note-amber" data-i18n="quality.noteAmber">янтарный = подозрительная перекодировка</span>
+        </div>
+
+        <div id="library-select-bar" class="select-bar" hidden>
+          <span id="select-count-label"></span>
+          <button type="button" id="btn-select-all" class="select-bar-btn" data-i18n="select.all">Выбрать все</button>
+          <button type="button" id="btn-delete-selected" class="select-bar-btn danger" data-i18n="btn.delete">Удалить</button>
+          <button type="button" id="btn-cancel-select" class="select-bar-btn" data-i18n="btn.cancel">Отмена</button>
         </div>
 
         <div id="library-health-filter" class="health-filter-bar" hidden>
@@ -1100,6 +1108,7 @@
   <!-- Track Context Menu -->
   <div id="track-context-menu" class="context-menu">
     <button class="cm-item" data-action="play"><svg class="i" width="11" height="11"><use href="#i-play"/></svg><span data-i18n="cm.play">Играть</span><span class="cm-sh">↵</span></button>
+    <button class="cm-item" data-action="select" id="cm-select" hidden><svg class="i" width="11" height="11"><use href="#i-check"/></svg><span data-i18n="select.enter">Выбрать</span></button>
     <button class="cm-item" data-action="add-to-playlist"><svg class="i" width="11" height="11"><use href="#i-plus"/></svg><span data-i18n="cm.addToPlaylist">Добавить в плейлист</span></button>
     <button class="cm-item" data-action="remove-from-playlist" id="cm-remove-from-pl" hidden><svg class="i" width="11" height="11"><use href="#i-close"/></svg><span data-i18n="cm.removeFromPlaylist">Убрать из плейлиста</span></button>
     <div class="cm-divider"></div>

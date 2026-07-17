@@ -425,6 +425,11 @@ const I18N = {
     'btn.choose': 'Выбрать…',
     'btn.cancel': 'Отмена',
     'btn.delete': 'Удалить',
+    'select.enter': 'Выбрать',
+    'select.count': 'Выбрано: {n}',
+    'select.all': 'Выбрать все',
+    'modal.deleteTracks.title': 'Удалить выбранные треки?',
+    'modal.deleteTracks.text': '{count} будет удалено из библиотеки, а файлы — перемещены в корзину.',
     'btn.create': 'Создать',
     'btn.close': 'Закрыть',
     'btn.save': 'Сохранить',
@@ -772,6 +777,11 @@ const I18N = {
     'btn.choose': 'Choose…',
     'btn.cancel': 'Cancel',
     'btn.delete': 'Delete',
+    'select.enter': 'Select',
+    'select.count': 'Selected: {n}',
+    'select.all': 'Select all',
+    'modal.deleteTracks.title': 'Delete selected tracks?',
+    'modal.deleteTracks.text': '{count} will be removed from the library and the files moved to the trash.',
     'btn.create': 'Create',
     'btn.close': 'Close',
     'btn.save': 'Save',
@@ -1119,6 +1129,11 @@ const I18N = {
     'btn.choose': 'Auswählen…',
     'btn.cancel': 'Abbrechen',
     'btn.delete': 'Löschen',
+    'select.enter': 'Auswählen',
+    'select.count': 'Ausgewählt: {n}',
+    'select.all': 'Alle auswählen',
+    'modal.deleteTracks.title': 'Ausgewählte Titel löschen?',
+    'modal.deleteTracks.text': '{count} werden aus der Bibliothek entfernt und die Dateien in den Papierkorb verschoben.',
     'btn.create': 'Erstellen',
     'btn.close': 'Schließen',
     'btn.save': 'Speichern',
@@ -1466,6 +1481,11 @@ const I18N = {
     'btn.choose': 'Choisir…',
     'btn.cancel': 'Annuler',
     'btn.delete': 'Supprimer',
+    'select.enter': 'Sélectionner',
+    'select.count': 'Sélection : {n}',
+    'select.all': 'Tout sélectionner',
+    'modal.deleteTracks.title': 'Supprimer les pistes sélectionnées ?',
+    'modal.deleteTracks.text': '{count} seront retirées de la bibliothèque et les fichiers déplacés vers la corbeille.',
     'btn.create': 'Créer',
     'btn.close': 'Fermer',
     'btn.save': 'Enregistrer',
@@ -1813,6 +1833,11 @@ const I18N = {
     'btn.choose': 'Обрати…',
     'btn.cancel': 'Скасувати',
     'btn.delete': 'Видалити',
+    'select.enter': 'Вибрати',
+    'select.count': 'Вибрано: {n}',
+    'select.all': 'Вибрати всі',
+    'modal.deleteTracks.title': 'Видалити вибрані треки?',
+    'modal.deleteTracks.text': '{count} буде вилучено з бібліотеки, а файли — переміщено у смітник.',
     'btn.create': 'Створити',
     'btn.close': 'Закрити',
     'btn.save': 'Зберегти',
@@ -2230,6 +2255,9 @@ function createVirtualList({ listEl, scrollEl, rowHeight = ROW_HEIGHT, overscan 
 
 const scrollEl = document.querySelector('.main-content');
 let libraryVList = null;
+let librarySelectMode = false;      // library-view multi-select (bulk delete)
+const selectedPaths = new Set();
+let lastSelectedPath = null;        // anchor for shift-click range selection
 let favoritesVList = null;
 let playlistVList = null;
 
@@ -2326,6 +2354,7 @@ function sortedFilteredLibrary() {
 
 // ── Render: navigation ──
 function setView(view) {
+  if (librarySelectMode && view !== 'library') setLibrarySelectMode(false);
   currentView = view;
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.view === view);
@@ -4190,12 +4219,16 @@ function renderTrackRow(track, displayIndex, queue) {
   const isPlayingRow = currentTrackIndex >= 0
     && library[currentTrackIndex]
     && library[currentTrackIndex].path === track.path;
+  const selectable = librarySelectMode && currentView === 'library';
+  const isSelected = selectable && selectedPaths.has(track.path);
   const tr = document.createElement('div');
-  tr.className = 'trow' + (isPlayingRow ? ' playing' : '');
+  tr.className = 'trow' + (isPlayingRow ? ' playing' : '') + (isSelected ? ' selected' : '');
   tr.dataset.path = track.path;
-  const numCell = isPlayingRow
-    ? `<span class="equalizer"><span></span><span></span><span></span></span>`
-    : String(displayIndex + 1).padStart(2, '0');
+  const numCell = selectable
+    ? `<span class="trow-check${isSelected ? ' checked' : ''}"></span>`
+    : isPlayingRow
+      ? `<span class="equalizer"><span></span><span></span><span></span></span>`
+      : String(displayIndex + 1).padStart(2, '0');
   const coverStyle = track.cover ? `background-image:url('${track.cover}')` : '';
   tr.innerHTML = `
     <div class="trow-num">${numCell}</div>
@@ -4210,6 +4243,18 @@ function renderTrackRow(track, displayIndex, queue) {
     <div class="trow-more"><svg class="i" width="13" height="13"><use href="#i-more"/></svg></div>
   `;
   tr.addEventListener('click', e => {
+    if (currentView === 'library') {
+      if (librarySelectMode) {
+        toggleRowSelection(track.path, e.shiftKey);
+        return;
+      }
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl+Click is a shortcut into select mode.
+        setLibrarySelectMode(true);
+        toggleRowSelection(track.path, false);
+        return;
+      }
+    }
     if (e.target.closest('.trow-more')) {
       e.stopPropagation();
       openContextMenu(e, track.path);
@@ -4262,6 +4307,63 @@ function renderLibrary() {
 }
 
 function pluralTracks(n) { return plural('tracks', n); }
+
+// ── Library multi-select ──
+function setLibrarySelectMode(on) {
+  if (librarySelectMode === on) return;
+  librarySelectMode = on;
+  selectedPaths.clear();
+  lastSelectedPath = null;
+  $('btn-select-mode').classList.toggle('active', on);
+  $('library-select-bar').hidden = !on;
+  updateSelectBar();
+  if (currentView === 'library') renderLibrary();
+}
+
+function updateSelectBar() {
+  $('select-count-label').textContent =
+    tr('select.count', { n: withCount('tracks', selectedPaths.size) });
+  $('btn-delete-selected').disabled = selectedPaths.size === 0;
+}
+
+function toggleRowSelection(path, shiftRange) {
+  if (shiftRange && lastSelectedPath && lastSelectedPath !== path) {
+    // Shift-click selects the visible range between the last-clicked row and this one.
+    const tracks = currentLibraryTracks();
+    const a = tracks.findIndex(t => t.path === lastSelectedPath);
+    const b = tracks.findIndex(t => t.path === path);
+    if (a >= 0 && b >= 0) {
+      const [lo, hi] = a < b ? [a, b] : [b, a];
+      for (let i = lo; i <= hi; i++) selectedPaths.add(tracks[i].path);
+    } else {
+      selectedPaths.add(path);
+    }
+  } else if (selectedPaths.has(path)) {
+    selectedPaths.delete(path);
+  } else {
+    selectedPaths.add(path);
+  }
+  lastSelectedPath = path;
+  updateSelectBar();
+  if (libraryVList) libraryVList.refreshVisible();
+}
+
+$('btn-select-mode').addEventListener('click', () => setLibrarySelectMode(!librarySelectMode));
+$('btn-cancel-select').addEventListener('click', () => setLibrarySelectMode(false));
+$('btn-select-all').addEventListener('click', () => {
+  currentLibraryTracks().forEach(t => selectedPaths.add(t.path));
+  updateSelectBar();
+  if (libraryVList) libraryVList.refreshVisible();
+});
+$('btn-delete-selected').addEventListener('click', () => {
+  if (selectedPaths.size === 0) return;
+  confirmDelete({
+    kind: 'tracks',
+    payload: [...selectedPaths],
+    title: tr('modal.deleteTracks.title'),
+    text: tr('modal.deleteTracks.text', { count: withCount('tracks', selectedPaths.size) }),
+  });
+});
 
 // ── Render: favorites ──
 function renderFavorites() {
@@ -5912,6 +6014,7 @@ $('btn-cancel-delete').addEventListener('click', () => {
 $('btn-confirm-delete').addEventListener('click', () => {
   if (!pendingDelete) return;
   if (pendingDelete.kind === 'track') deleteTrack(pendingDelete.payload);
+  else if (pendingDelete.kind === 'tracks') deleteTracks(pendingDelete.payload);
   else if (pendingDelete.kind === 'playlist') deletePlaylist(pendingDelete.payload);
   $('confirm-modal').classList.remove('active');
   pendingDelete = null;
@@ -5944,6 +6047,48 @@ async function deleteTrack(path) {
   refreshCurrentViewRows();
   renderRecents();
 }
+async function deleteTracks(paths) {
+  const deleted = new Set();
+  let firstError = null;
+  for (const path of paths) {
+    const res = await window.electronAPI.deleteFile(path);
+    if (res && res.success) deleted.add(path);
+    else if (!firstError) firstError = (res && res.error) || tr('error.unknown');
+  }
+  if (deleted.size > 0) {
+    const playingPath = currentTrackIndex >= 0 && library[currentTrackIndex]
+      ? library[currentTrackIndex].path : null;
+    // Mutate in place: currentQueue may alias the library array.
+    for (let i = library.length - 1; i >= 0; i--) {
+      if (deleted.has(library[i].path)) library.splice(i, 1);
+    }
+    if (currentQueue !== library) {
+      for (let i = currentQueue.length - 1; i >= 0; i--) {
+        if (deleted.has(currentQueue[i].path)) currentQueue.splice(i, 1);
+      }
+    }
+    if (playingPath && deleted.has(playingPath)) {
+      audio.pause();
+      isPlaying = false;
+      currentTrackIndex = -1;
+      $('track-title').textContent = tr('np.empty.title');
+      $('track-artist').textContent = '—';
+      updatePlayButtonUI();
+    } else if (playingPath) {
+      currentTrackIndex = trackIndexByPath(playingPath);
+    }
+    favorites = favorites.filter(p => !deleted.has(p));
+    recents = recents.filter(p => !deleted.has(p));
+    playlists.forEach(pl => { pl.trackPaths = pl.trackPaths.filter(p => !deleted.has(p)); });
+    saveLibrary(); savePlaylists(); saveRecents();
+    renderCounts();
+    renderRecents();
+  }
+  setLibrarySelectMode(false); // clears selection and re-renders the library view
+  refreshCurrentViewRows();
+  if (firstError) alert(tr('error.deleteFile') + firstError);
+}
+
 function deletePlaylist(id) {
   playlists = playlists.filter(pl => pl.id !== id);
   savePlaylists();
@@ -6013,6 +6158,7 @@ function openContextMenu(e, path) {
   const menu = $('track-context-menu');
   $('cm-fav-label').textContent = favorites.includes(path) ? tr('btn.unfavorite') : tr('btn.favorite');
   $('cm-remove-from-pl').hidden = !(currentView === 'playlist-detail' && activePlaylistId);
+  $('cm-select').hidden = currentView !== 'library';
   menu.classList.add('open');
   // position
   const rect = menu.getBoundingClientRect();
@@ -6040,6 +6186,10 @@ document.querySelectorAll('#track-context-menu .cm-item').forEach(btn => {
     if (!path) return;
     const track = trackByPath(path);
     if (action === 'play') playTrackByPath(path, currentQueue.length ? currentQueue : library);
+    else if (action === 'select') {
+      setLibrarySelectMode(true); // no-op if already in select mode (keeps existing selection)
+      if (!selectedPaths.has(path)) toggleRowSelection(path, false);
+    }
     else if (action === 'favorite') toggleFavorite(path);
     else if (action === 'reveal') window.electronAPI.revealInFolder(path);
     else if (action === 'edit-tags') openMetadataEditor(path);
@@ -6275,13 +6425,14 @@ document.addEventListener('keydown', e => {
     else if ($('metadata-modal').classList.contains('active')) $('metadata-modal').classList.remove('active');
     else if ($('new-playlist-modal').classList.contains('active')) $('new-playlist-modal').classList.remove('active');
     else if ($('add-to-playlist-modal').classList.contains('active')) $('add-to-playlist-modal').classList.remove('active');
+    else if (librarySelectMode) setLibrarySelectMode(false);
   }
 });
 
 // ── Filters / sort ──
-document.querySelectorAll('#view-library .chip').forEach(chip => {
+document.querySelectorAll('#view-library .chip[data-filter]').forEach(chip => {
   chip.addEventListener('click', () => {
-    document.querySelectorAll('#view-library .chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#view-library .chip[data-filter]').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     activeFilter = chip.dataset.filter;
     renderLibrary();
