@@ -3934,3 +3934,134 @@ html:has(.palette-overlay.active) .dl-progress-fill {
   /* Health-check — stack the score/inspector column above the issue list. */
   .health-grid { grid-template-columns: 1fr; }
 }
+
+/* ─── Boot overlay (in-window loader, replaces the old splash window) ─── */
+#boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #0a0a0b;
+  color: #e7e7e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-feature-settings: "cv01", "ss01";
+  user-select: none;
+  cursor: default;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+#boot-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+#boot-overlay.boot-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.boot-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: bootFadeUp 0.6s ease both;
+}
+.boot-mark { position: relative; width: 120px; height: 120px; }
+.boot-halo {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 145, 46, 0.2), transparent 68%);
+  animation: bootMarkPulse 2.4s ease-in-out infinite;
+}
+.boot-mark svg { position: relative; display: block; }
+.boot-eq {
+  transform-origin: var(--ox) 74px;
+  animation: bootEqBar 1.05s ease-in-out var(--d) infinite;
+}
+.boot-wordmark {
+  margin-top: 26px;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #f5f5f7;
+}
+.boot-tagline {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(231, 231, 232, 0.4);
+}
+.boot-rail {
+  margin-top: 40px;
+  width: 240px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+.boot-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #e8912e, transparent);
+  animation: bootBarSweep 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.boot-status {
+  margin-top: 14px;
+  min-height: 16px;
+  font-size: 12.5px;
+  color: rgba(231, 231, 232, 0.55);
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.boot-dots { display: none; gap: 3px; margin-left: 4px; }
+.boot-status.has-text .boot-dots { display: inline-flex; }
+.boot-dots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(231, 231, 232, 0.55);
+  animation: bootDotPulse 1.4s ease-in-out infinite;
+}
+.boot-dots span:nth-child(2) { animation-delay: 0.18s; }
+.boot-dots span:nth-child(3) { animation-delay: 0.36s; }
+.boot-footer {
+  position: absolute;
+  bottom: 18px;
+  width: 100%;
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: rgba(231, 231, 232, 0.3);
+}
+@keyframes bootEqBar {
+  0%, 100% { transform: scaleY(0.32); }
+  50%      { transform: scaleY(1); }
+}
+@keyframes bootMarkPulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.9; transform: scale(1.08); }
+}
+@keyframes bootBarSweep {
+  0%   { left: -35%; }
+  100% { left: 100%; }
+}
+@keyframes bootDotPulse {
+  0%, 80%, 100% { opacity: 0.2; }
+  40%           { opacity: 1; }
+}
+@keyframes bootFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

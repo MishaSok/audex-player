@@ -4,6 +4,8 @@ const fs = require('fs');
 const net = require('net');
 const { spawn } = require('child_process');
 const https = require('https');
+const crypto = require('crypto');
+const { pathToFileURL } = require('url');
 const musicMetadata = require('music-metadata');
 const NodeID3 = require('node-id3');
 
@@ -84,63 +86,6 @@ function scanDir(dirPath) {
   return results;
 }
 
-// ── Boot splash ──
-// Discord-style: a small frameless window appears instantly while the main
-// window boots hidden. The renderer reports progress ('splash:status') and
-// completion ('splash:done'); a fallback timer reveals the main window anyway
-// if the renderer never reports (e.g. a boot-time error).
-let splashWindow = null;
-let splashFinished = false;
-let splashFallbackTimer = null;
-
-function createSplash() {
-  splashWindow = new BrowserWindow({
-    width: 360,
-    height: 440,
-    frame: false,
-    resizable: false,
-    maximizable: false,
-    fullscreenable: false,
-    show: false,
-    backgroundColor: '#0a0a0b',
-    icon: path.join(__dirname, 'build', 'icon.png'),
-    webPreferences: {
-      preload: path.join(__dirname, 'splash-preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    }
-  });
-  splashWindow.setMenuBarVisibility(false);
-  splashWindow.loadFile('splash.html', { query: { v: app.getVersion() } });
-  splashWindow.once('ready-to-show', () => {
-    if (splashWindow && !splashWindow.isDestroyed()) splashWindow.show();
-  });
-  // User closed the splash by hand (Alt+F4) — don't leave the app invisible.
-  splashWindow.on('closed', () => {
-    splashWindow = null;
-    finishSplash();
-  });
-}
-
-function finishSplash() {
-  if (splashFinished) return;
-  splashFinished = true;
-  if (splashFallbackTimer) { clearTimeout(splashFallbackTimer); splashFallbackTimer = null; }
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
-  if (splashWindow && !splashWindow.isDestroyed()) {
-    const s = splashWindow;
-    splashWindow = null;
-    s.destroy();
-  }
-}
-
-ipcMain.on('splash:status', (_e, text) => {
-  if (splashWindow && !splashWindow.isDestroyed()) {
-    splashWindow.webContents.send('splash:status', String(text || ''));
-  }
-});
-ipcMain.on('splash:done', () => finishSplash());
-
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -164,19 +109,23 @@ function createWindow() {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.autoHideMenuBar = true;
 
-  // While the splash is up, keep the main window hidden until the renderer
-  // reports boot completion ('splash:done'). Without a splash (or if it was
-  // already dismissed), show on first paint as before — avoids the blank
+  // Show only once the renderer has painted its first frame — avoids the blank
   // white window that otherwise flashes (and looks like a freeze) on slow boots.
+  // The renderer paints the boot overlay (#boot-overlay in index.html) first,
+  // so what appears is the loader screen.
   mainWindow.once('ready-to-show', () => {
-    if (splashFinished || !splashWindow) {
-      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
-      return;
-    }
-    // Safety net: if the renderer errors out before reporting, don't stay
-    // hidden behind the splash forever.
-    splashFallbackTimer = setTimeout(finishSplash, 30000);
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
   });
+  // ready-to-show is flaky on some Wayland/GPU combos — it occasionally never
+  // fires, leaving the app tray-only. Guarantee a visible window regardless:
+  // if it still isn't visible shortly after creation, show it anyway (worst
+  // case the user briefly sees the background color instead of the first
+  // painted frame).
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+  }, 2000);
 
   // If the renderer hangs (common with broken GPU drivers on Windows 10), drop a
   // marker so the next launch disables hardware acceleration, and offer an
@@ -342,7 +291,6 @@ ipcMain.handle('tray:updateState', (event, state) => {
 });
 
 app.whenReady().then(() => {
-  createSplash();
   createWindow();
   createTray();
 
@@ -487,6 +435,61 @@ function buildQuality(format) {
     encoder, preset, hasLame, lossless, tier, cutoffKHz: null };
 }
 
+// ── Persistent cover cache ──
+// Extracted cover art is written to <userData>/cover-cache/<sha1(trackPath)>.<ext>
+// the first time a track is parsed. On boot the renderer bulk-loads the whole
+// cache in one 'covers:load' IPC (file:// URLs, no metadata parsing), so covers
+// are available instantly instead of being re-extracted from the audio files
+// every session.
+function coverCacheDir() {
+  return path.join(app.getPath('userData'), 'cover-cache');
+}
+function coverCacheHash(trackPath) {
+  return crypto.createHash('sha1').update(String(trackPath)).digest('hex');
+}
+function coverExt(format) {
+  const f = String(format || '').toLowerCase();
+  if (f.includes('png')) return 'png';
+  if (f.includes('webp')) return 'webp';
+  return 'jpg';
+}
+async function saveCoverToCache(trackPath, picture) {
+  try {
+    const dir = coverCacheDir();
+    const file = path.join(dir, coverCacheHash(trackPath) + '.' + coverExt(picture.format));
+    if (fs.existsSync(file)) return;
+    await fs.promises.mkdir(dir, { recursive: true });
+    await fs.promises.writeFile(file, Buffer.from(picture.data));
+  } catch (_) { /* cache is best-effort */ }
+}
+
+// Bulk cover lookup for the given track paths. Also prunes cache entries whose
+// track is no longer in the library (the renderer always passes the full list).
+ipcMain.handle('covers:load', async (_event, paths) => {
+  const result = {};
+  try {
+    const dir = coverCacheDir();
+    let entries = [];
+    try { entries = await fs.promises.readdir(dir); } catch (_) { return result; }
+    const byHash = new Map();
+    for (const name of entries) {
+      const dot = name.lastIndexOf('.');
+      byHash.set(dot > 0 ? name.slice(0, dot) : name, name);
+    }
+    const wanted = new Set();
+    for (const p of Array.isArray(paths) ? paths : []) {
+      const h = coverCacheHash(p);
+      wanted.add(h);
+      const name = byHash.get(h);
+      if (name) result[p] = pathToFileURL(path.join(dir, name)).href;
+    }
+    for (const [h, name] of byHash) {
+      if (!wanted.has(h)) fs.promises.unlink(path.join(dir, name)).catch(() => {});
+    }
+  } catch (_) { /* cache is best-effort */ }
+  return result;
+});
+
 ipcMain.handle('music:parseMetadata', async (event, filePath) => {
   try {
     const metadata = await musicMetadata.parseFile(filePath);
@@ -497,6 +500,7 @@ ipcMain.handle('music:parseMetadata', async (event, filePath) => {
       const picture = metadata.common.picture[0];
       coverBase64 = Buffer.from(picture.data).toString('base64');
       coverFormat = picture.format;
+      saveCoverToCache(filePath, picture);
     }
 
     return {
@@ -1733,6 +1737,220 @@ ipcMain.handle('spotify:parsePlaylist', async (event, payload) => {
   } finally {
     try { if (spotifyBrowser) await spotifyBrowser.close(); } catch (_) {}
     spotifyBrowser = null;
+  }
+});
+
+// ── VK (ВКонтакте) parser ───────────────────────────────────────────────────
+// Mirrors the Spotify parser: Puppeteer + bundled Chromium with a persistent
+// vk-profile (music requires login — the user signs in once in the visible
+// browser window and the session survives restarts). Only the track list is
+// scraped; audio itself is downloaded via the shared ytsearch1: queue.
+let vkBrowser = null;
+// `.audio_row` is the long-standing VK web-player row; the bracketed variants
+// cover the newer React (VKUI) markup in case VK finishes migrating.
+const VK_TRACK_SEL = '.audio_row, [data-testid="audio_row"], [class*="AudioRow__root"]';
+
+async function extractVkTracksFromDom(page) {
+  return await page.evaluate((TRACK_SEL) => {
+    const textOf = (el) => el ? (el.textContent || '').trim() : '';
+    function firstText(row, sels) {
+      for (const s of sels) {
+        const t = textOf(row.querySelector(s));
+        if (t) return t;
+      }
+      return '';
+    }
+    function coverOf(row) {
+      const el = row.querySelector('.audio_row__cover, [class*="AudioRow__cover"], [class*="__cover"]');
+      if (el) {
+        const bg = (getComputedStyle(el).backgroundImage || '');
+        const m = bg.match(/url\(["']?(.+?)["']?\)/);
+        if (m && !/^data:/.test(m[1])) return m[1];
+      }
+      const img = row.querySelector('img');
+      const src = img ? (img.currentSrc || img.src || '') : '';
+      return /^data:/.test(src) ? '' : src;
+    }
+    const out = [];
+    document.querySelectorAll(TRACK_SEL).forEach(row => {
+      const title = firstText(row, [
+        '.audio_row__title_inner',
+        '.audio_row__title a',
+        '[data-testid="audio_row_title"]',
+        '[class*="AudioRowTitle"]',
+      ]);
+      if (!title) return;
+
+      let artist = '';
+      const perfLinks = row.querySelectorAll('.audio_row__performers a');
+      if (perfLinks.length) {
+        const names = [];
+        perfLinks.forEach(a => {
+          const t = textOf(a);
+          if (t && !names.includes(t)) names.push(t);
+        });
+        artist = names.join(' & ');
+      }
+      if (!artist) {
+        artist = firstText(row, [
+          '.audio_row__performers',
+          '[class*="AudioRowSubtitle"]',
+          '[class*="performer"]',
+        ]);
+      }
+
+      let dur = '';
+      const durText = textOf(row.querySelector('.audio_row__duration, [class*="duration"]'));
+      if (/^\d+:\d{2}$/.test(durText)) dur = durText;
+      if (!dur) {
+        row.querySelectorAll('div,span').forEach(d => {
+          if (dur) return;
+          const t = textOf(d);
+          if (/^\d+:\d{2}$/.test(t) && d.childElementCount === 0) dur = t;
+        });
+      }
+
+      out.push({
+        title,
+        artist: artist || '—',
+        duration: dur || '—',
+        cover_url: coverOf(row),
+      });
+    });
+    return out;
+  }, VK_TRACK_SEL);
+}
+
+ipcMain.handle('vk:parsePlaylist', async (event, payload) => {
+  const url = (payload && payload.url) ? String(payload.url).trim() : '';
+  const showBrowser = !payload || payload.showBrowser !== false;
+  if (!url || !/^https?:\/\/(m\.)?vk\.(com|ru)\//i.test(url)) {
+    return { success: false, error: 'Invalid VK URL' };
+  }
+
+  const send = (data) => {
+    try {
+      if (event && event.sender && !event.sender.isDestroyed()) {
+        event.sender.send('vk:parseProgress', data);
+      }
+    } catch (_) {}
+  };
+
+  let puppeteer;
+  try { puppeteer = require('puppeteer'); } catch (err) {
+    return { success: false, error: 'puppeteer not installed' };
+  }
+
+  const executablePath = resolveBundledChromium();
+  if (!executablePath || !fs.existsSync(executablePath)) {
+    return { success: false, error: 'Bundled Chromium not found. Run "npm install puppeteer" before packaging.' };
+  }
+
+  const userDataDir = path.join(app.getPath('userData'), 'vk-profile');
+  try { fs.mkdirSync(userDataDir, { recursive: true }); } catch (_) {}
+
+  send({ phase: 'launching', message: showBrowser ? 'Запуск браузера…' : 'Запускаем парсер…' });
+
+  try {
+    vkBrowser = await puppeteer.launch({
+      executablePath,
+      headless: !showBrowser,
+      userDataDir,
+      args: [
+        '--no-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-notifications',
+        ...(showBrowser ? ['--window-size=1440,900'] : []),
+      ],
+      defaultViewport: showBrowser ? null : { width: 1440, height: 900 },
+    });
+  } catch (err) {
+    return { success: false, error: 'Failed to launch Chromium: ' + String(err).slice(0, 200) };
+  }
+
+  const collected = new Map();
+
+  try {
+    const pages = await vkBrowser.pages();
+    const page = pages[0] || await vkBrowser.newPage();
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    });
+
+    send({ phase: 'loading', message: 'Открываем страницу…' });
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    } catch (navErr) {
+      // Same rationale as the Yandex/Spotify parsers: the "wait for tracks"
+      // loop below is the real gate, DOMContentLoaded is unreliable on SPAs.
+      send({ phase: 'loading', message: 'Страница грузится дольше обычного, продолжаем…' });
+    }
+    await new Promise(r => setTimeout(r, 2500));
+
+    send({
+      phase: 'loading',
+      message: showBrowser
+        ? 'Ждём загрузку треков (вход во ВКонтакте — в окне браузера, если нужно)…'
+        : 'Ждём загрузку треков…',
+    });
+    // Long deadline on purpose: the first run typically includes a manual login.
+    const deadline = Date.now() + 180_000;
+    let appeared = false;
+    while (Date.now() < deadline) {
+      const count = await page.$$eval(VK_TRACK_SEL, els => els.length).catch(() => 0);
+      if (count > 0) { appeared = true; break; }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    if (!appeared) throw new Error('Треки не появились (нужен вход, приватный плейлист или неверная ссылка?)');
+
+    send({ phase: 'scrolling', message: 'Собираем треки…', total: 0 });
+
+    let noNew = 0;
+    const SCROLL_RETRIES = 6;
+    while (noNew < SCROLL_RETRIES) {
+      const tracks = await extractVkTracksFromDom(page);
+      let added = 0;
+      for (const t of tracks) {
+        const key = `${t.title}|${t.artist}`;
+        if (!collected.has(key)) {
+          collected.set(key, { ...t, index: collected.size + 1, duration_sec: durationToSeconds(t.duration) });
+          added++;
+        }
+      }
+      if (added === 0) noNew++; else noNew = 0;
+      send({
+        phase: 'scrolling',
+        message: 'Собираем треки…',
+        total: collected.size,
+        added,
+        tracks: Array.from(collected.values()),
+      });
+      try {
+        // VK paginates with a "Show more" button in the legacy markup and
+        // infinite scroll in the newer one — handle both.
+        await page.evaluate((sel) => {
+          const more = document.querySelector('.audio_showmore, .show_more, [class*="ShowMore"]');
+          if (more && more.offsetParent !== null) { more.click(); return; }
+          const els = document.querySelectorAll(sel);
+          if (els.length) { els[els.length - 1].scrollIntoView({ block: 'center' }); return; }
+          window.scrollBy(0, 600);
+        }, VK_TRACK_SEL);
+      } catch (_) {
+        await page.evaluate(() => window.scrollBy(0, 600)).catch(() => {});
+      }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+
+    const tracks = Array.from(collected.values());
+    send({ phase: 'done', message: `Готово — ${tracks.length} треков`, total: tracks.length, tracks });
+    return { success: true, tracks };
+  } catch (err) {
+    const msg = String(err && err.message || err).slice(0, 300);
+    send({ phase: 'error', message: msg });
+    return { success: false, error: msg, tracks: Array.from(collected.values()) };
+  } finally {
+    try { if (vkBrowser) await vkBrowser.close(); } catch (_) {}
+    vkBrowser = null;
   }
 });
 

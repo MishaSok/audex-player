@@ -13,6 +13,7 @@ const LS = {
   ymState: 'audex-dl-ym-state',
   ytmState: 'audex-dl-ytm-state',
   spState: 'audex-dl-sp-state',
+  vkState: 'audex-dl-vk-state',
   queue: 'audex-dl-queue',
   wavePeaks: 'audex-wave-peaks',
   playLog: 'audex-play-log',
@@ -508,6 +509,11 @@ const I18N = {
     'downloads.sp.hint': 'Ссылка на плейлист, альбом или исполнителя из Spotify. Парсер работает в фоне.',
     'downloads.sp.idle.title': 'Парсинг Spotify',
     'downloads.sp.idle.text': 'Вставьте ссылку на плейлист или альбом из Spotify. Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.',
+    'downloads.parsing.subtab.vk': 'ВКонтакте',
+    'downloads.vk.urlPlaceholder': 'https://vk.com/music/playlist/…',
+    'downloads.vk.hint': 'Ссылка на плейлист или раздел «Моя музыка» из ВКонтакте. Вход выполняется в окне браузера и сохраняется.',
+    'downloads.vk.idle.title': 'Парсинг ВКонтакте',
+    'downloads.vk.idle.text': 'Вставьте ссылку на плейлист или свою музыку из ВКонтакте. Приложение откроет браузер (при первом запуске войдите в аккаунт), соберёт список треков, и вы сможете скачать любой одним кликом.',
     'downloads.parsing.starting': 'Запускаем парсер…',
     'downloads.parsing.done': 'Готово — собрано треков: {n}',
     'downloads.parsing.error': 'Ошибка парсинга: {e}',
@@ -568,6 +574,8 @@ const I18N = {
     'modal.editPlaylist.avatarRemove': 'Убрать обложку',
     'cm.plEdit': 'Изменить плейлист…',
     'splash.loading': 'Загрузка интерфейса',
+    'splash.covers': 'Загрузка обложек',
+    'splash.caching': 'Кеширование обложек {n} / {total}',
     'splash.scanning': 'Сканирование библиотеки',
     'cm.plDelete': 'Удалить плейлист',
     'modal.addToPlaylist.title': 'Добавить в плейлист',
@@ -872,6 +880,11 @@ const I18N = {
     'downloads.sp.hint': 'Link to a playlist, album, or artist on Spotify. The parser runs in the background.',
     'downloads.sp.idle.title': 'Spotify parsing',
     'downloads.sp.idle.text': 'Paste a playlist or album link from Spotify. The app will open a browser, collect the track list, and let you download any of them in one click.',
+    'downloads.parsing.subtab.vk': 'VK',
+    'downloads.vk.urlPlaceholder': 'https://vk.com/music/playlist/…',
+    'downloads.vk.hint': 'Link to a VK playlist or your VK music. You sign in inside the browser window; the login is remembered.',
+    'downloads.vk.idle.title': 'VK parsing',
+    'downloads.vk.idle.text': 'Paste a link to a VK playlist or your music. The app will open a browser (sign in on first run), collect the track list, and let you download any of them in one click.',
     'downloads.parsing.starting': 'Starting parser…',
     'downloads.parsing.done': 'Done — {n} tracks collected',
     'downloads.parsing.error': 'Parsing error: {e}',
@@ -932,6 +945,8 @@ const I18N = {
     'modal.editPlaylist.avatarRemove': 'Remove cover',
     'cm.plEdit': 'Edit playlist…',
     'splash.loading': 'Loading interface',
+    'splash.covers': 'Loading covers',
+    'splash.caching': 'Caching covers {n} / {total}',
     'splash.scanning': 'Scanning library',
     'cm.plDelete': 'Delete playlist',
     'modal.addToPlaylist.title': 'Add to playlist',
@@ -1236,6 +1251,11 @@ const I18N = {
     'downloads.sp.hint': 'Link zu einer Playlist, einem Album oder einem Interpreten auf Spotify. Der Parser läuft im Hintergrund.',
     'downloads.sp.idle.title': 'Spotify-Parsing',
     'downloads.sp.idle.text': 'Füge einen Playlist- oder Album-Link von Spotify ein. Die App öffnet einen Browser, sammelt die Titelliste, und du kannst jeden Titel mit einem Klick herunterladen.',
+    'downloads.parsing.subtab.vk': 'VK',
+    'downloads.vk.urlPlaceholder': 'https://vk.com/music/playlist/…',
+    'downloads.vk.hint': 'Link zu einer VK-Playlist oder deiner VK-Musik. Die Anmeldung erfolgt im Browserfenster und wird gespeichert.',
+    'downloads.vk.idle.title': 'VK-Parsing',
+    'downloads.vk.idle.text': 'Füge einen Link zu einer VK-Playlist oder deiner Musik ein. Die App öffnet einen Browser (beim ersten Start anmelden), sammelt die Titelliste, und du kannst jeden Titel mit einem Klick herunterladen.',
     'downloads.parsing.starting': 'Parser wird gestartet…',
     'downloads.parsing.done': 'Fertig — {n} Titel gesammelt',
     'downloads.parsing.error': 'Parsing-Fehler: {e}',
@@ -1296,6 +1316,8 @@ const I18N = {
     'modal.editPlaylist.avatarRemove': 'Cover entfernen',
     'cm.plEdit': 'Playlist bearbeiten…',
     'splash.loading': 'Oberfläche wird geladen',
+    'splash.covers': 'Cover werden geladen',
+    'splash.caching': 'Cover werden gecacht {n} / {total}',
     'splash.scanning': 'Bibliothek wird durchsucht',
     'cm.plDelete': 'Playlist löschen',
     'modal.addToPlaylist.title': 'Zur Playlist hinzufügen',
@@ -1600,6 +1622,11 @@ const I18N = {
     'downloads.sp.hint': "Lien vers une playlist, un album ou un artiste sur Spotify. L'analyseur fonctionne en arrière-plan.",
     'downloads.sp.idle.title': 'Analyse Spotify',
     'downloads.sp.idle.text': "Collez un lien de playlist ou d'album depuis Spotify. L'application ouvrira un navigateur, récupérera la liste des pistes, et vous pourrez en télécharger n'importe laquelle en un clic.",
+    'downloads.parsing.subtab.vk': 'VK',
+    'downloads.vk.urlPlaceholder': 'https://vk.com/music/playlist/…',
+    'downloads.vk.hint': 'Lien vers une playlist VK ou votre musique VK. La connexion se fait dans la fenêtre du navigateur et est mémorisée.',
+    'downloads.vk.idle.title': 'Analyse VK',
+    'downloads.vk.idle.text': "Collez un lien vers une playlist VK ou votre musique. L'application ouvrira un navigateur (connectez-vous au premier lancement), récupérera la liste des pistes, et vous pourrez en télécharger n'importe laquelle en un clic.",
     'downloads.parsing.starting': "Démarrage de l'analyseur…",
     'downloads.parsing.done': 'Terminé — {n} pistes collectées',
     'downloads.parsing.error': "Erreur d'analyse : {e}",
@@ -1660,6 +1687,8 @@ const I18N = {
     'modal.editPlaylist.avatarRemove': 'Retirer la pochette',
     'cm.plEdit': 'Modifier la playlist…',
     'splash.loading': 'Chargement de l\'interface',
+    'splash.covers': 'Chargement des pochettes',
+    'splash.caching': 'Mise en cache des pochettes {n} / {total}',
     'splash.scanning': 'Analyse de la bibliothèque',
     'cm.plDelete': 'Supprimer la playlist',
     'modal.addToPlaylist.title': 'Ajouter à la playlist',
@@ -1964,6 +1993,11 @@ const I18N = {
     'downloads.sp.hint': 'Посилання на плейлист, альбом або виконавця зі Spotify. Парсер працює у фоні.',
     'downloads.sp.idle.title': 'Парсинг Spotify',
     'downloads.sp.idle.text': 'Вставте посилання на плейлист або альбом зі Spotify. Застосунок відкриє браузер, збере список треків, і ви зможете завантажити будь-який одним кліком.',
+    'downloads.parsing.subtab.vk': 'ВКонтакте',
+    'downloads.vk.urlPlaceholder': 'https://vk.com/music/playlist/…',
+    'downloads.vk.hint': 'Посилання на плейлист або розділ «Моя музика» з ВКонтакте. Вхід виконується у вікні браузера і зберігається.',
+    'downloads.vk.idle.title': 'Парсинг ВКонтакте',
+    'downloads.vk.idle.text': 'Вставте посилання на плейлист або свою музику з ВКонтакте. Застосунок відкриє браузер (за першого запуску увійдіть в акаунт), збере список треків, і ви зможете завантажити будь-який одним кліком.',
     'downloads.parsing.starting': 'Запускаємо парсер…',
     'downloads.parsing.done': 'Готово — зібрано треків: {n}',
     'downloads.parsing.error': 'Помилка парсингу: {e}',
@@ -2024,6 +2058,8 @@ const I18N = {
     'modal.editPlaylist.avatarRemove': 'Прибрати обкладинку',
     'cm.plEdit': 'Змінити плейлист…',
     'splash.loading': 'Завантаження інтерфейсу',
+    'splash.covers': 'Завантаження обкладинок',
+    'splash.caching': 'Кешування обкладинок {n} / {total}',
     'splash.scanning': 'Сканування бібліотеки',
     'cm.plDelete': 'Видалити плейлист',
     'modal.addToPlaylist.title': 'Додати до плейлиста',
@@ -2343,7 +2379,11 @@ function scheduleCoverRefresh() {
     if ($('palette-overlay').classList.contains('active')) renderPaletteResults($('palette-input').value);
   });
 }
-async function ensureCoverFor(track) {
+// `quiet` skips the visible-row refresh — used by the boot-time background
+// warmer, whose per-batch refreshes rebuilt the rows under the cursor and made
+// the hover background flicker. Quietly-loaded covers appear when rows
+// re-render naturally (scroll, track change, or the warmer's final refresh).
+async function ensureCoverFor(track, quiet = false) {
   if (!track || pendingCoverLoad.has(track.path)) return;
   const needCover = !track.cover;
   const needQuality = track.quality === undefined || track.hasCover === undefined;
@@ -2367,7 +2407,7 @@ async function ensureCoverFor(track) {
           updateNowPlayingUI(library[currentTrackIndex]);
         }
       }
-      if (touched) scheduleCoverRefresh();
+      if (touched && !quiet) scheduleCoverRefresh();
     }
   } catch (e) { /* file moved / unreadable */ }
 }
@@ -3399,6 +3439,7 @@ function enqueueSpTrack(idx) {
   downloadQueue.push(buildQueueItemFromSp(t));
   renderQueue();
   renderSpResults(spTracks);
+  renderVkResults(vkTracks);
   updateQueueTabBadge();
   startQueueWorker();
 }
@@ -3460,6 +3501,285 @@ async function runSpParse() {
       if (e.key === 'Enter') { e.preventDefault(); runSpParse(); }
     });
     url.addEventListener('input', saveSpState);
+  }
+})();
+
+// ── Downloads: VK (ВКонтакте) parsing ──
+// Mirrors the Spotify section: Puppeteer scrapes the VK web player (login
+// persists in the vk-profile browser profile), downloads go through
+// ytsearch1: by "artist title" query via the shared queue (source 'vk').
+let vkParseActive = false;
+let vkTracks = [];
+let vkDownloadReqSeq = 0;
+const vkActiveDownloads = new Map(); // requestId -> rowEl
+
+function setVkStatus(text, kind) {
+  const el = $('dl-vk-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function saveVkState() {
+  try {
+    const u = $('dl-vk-url');
+    localStorage.setItem(LS.vkState, JSON.stringify({
+      url: u ? u.value : '',
+      tracks: vkTracks,
+    }));
+  } catch (_) { /* ignore */ }
+}
+
+function renderVkResults(tracks) {
+  vkTracks = tracks || [];
+  saveVkState();
+  const wrap = $('dl-vk-results');
+  const rows = $('dl-vk-rows');
+  const empty = $('dl-vk-empty');
+  const note = $('dl-vk-tag-note');
+  const queueAllBtn = $('dl-vk-queue-all');
+  if (!wrap || !rows) return;
+  if (!vkTracks.length) {
+    wrap.hidden = true;
+    if (note) note.hidden = true;
+    if (empty) empty.classList.add('show');
+    if (queueAllBtn) queueAllBtn.hidden = true;
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  if (note) note.hidden = false;
+  if (queueAllBtn) {
+    queueAllBtn.hidden = false;
+    queueAllBtn.disabled = vkParseActive;
+  }
+  const disabledAttr = vkParseActive ? ' disabled' : '';
+  rows.innerHTML = vkTracks.map((t, i) => {
+    const queued = isVkTrackInQueue(t);
+    const queuedCls = queued ? ' is-done' : '';
+    const queueDis = vkParseActive || queued ? ' disabled' : '';
+    const queueLabel = queued ? tr('downloads.queue.queued') : tr('downloads.queue.add');
+    const coverStyle = t.cover_url ? `background-image:url('${escapeHtml(t.cover_url)}')` : '';
+    return `
+      <div class="dl-row-ym dl-row-ytm" data-vk-row="${i}">
+        <div class="num">${i + 1}</div>
+        <div class="cover" style="${coverStyle}"></div>
+        <div class="artist" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+        <div class="title" title="${escapeHtml(t.title || '')}">${escapeHtml(t.title || '')}</div>
+        <div class="duration">${escapeHtml(t.duration || '')}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn dl-queue-btn${queuedCls}" data-vk-queue="${i}"${queueDis} title="${escapeHtml(queueLabel)}">
+            <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+            <span>${escapeHtml(queueLabel)}</span>
+          </button>
+          <button type="button" class="dl-download-btn" data-vk-dl="${i}"${disabledAttr}>
+            <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+            <span>${escapeHtml(tr('downloads.yt.action.download'))}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-vk-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-vk-dl'), 10);
+      if (!isNaN(idx)) downloadVkTrack(idx, btn);
+    });
+  });
+  rows.querySelectorAll('[data-vk-queue]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-vk-queue'), 10);
+      if (!isNaN(idx)) enqueueVkTrack(idx);
+    });
+  });
+}
+
+function restoreVkDownloadButton(actionEl, idx, labelKey, cls) {
+  actionEl.innerHTML = `
+    <button type="button" class="dl-download-btn ${cls || ''}" data-vk-dl="${idx}">
+      <svg class="i" width="12" height="12"><use href="#i-download"/></svg>
+      <span>${escapeHtml(tr(labelKey))}</span>
+    </button>
+  `;
+  const newBtn = actionEl.querySelector('[data-vk-dl]');
+  if (newBtn) newBtn.addEventListener('click', () => downloadVkTrack(idx, newBtn));
+  return newBtn;
+}
+
+async function downloadVkTrack(idx, btn) {
+  const t = vkTracks[idx];
+  if (!t || !btn) return;
+  if (btn.classList.contains('is-done')) return;
+  const rowEl = btn.closest('.dl-row-ym');
+  if (!rowEl) return;
+  const actionEl = rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  const requestId = 'vk-' + (++vkDownloadReqSeq);
+  rowEl.dataset.requestId = requestId;
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>
+  `;
+  vkActiveDownloads.set(requestId, rowEl);
+
+  const query = `${t.artist} ${t.title}`.replace(/—/g, '').trim();
+  const suggestedName = `${t.artist} - ${t.title}`;
+
+  try {
+    const res = await window.electronAPI.ytDownloadByQuery({ query, suggestedName, requestId, targetDir: settings.defaultFolder || '' });
+    vkActiveDownloads.delete(requestId);
+    if (!res || !res.success) {
+      restoreVkDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+      setVkStatus(tr('downloads.yt.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    const doneBtn = restoreVkDownloadButton(actionEl, idx, 'downloads.yt.action.done', 'is-done');
+    if (doneBtn) doneBtn.disabled = true;
+    setVkStatus(tr('downloads.yt.downloadOk', { t: suggestedName }), 'ok');
+  } catch (err) {
+    vkActiveDownloads.delete(requestId);
+    restoreVkDownloadButton(actionEl, idx, 'downloads.yt.action.retry', 'is-error');
+    setVkStatus(tr('downloads.yt.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  window.electronAPI.onYtDownloadProgress(({ requestId, phase, percent }) => {
+    if (!requestId) return;
+    const rowEl = vkActiveDownloads.get(requestId);
+    if (!rowEl) return;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      fill.style.width = percent.toFixed(1) + '%';
+      pct.textContent = Math.round(percent) + '%';
+    }
+  });
+}
+
+if (window.electronAPI && window.electronAPI.onVkParseProgress) {
+  window.electronAPI.onVkParseProgress((data) => {
+    if (!data) return;
+    if (data.message) {
+      const total = typeof data.total === 'number' ? ` · ${data.total}` : '';
+      setVkStatus(data.message + total, data.phase === 'error' ? 'error' : null);
+    }
+    if (Array.isArray(data.tracks)) {
+      renderVkResults(data.tracks);
+    }
+  });
+}
+
+function isVkTrackInQueue(t) {
+  if (!t) return false;
+  const key = ymTrackKey(t);
+  return downloadQueue.some(it => it.source === 'vk' && it.key === key && it.status !== 'error');
+}
+
+function buildQueueItemFromVk(t) {
+  return {
+    id: 'q-' + (++queueIdSeq),
+    source: 'vk',
+    key: ymTrackKey(t),
+    artist: t.artist || '',
+    title: t.title || '',
+    duration: t.duration || '',
+    query: `${t.artist || ''} ${t.title || ''}`.replace(/—/g, '').trim(),
+    suggestedName: `${t.artist || ''} - ${t.title || ''}`,
+    videoId: '',
+    url: '',
+    status: 'queued',
+    percent: 0,
+    indeterminate: false,
+    filePath: '',
+    error: '',
+    requestId: '',
+  };
+}
+
+function enqueueVkTrack(idx) {
+  const t = vkTracks[idx];
+  if (!t || isVkTrackInQueue(t)) return;
+  downloadQueue.push(buildQueueItemFromVk(t));
+  renderQueue();
+  renderVkResults(vkTracks);
+  updateQueueTabBadge();
+  startQueueWorker();
+}
+
+function enqueueAllVkTracks() {
+  if (!vkTracks || !vkTracks.length) return;
+  let added = 0;
+  for (const t of vkTracks) {
+    if (isVkTrackInQueue(t)) continue;
+    downloadQueue.push(buildQueueItemFromVk(t));
+    added++;
+  }
+  if (added > 0) {
+    renderQueue();
+    renderVkResults(vkTracks);
+    updateQueueTabBadge();
+    startQueueWorker();
+    activateDlTab('queue');
+  }
+}
+
+async function runVkParse() {
+  if (vkParseActive) return;
+  const urlEl = $('dl-vk-url');
+  const startBtn = $('dl-vk-parse-btn');
+  if (!urlEl) return;
+  const url = urlEl.value.trim();
+  if (!url) { urlEl.focus(); return; }
+  vkParseActive = true;
+  if (startBtn) startBtn.disabled = true;
+  renderVkResults([]);
+  setVkStatus(tr('downloads.parsing.starting'));
+  try {
+    const res = await window.electronAPI.vkParse({ url, showBrowser: !!settings.showParserBrowser });
+    if (!res || !res.success) {
+      setVkStatus(tr('downloads.parsing.error', { e: (res && res.error) || 'unknown' }), 'error');
+      if (res && Array.isArray(res.tracks) && res.tracks.length) renderVkResults(res.tracks);
+    } else {
+      setVkStatus(tr('downloads.parsing.done', { n: res.tracks.length }), 'ok');
+      renderVkResults(res.tracks);
+    }
+  } catch (err) {
+    setVkStatus(tr('downloads.parsing.error', { e: String(err) }), 'error');
+  } finally {
+    vkParseActive = false;
+    if (startBtn) startBtn.disabled = false;
+    if (vkTracks && vkTracks.length) renderVkResults(vkTracks);
+  }
+}
+
+(function wireVkControls() {
+  const start = $('dl-vk-parse-btn');
+  const url = $('dl-vk-url');
+  const queueAll = $('dl-vk-queue-all');
+  if (start) start.addEventListener('click', runVkParse);
+  if (queueAll) queueAll.addEventListener('click', enqueueAllVkTracks);
+  if (url) {
+    url.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); runVkParse(); }
+    });
+    url.addEventListener('input', saveVkState);
   }
 })();
 
@@ -3661,6 +3981,7 @@ async function processQueueItem(item) {
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
   renderSpResults(spTracks);
+  renderVkResults(vkTracks);
   renderYtResults(ytLastResults);
   updateQueueTabBadge();
 }
@@ -3798,6 +4119,7 @@ function renderQueue() {
       renderYmResults(ymTracks);
       renderYtmResults(ytmTracks);
       renderSpResults(spTracks);
+      renderVkResults(vkTracks);
       updateQueueTabBadge();
     });
   });
@@ -3891,6 +4213,7 @@ function clearFinishedFromQueue() {
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
   renderSpResults(spTracks);
+  renderVkResults(vkTracks);
   updateQueueTabBadge();
 }
 
@@ -3907,6 +4230,7 @@ function clearAllFromQueue() {
   renderYmResults(ymTracks);
   renderYtmResults(ytmTracks);
   renderSpResults(spTracks);
+  renderVkResults(vkTracks);
   updateQueueTabBadge();
 }
 
@@ -3975,6 +4299,15 @@ function restoreDownloadsState() {
     }
   } catch (_) { /* ignore */ }
   try {
+    const raw = localStorage.getItem(LS.vkState);
+    if (raw) {
+      const vk = JSON.parse(raw);
+      const urlEl = $('dl-vk-url');
+      if (urlEl && typeof vk.url === 'string') urlEl.value = vk.url;
+      if (Array.isArray(vk.tracks) && vk.tracks.length) renderVkResults(vk.tracks);
+    }
+  } catch (_) { /* ignore */ }
+  try {
     const raw = localStorage.getItem(LS.queue);
     if (!raw) return;
     const parsed = JSON.parse(raw);
@@ -4010,6 +4343,7 @@ function restoreDownloadsState() {
     if (ymTracks && ymTracks.length) renderYmResults(ymTracks);
     if (ytmTracks && ytmTracks.length) renderYtmResults(ytmTracks);
     if (spTracks && spTracks.length) renderSpResults(spTracks);
+    if (vkTracks && vkTracks.length) renderVkResults(vkTracks);
     if (ytLastResults && ytLastResults.length) renderYtResults(ytLastResults);
     updateQueueTabBadge();
     startQueueWorker();
@@ -7698,24 +8032,108 @@ async function checkForUpdates() {
 }
 
 // Boot
-// The splash window (main.js/createSplash) stays up until splashDone() —
-// the main window is revealed only after the async boot work below finishes.
-function splashStatus(key) {
-  try { window.electronAPI.splashStatus(tr(key)); } catch (_) { /* ignore */ }
+// The boot overlay (#boot-overlay in index.html) covers the window from first
+// paint; the phases below update its status line, and hideBootOverlay() fades
+// it out once the async boot work finishes.
+const bootStartedAt = Date.now();
+const BOOT_OVERLAY_MIN_MS = 800; // don't blink on instant warm boots
+function splashStatus(key, params) {
+  const el = document.getElementById('boot-status-text');
+  if (!el) return;
+  const text = tr(key, params);
+  el.textContent = text;
+  document.getElementById('boot-status').classList.toggle('has-text', !!text);
 }
+function hideBootOverlay() {
+  const overlay = document.getElementById('boot-overlay');
+  if (!overlay) return;
+  const left = BOOT_OVERLAY_MIN_MS - (Date.now() - bootStartedAt);
+  setTimeout(() => {
+    overlay.classList.add('boot-hide');
+    // Drop it from the DOM after the fade so it can't intercept anything.
+    setTimeout(() => overlay.remove(), 600);
+  }, Math.max(0, left));
+}
+// Version line in the overlay footer (single source: the Settings version tag).
+(() => {
+  const tag = document.querySelector('.version-tag');
+  const footer = document.getElementById('boot-footer');
+  if (tag && footer) footer.textContent = `${tag.textContent.trim()} · Audex Audio Engine`;
+})();
+// Hard fallback: never leave the overlay up if something in the boot chain throws.
+setTimeout(hideBootOverlay, 30000);
+
+// While the splash is still up, fully cache the first `count` tracks of the
+// default library view (covers + quality), so the screen the user lands on is
+// completely drawn and the disk cache covers it on the next boot. On warm
+// boots everything is already cached and this is a no-op.
+async function warmFirstCoversDuringSplash(count) {
+  const first = sortedFilteredLibrary().slice(0, count).filter(t =>
+    (!t.cover && t.hasCover !== false) || t.quality === undefined || t.hasCover === undefined);
+  const total = first.length;
+  if (total === 0) return;
+  let idx = 0;
+  let done = 0;
+  const worker = async () => {
+    while (idx < first.length) {
+      const t = first[idx++];
+      try { await ensureCoverFor(t, true); } catch (_) { /* ignore */ }
+      done++;
+      if (done % 5 === 0 || done === total) splashStatus('splash.caching', { n: done, total });
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  scheduleCoverRefresh();
+}
+
+// Bulk-load the persistent disk cover cache (one IPC round-trip) before the
+// first row render, so covers appear instantly without per-track metadata
+// parsing while scrolling.
+async function warmCoversFromDisk() {
+  if (library.length === 0) return;
+  try {
+    const map = await window.electronAPI.loadCoverCache(library.map(t => t.path));
+    for (const p in map) {
+      coverCache[p] = map[p];
+      const t = trackByPath(p);
+      if (t && !t.cover) t.cover = map[p];
+    }
+  } catch (_) { /* cache is best-effort */ }
+}
+
+// After boot, parse whatever the disk cache didn't have (covers + quality)
+// in small throttled batches. Each parse also writes the extracted cover to
+// the disk cache in the main process, so the next boot is fully warm.
+function warmMissingCoversInBackground() {
+  const missing = library.filter(t =>
+    (!t.cover && t.hasCover !== false) || t.quality === undefined || t.hasCover === undefined);
+  let i = 0;
+  const step = () => {
+    if (i >= missing.length) { scheduleCoverRefresh(); return; }
+    const batch = missing.slice(i, i + 4);
+    i += 4;
+    Promise.allSettled(batch.map(t => ensureCoverFor(t, true))).then(() => setTimeout(step, 200));
+  };
+  step();
+}
+
 applyLanguage(settings.language);
 splashStatus('splash.loading');
 renderSettings();
-renderLibrary();
-renderRecents();
 updateShuffleUI();
 updateRepeatUI();
-loadLastTrack();
 (async () => {
+  splashStatus('splash.covers');
+  await warmCoversFromDisk();
+  renderLibrary();
+  renderRecents();
+  loadLastTrack();
+  try { await warmFirstCoversDuringSplash(200); } catch (_) { /* ignore */ }
   splashStatus('splash.scanning');
   try { await restoreCovers(); } catch (_) { /* ignore */ }
   restoreDownloadsState();
   try { await rescanOnBoot(); } catch (_) { /* ignore */ }
-  try { window.electronAPI.splashDone(); } catch (_) { /* ignore */ }
+  hideBootOverlay();
   checkForUpdates();
+  warmMissingCoversInBackground();
 })();

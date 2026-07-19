@@ -9,6 +9,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Boot overlay: full-window loader shown from first paint until the
+       renderer finishes booting (renderer.js hides it). Replaces the old
+       separate splash window — Wayland can't position windows, an in-window
+       overlay centers itself with CSS and works on every backend. -->
+  <div id="boot-overlay">
+    <div class="boot-wrap">
+      <div class="boot-mark">
+        <div class="boot-halo"></div>
+        <svg width="120" height="120" viewBox="0 0 100 100" fill="none"
+          stroke="#f5f5f7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 18 88 L 50 14 L 82 88"/>
+          <line class="boot-eq" style="--ox: 40px; --d: 0s"    x1="40" y1="74" x2="40" y2="62" stroke="#e8912e"/>
+          <line class="boot-eq" style="--ox: 50px; --d: 0.18s" x1="50" y1="74" x2="50" y2="48" stroke="#e8912e"/>
+          <line class="boot-eq" style="--ox: 60px; --d: 0.36s" x1="60" y1="74" x2="60" y2="56" stroke="#e8912e"/>
+        </svg>
+      </div>
+      <div class="boot-wordmark">Audex</div>
+      <div class="boot-tagline">Local Audio Player</div>
+      <div class="boot-rail"><div class="boot-sweep"></div></div>
+      <div class="boot-status" id="boot-status">
+        <span id="boot-status-text"></span>
+        <span class="boot-dots"><span></span><span></span><span></span></span>
+      </div>
+    </div>
+    <div class="boot-footer" id="boot-footer">Audex Audio Engine</div>
+  </div>
   <!-- SVG icon symbols -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
@@ -518,6 +544,7 @@
             <button type="button" class="dl-subtab is-active" data-dl-subtab="yandex" role="tab" aria-selected="true" data-i18n="downloads.parsing.subtab.yandex">Яндекс.Музыка</button>
             <button type="button" class="dl-subtab" data-dl-subtab="ytmusic" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.ytmusic">YouTube Music</button>
             <button type="button" class="dl-subtab" data-dl-subtab="spotify" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.spotify">Spotify</button>
+            <button type="button" class="dl-subtab" data-dl-subtab="vk" role="tab" aria-selected="false" data-i18n="downloads.parsing.subtab.vk">ВКонтакте</button>
           </div>
 
           <div class="dl-subpane" data-dl-subpane="yandex">
@@ -647,6 +674,49 @@
               <div class="empty-text" data-i18n="downloads.sp.idle.text">Вставьте ссылку на плейлист или альбом из Spotify. Приложение откроет браузер, соберёт список треков, и вы сможете скачать любой одним кликом.</div>
             </div>
           </div>
+
+          <div class="dl-subpane" data-dl-subpane="vk" hidden>
+            <div class="dl-search">
+              <div class="dl-search-row">
+                <label class="dl-search-field" for="dl-vk-url">
+                  <svg class="i" width="13" height="13"><use href="#i-link"/></svg>
+                  <input type="text" id="dl-vk-url" class="dl-search-input" data-i18n-placeholder="downloads.vk.urlPlaceholder" placeholder="https://vk.com/music/playlist/…">
+                </label>
+                <button type="button" id="dl-vk-parse-btn" class="dl-search-btn">
+                  <svg class="i" width="12" height="12"><use href="#i-play"/></svg>
+                  <span data-i18n="downloads.parsing.start">Парсить</span>
+                </button>
+              </div>
+              <div class="dl-search-hint" data-i18n="downloads.vk.hint">Ссылка на плейлист или раздел «Моя музыка» из ВКонтакте. Вход выполняется в окне браузера и сохраняется.</div>
+            </div>
+
+            <div id="dl-vk-status" class="dl-status" hidden></div>
+
+            <button type="button" id="dl-vk-queue-all" class="dl-search-btn dl-search-btn-secondary dl-ym-queue-all" hidden>
+              <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+              <span data-i18n="downloads.queue.addAll">Все треки в очередь</span>
+            </button>
+
+            <div id="dl-vk-results" class="dl-results" hidden>
+              <div class="dl-results-head dl-results-head-ym dl-results-head-ytm">
+                <div class="dl-col-num">#</div>
+                <div class="dl-col-cover"></div>
+                <div class="dl-col-artist" data-i18n="downloads.parsing.col.artist">Исполнитель</div>
+                <div class="dl-col-title" data-i18n="downloads.parsing.col.title">Название</div>
+                <div class="dl-col-duration" data-i18n="downloads.parsing.col.duration">Длит.</div>
+                <div class="dl-col-action"></div>
+              </div>
+              <div id="dl-vk-rows" class="dl-results-body"></div>
+            </div>
+
+            <div id="dl-vk-tag-note" class="dl-tag-note" hidden data-i18n="downloads.yt.tagNote">После скачивания, возможно, потребуется вручную поправить MP3-теги (название, исполнитель, обложка) через контекстное меню трека.</div>
+
+            <div id="dl-vk-empty" class="empty-block show">
+              <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-link"/></svg></div>
+              <div class="empty-title-lg" data-i18n="downloads.vk.idle.title">Парсинг ВКонтакте</div>
+              <div class="empty-text" data-i18n="downloads.vk.idle.text">Вставьте ссылку на плейлист или свою музыку из ВКонтакте. Приложение откроет браузер (при первом запуске войдите в аккаунт), соберёт список треков, и вы сможете скачать любой одним кликом.</div>
+            </div>
+          </div>
         </div>
 
         <div class="dl-pane" data-dl-pane="queue" hidden>
@@ -684,7 +754,7 @@
           <div class="crumb">
             <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
           </div>
-          <div class="version-tag">Audex 1.1.6</div>
+          <div class="version-tag">Audex 1.1.7</div>
         </header>
 
         <div class="settings-page">
@@ -909,7 +979,7 @@
               <div class="setting-row">
                 <div class="setting-text">
                   <div class="setting-label" data-i18n="setting.version">Версия</div>
-                  <div class="setting-desc">1.1.6 · Electron · Linux</div>
+                  <div class="setting-desc">1.1.7 · Electron · Linux</div>
                 </div>
               </div>
             </div>

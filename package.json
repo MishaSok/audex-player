@@ -1,7 +1,7 @@
 {
   "name": "audex-player",
   "productName": "Audex",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Audex — minimal desktop music player",
   "main": "main.js",
   "scripts": {
@@ -22,8 +22,6 @@
       "preload.js",
       "renderer.js",
       "index.html",
-      "splash.html",
-      "splash-preload.js",
       "style.css",
       "LICENSE",
       "package.json",

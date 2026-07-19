@@ -8,12 +8,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     try { return webFrame.getZoomFactor(); } catch (_) { return 1; }
   },
   setPortrait: (on) => ipcRenderer.invoke('window:setPortrait', { on: !!on }),
-  splashStatus: (text) => ipcRenderer.send('splash:status', text),
-  splashDone: () => ipcRenderer.send('splash:done'),
   openFiles: () => ipcRenderer.invoke('dialog:openFiles'),
   chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder'),
   scanFolder: (folderPath) => ipcRenderer.invoke('music:scanFolder', folderPath),
   parseMetadata: (filePath) => ipcRenderer.invoke('music:parseMetadata', filePath),
+  loadCoverCache: (paths) => ipcRenderer.invoke('covers:load', paths),
   readAudioFile: (filePath) => ipcRenderer.invoke('audio:readFile', filePath),
   writeMetadata: (filePath, tags) => ipcRenderer.invoke('music:writeMetadata', { filePath, tags }),
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
@@ -43,6 +42,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const listener = (_e, data) => cb(data);
     ipcRenderer.on('spotify:parseProgress', listener);
     return () => ipcRenderer.removeListener('spotify:parseProgress', listener);
+  },
+  vkParse: (payload) => ipcRenderer.invoke('vk:parsePlaylist', payload),
+  onVkParseProgress: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('vk:parseProgress', listener);
+    return () => ipcRenderer.removeListener('vk:parseProgress', listener);
   },
   discordConnect: (clientId) => ipcRenderer.invoke('discord:connect', { clientId }),
   discordDisconnect: () => ipcRenderer.invoke('discord:disconnect'),
