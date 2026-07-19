@@ -33,6 +33,7 @@ let settings = Object.assign({
   scanSubdirs: true,
   healthCheck: false,
   reports: false,
+  crossfade: false,
   downloads: true,
   showParserBrowser: true,
   uiScale: 1,
@@ -549,6 +550,8 @@ const I18N = {
     'setting.healthCheckDesc': 'Раздел «Состояние библиотеки» и столбец «Качество» в списках треков. Выключено — колонка и раздел скрыты полностью.',
     'setting.reports': 'Отчёт о прослушивании',
     'setting.reportsDesc': 'Раздел «Отчёт» со статистикой прослушивания. Статистика собирается всегда, даже когда раздел скрыт.',
+    'setting.crossfade': 'Плавный переход между треками',
+    'setting.crossfadeDesc': 'Треки перетекают друг в друга: конец текущего затихает, пока следующий нарастает. Действует и в конце трека, и при ручном переключении.',
     'setting.showDownloads': 'Показать вкладку «Загрузки»',
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
@@ -920,6 +923,8 @@ const I18N = {
     'setting.healthCheckDesc': 'The “Library health” section and the “Quality” column in track lists. When off, the column and section are hidden entirely.',
     'setting.reports': 'Listening report',
     'setting.reportsDesc': 'The “Report” section with listening statistics. Stats are always collected, even while the section is hidden.',
+    'setting.crossfade': 'Crossfade between tracks',
+    'setting.crossfadeDesc': 'Tracks blend into each other: the current one fades out while the next fades in. Applies both at the end of a track and when switching manually.',
     'setting.showDownloads': 'Show the “Downloads” tab',
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
@@ -1291,6 +1296,8 @@ const I18N = {
     'setting.healthCheckDesc': 'Der Bereich „Bibliothekszustand“ und die Spalte „Qualität“ in den Titellisten. Wenn deaktiviert, sind Spalte und Bereich vollständig ausgeblendet.',
     'setting.reports': 'Hörbericht',
     'setting.reportsDesc': 'Der Bereich „Bericht“ mit Hörstatistiken. Statistiken werden immer erfasst, auch wenn der Bereich ausgeblendet ist.',
+    'setting.crossfade': 'Überblendung zwischen Titeln',
+    'setting.crossfadeDesc': 'Titel gehen ineinander über: der aktuelle wird ausgeblendet, während der nächste einsetzt. Gilt sowohl am Titelende als auch beim manuellen Wechseln.',
     'setting.showDownloads': 'Tab „Downloads“ anzeigen',
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
@@ -1662,6 +1669,8 @@ const I18N = {
     'setting.healthCheckDesc': 'La section « État de la bibliothèque » et la colonne « Qualité » dans les listes de pistes. Désactivé, la colonne et la section sont entièrement masquées.',
     'setting.reports': "Rapport d'écoute",
     'setting.reportsDesc': "La section « Rapport » avec les statistiques d'écoute. Les statistiques sont toujours collectées, même lorsque la section est masquée.",
+    'setting.crossfade': 'Fondu enchaîné entre les pistes',
+    'setting.crossfadeDesc': "Les pistes se fondent l'une dans l'autre : la piste en cours s'estompe pendant que la suivante monte. S'applique en fin de piste comme lors d'un changement manuel.",
     'setting.showDownloads': "Afficher l'onglet « Téléchargements »",
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
@@ -2033,6 +2042,8 @@ const I18N = {
     'setting.healthCheckDesc': 'Розділ «Стан бібліотеки» та стовпець «Якість» у списках треків. Коли вимкнено — стовпець і розділ повністю приховані.',
     'setting.reports': 'Звіт про прослуховування',
     'setting.reportsDesc': 'Розділ «Звіт» зі статистикою прослуховування. Статистика збирається завжди, навіть коли розділ прихований.',
+    'setting.crossfade': 'Плавний перехід між треками',
+    'setting.crossfadeDesc': 'Треки перетікають один в одного: кінець поточного стихає, поки наступний наростає. Діє і в кінці треку, і під час ручного перемикання.',
     'setting.showDownloads': 'Показати вкладку «Завантаження»',
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
@@ -5460,6 +5471,69 @@ function renderArtistDetail(name) {
   };
 }
 
+// ── Crossfade ──
+// Gated by settings.crossfade. The main <audio> element stays the single source
+// of truth for everything else (progress, seek, MediaSession, waveform); the
+// outgoing track is handed to a transient Audio object that plays only its tail
+// while the main element fades the new track in. That way no existing wiring has
+// to learn about a second element.
+const CROSSFADE_MS = 3000;
+let crossfadeTail = null;      // transient Audio playing the outgoing track
+let crossfadeTailTimer = null;
+let crossfadeRampId = null;    // rAF id of the incoming fade-in
+let crossfadeArmed = false;    // per-track guard for the end-of-track trigger
+// The user's chosen volume. audio.volume is transient while a fade runs, so the
+// slider, the mute icon, and the fade ceiling all read this instead.
+let targetVolume = 1;
+
+function rampVolume(el, to, ms, onDone) {
+  const from = el.volume;
+  const start = performance.now();
+  let id = 0;
+  const step = (now) => {
+    const k = Math.min(1, (now - start) / ms);
+    try { el.volume = Math.max(0, Math.min(1, from + (to - from) * k)); } catch (_) {}
+    if (k < 1) id = requestAnimationFrame(step);
+    else if (onDone) onDone();
+  };
+  id = requestAnimationFrame(step);
+  return () => cancelAnimationFrame(id);
+}
+
+function stopCrossfadeTail() {
+  if (crossfadeTailTimer) { clearTimeout(crossfadeTailTimer); crossfadeTailTimer = null; }
+  if (crossfadeTail) {
+    try { crossfadeTail.pause(); crossfadeTail.src = ''; } catch (_) {}
+    crossfadeTail = null;
+  }
+}
+
+// Hand the currently playing track to a transient element and fade it out.
+function startCrossfadeTail() {
+  stopCrossfadeTail();
+  if (!audio.src || audio.paused || audio.muted) return;
+  const pos = audio.currentTime;
+  const tail = new Audio();
+  crossfadeTail = tail;
+  tail.volume = audio.volume;
+  // currentTime only sticks once metadata is in (local files: a few ms) —
+  // setting it right after .src assignment is silently dropped and the tail
+  // would restart the outgoing track from 0:00.
+  tail.addEventListener('loadedmetadata', () => {
+    if (crossfadeTail !== tail) return;
+    try { tail.currentTime = pos; } catch (_) {}
+    tail.play().then(() => {
+      if (crossfadeTail !== tail) { try { tail.pause(); } catch (_) {} return; }
+      rampVolume(tail, 0, CROSSFADE_MS);
+    }).catch(() => { if (crossfadeTail === tail) stopCrossfadeTail(); });
+  }, { once: true });
+  tail.src = audio.src;
+  // Hard stop so a tail can never outlive its fade (e.g. if the ramp is lost).
+  crossfadeTailTimer = setTimeout(() => {
+    if (crossfadeTail === tail) stopCrossfadeTail();
+  }, CROSSFADE_MS + 1500);
+}
+
 // ── Playback ──
 function playTrackByPath(path, queue) {
   const realIndex = trackIndexByPath(path);
@@ -5468,7 +5542,17 @@ function playTrackByPath(path, queue) {
   currentQueue = queue && queue.length > 0 ? queue : library;
   const track = library[realIndex];
   if (!track.cover) ensureCoverFor(track);
+  const fade = !!settings.crossfade && !audio.paused && !!audio.src;
+  if (fade) startCrossfadeTail();
+  if (crossfadeRampId) { crossfadeRampId(); crossfadeRampId = null; }
+  crossfadeArmed = false;
   audio.src = 'file://' + track.path;
+  if (fade) {
+    audio.volume = 0;
+    crossfadeRampId = rampVolume(audio, targetVolume, CROSSFADE_MS, () => { crossfadeRampId = null; });
+  } else {
+    audio.volume = targetVolume;
+  }
   audio.play().catch(e => console.warn('play error:', e));
   isPlaying = true;
   // recent
@@ -5786,7 +5870,7 @@ function togglePlay() {
     return;
   }
   if (audio.paused) { audio.play(); isPlaying = true; }
-  else { audio.pause(); isPlaying = false; }
+  else { audio.pause(); isPlaying = false; stopCrossfadeTail(); }
   updatePlayButtonUI();
 }
 
@@ -6445,6 +6529,18 @@ audio.addEventListener('timeupdate', () => {
     playbarWave.setProgress(pct);
     fsWave.setProgress(pct);
   }
+  // Crossfade into the next track *before* this one ends. Repeat-one is left to
+  // the 'ended' handler — fading a track into itself makes no sense.
+  if (settings.crossfade && !isNaN(dur) && dur > 0) {
+    const left = dur - cur;
+    if (left > CROSSFADE_MS / 1000 + 0.5) {
+      crossfadeArmed = false; // seeked back out of the fade window — re-arm
+    } else if (!crossfadeArmed && repeatMode !== 2 && left <= CROSSFADE_MS / 1000) {
+      crossfadeArmed = true;
+      nextTrack();
+      return;
+    }
+  }
   plTick();
   if (plSaveAccum >= 15) { plSaveAccum = 0; savePlayLog(); }   // persist periodically, not every tick
   // Keep the Discord preview timer ticking (once per second, settings view only).
@@ -6481,7 +6577,9 @@ wireSeek($('fs-progress-track'));
 // Volume
 function setVolume(v) {
   audio.muted = false;
-  audio.volume = Math.max(0, Math.min(1, v));
+  targetVolume = Math.max(0, Math.min(1, v));
+  // A running fade-in owns audio.volume until it reaches the (new) ceiling.
+  if (!crossfadeRampId) audio.volume = targetVolume;
   updateVolumeUI();
 }
 function wireVolume(trackEl) {
@@ -6498,7 +6596,7 @@ wireVolume($('vol-track'));
 wireVolume($('fs-vol-track'));
 
 function updateVolumeUI() {
-  const v = audio.muted ? 0 : audio.volume;
+  const v = audio.muted ? 0 : targetVolume;
   const pct = `${v * 100}%`;
   $('vol-fill').style.width = pct;
   const fsFill = $('fs-vol-fill');
@@ -6517,6 +6615,7 @@ function toggleMute() {
 $('btn-mute').addEventListener('click', toggleMute);
 const fsMuteBtn = $('fs-btn-mute');
 if (fsMuteBtn) fsMuteBtn.addEventListener('click', toggleMute);
+targetVolume = 1;
 audio.volume = 1;
 updateVolumeUI();
 
@@ -6735,6 +6834,7 @@ async function deleteTrack(path) {
   library.splice(idx, 1);
   if (currentTrackIndex === idx) {
     audio.pause();
+    stopCrossfadeTail();
     isPlaying = false;
     currentTrackIndex = -1;
     $('track-title').textContent = tr('np.empty.title');
@@ -6773,6 +6873,7 @@ async function deleteTracks(paths) {
     }
     if (playingPath && deleted.has(playingPath)) {
       audio.pause();
+      stopCrossfadeTail();
       isPlaying = false;
       currentTrackIndex = -1;
       $('track-title').textContent = tr('np.empty.title');
@@ -7330,6 +7431,7 @@ const TOGGLE_KEY_MAP = {
   'scan-subdirs': 'scanSubdirs',
   'health-check': 'healthCheck',
   'reports': 'reports',
+  'crossfade': 'crossfade',
   'downloads': 'downloads',
   'show-parser-browser': 'showParserBrowser',
 };
