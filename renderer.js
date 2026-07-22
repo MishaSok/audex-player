@@ -365,6 +365,28 @@ const I18N = {
     'nav.recents': 'Недавнее',
     'nav.openFiles': 'Открыть файлы',
     'nav.settings': 'Настройки',
+    'nav.trending': 'В тренде',
+    'trending.refresh': 'Обновить',
+    'trending.loading': 'Загружаем чарт…',
+    'trending.error': 'Не удалось загрузить чарт: {e}',
+    'trending.unavailable': 'Недоступно в этой сборке',
+    'trending.count': '{n} треков',
+    'trending.download': 'Скачать',
+    'trending.have': 'В библиотеке',
+    'trending.retry': 'Повторить',
+    'trending.downloadOk': 'Скачано: {t}',
+    'trending.downloadError': 'Ошибка загрузки: {e}',
+    'trending.empty.title': 'Что сейчас слушают',
+    'trending.empty.text': 'Чарты YouTube Music по странам. Выберите регион — и скачивайте треки в один клик.',
+    'trending.region.global': 'Мир',
+    'trending.region.russia': 'Россия',
+    'trending.region.ukraine': 'Украина',
+    'trending.region.usa': 'США',
+    'trending.region.uk': 'Британия',
+    'trending.region.germany': 'Германия',
+    'trending.region.france': 'Франция',
+    'trending.region.turkey': 'Турция',
+    'trending.region.poland': 'Польша',
     'nav.report': 'Отчёт',
     'report.onDevice': 'Считается на устройстве',
     'report.eyebrow': 'Отчёт о прослушивании',
@@ -819,6 +841,28 @@ const I18N = {
     'nav.recents': 'Recent',
     'nav.openFiles': 'Open files',
     'nav.settings': 'Settings',
+    'nav.trending': 'Trending',
+    'trending.refresh': 'Refresh',
+    'trending.loading': 'Loading the chart…',
+    'trending.error': 'Could not load the chart: {e}',
+    'trending.unavailable': 'Not available in this build',
+    'trending.count': '{n} tracks',
+    'trending.download': 'Download',
+    'trending.have': 'In library',
+    'trending.retry': 'Retry',
+    'trending.downloadOk': 'Downloaded: {t}',
+    'trending.downloadError': 'Download failed: {e}',
+    'trending.empty.title': 'What people are listening to',
+    'trending.empty.text': 'YouTube Music charts by country. Pick a region and download tracks in one click.',
+    'trending.region.global': 'Global',
+    'trending.region.russia': 'Russia',
+    'trending.region.ukraine': 'Ukraine',
+    'trending.region.usa': 'USA',
+    'trending.region.uk': 'UK',
+    'trending.region.germany': 'Germany',
+    'trending.region.france': 'France',
+    'trending.region.turkey': 'Turkey',
+    'trending.region.poland': 'Poland',
     'nav.report': 'Report',
     'report.onDevice': 'Computed on this device',
     'report.eyebrow': 'Listening report',
@@ -1273,6 +1317,28 @@ const I18N = {
     'nav.recents': 'Zuletzt',
     'nav.openFiles': 'Dateien öffnen',
     'nav.settings': 'Einstellungen',
+    'nav.trending': 'Im Trend',
+    'trending.refresh': 'Aktualisieren',
+    'trending.loading': 'Charts werden geladen…',
+    'trending.error': 'Charts konnten nicht geladen werden: {e}',
+    'trending.unavailable': 'In diesem Build nicht verfügbar',
+    'trending.count': '{n} Titel',
+    'trending.download': 'Laden',
+    'trending.have': 'In der Bibliothek',
+    'trending.retry': 'Erneut',
+    'trending.downloadOk': 'Geladen: {t}',
+    'trending.downloadError': 'Download fehlgeschlagen: {e}',
+    'trending.empty.title': 'Was gerade gehört wird',
+    'trending.empty.text': 'YouTube-Music-Charts nach Ländern. Region wählen und Titel mit einem Klick laden.',
+    'trending.region.global': 'Global',
+    'trending.region.russia': 'Russland',
+    'trending.region.ukraine': 'Ukraine',
+    'trending.region.usa': 'USA',
+    'trending.region.uk': 'GB',
+    'trending.region.germany': 'Deutschland',
+    'trending.region.france': 'Frankreich',
+    'trending.region.turkey': 'Türkei',
+    'trending.region.poland': 'Polen',
     'nav.report': 'Bericht',
     'report.onDevice': 'Auf diesem Gerät berechnet',
     'report.eyebrow': 'Hörbericht',
@@ -1727,6 +1793,28 @@ const I18N = {
     'nav.recents': 'Récents',
     'nav.openFiles': 'Ouvrir des fichiers',
     'nav.settings': 'Paramètres',
+    'nav.trending': 'Tendances',
+    'trending.refresh': 'Actualiser',
+    'trending.loading': 'Chargement du classement…',
+    'trending.error': 'Impossible de charger le classement : {e}',
+    'trending.unavailable': 'Indisponible dans cette version',
+    'trending.count': '{n} titres',
+    'trending.download': 'Télécharger',
+    'trending.have': 'Dans la bibliothèque',
+    'trending.retry': 'Réessayer',
+    'trending.downloadOk': 'Téléchargé : {t}',
+    'trending.downloadError': 'Échec du téléchargement : {e}',
+    'trending.empty.title': "Ce que l'on écoute en ce moment",
+    'trending.empty.text': 'Classements YouTube Music par pays. Choisissez une région et téléchargez en un clic.',
+    'trending.region.global': 'Monde',
+    'trending.region.russia': 'Russie',
+    'trending.region.ukraine': 'Ukraine',
+    'trending.region.usa': 'États-Unis',
+    'trending.region.uk': 'R.-U.',
+    'trending.region.germany': 'Allemagne',
+    'trending.region.france': 'France',
+    'trending.region.turkey': 'Turquie',
+    'trending.region.poland': 'Pologne',
     'nav.report': 'Rapport',
     'report.onDevice': 'Calculé sur cet appareil',
     'report.eyebrow': "Rapport d'écoute",
@@ -2181,6 +2269,28 @@ const I18N = {
     'nav.recents': 'Нещодавнє',
     'nav.openFiles': 'Відкрити файли',
     'nav.settings': 'Налаштування',
+    'nav.trending': 'У тренді',
+    'trending.refresh': 'Оновити',
+    'trending.loading': 'Завантажуємо чарт…',
+    'trending.error': 'Не вдалося завантажити чарт: {e}',
+    'trending.unavailable': 'Недоступно в цій збірці',
+    'trending.count': '{n} треків',
+    'trending.download': 'Завантажити',
+    'trending.have': 'У бібліотеці',
+    'trending.retry': 'Повторити',
+    'trending.downloadOk': 'Завантажено: {t}',
+    'trending.downloadError': 'Помилка завантаження: {e}',
+    'trending.empty.title': 'Що зараз слухають',
+    'trending.empty.text': 'Чарти YouTube Music за країнами. Оберіть регіон — і завантажуйте треки одним кліком.',
+    'trending.region.global': 'Світ',
+    'trending.region.russia': 'Росія',
+    'trending.region.ukraine': 'Україна',
+    'trending.region.usa': 'США',
+    'trending.region.uk': 'Британія',
+    'trending.region.germany': 'Німеччина',
+    'trending.region.france': 'Франція',
+    'trending.region.turkey': 'Туреччина',
+    'trending.region.poland': 'Польща',
     'nav.report': 'Звіт',
     'report.onDevice': 'Обчислюється на пристрої',
     'report.eyebrow': 'Звіт про прослуховування',
@@ -2943,6 +3053,8 @@ function setView(view) {
   else if (view === 'artist-detail') renderArtistDetail(activeArtistName);
   else if (view === 'report') renderReport();
   else if (view === 'health') renderHealth();
+  // Fetch the chart on first visit; afterwards the session cache answers.
+  else if (view === 'trending') { renderTrending(); loadTrending(false); }
 }
 
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -3491,6 +3603,206 @@ function saveYtState() {
     }));
   } catch (_) { /* ignore */ }
 }
+
+// ── Trending ──
+// Reads a YouTube Music country chart through the main process and lets each row
+// be downloaded with one click, reusing the same yt-dlp download path (and the
+// same progress events) as the Downloads tab. Charts are cached per region for
+// the session so switching back and forth doesn't re-hit the network.
+let trRegion = 'global';
+let trTracks = [];
+const trCache = new Map();               // region -> { tracks, fetchedAt }
+const trActiveDownloads = new Map();     // videoId -> row element
+let trLoading = false;
+
+function setTrStatus(text, kind) {
+  const el = $('tr-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind) el.classList.add(kind === 'error' ? 'is-error' : 'is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+function trFormatDuration(sec) {
+  if (!sec || !isFinite(sec)) return '';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// A chart row counts as "in the library" when a track with the same title and
+// artist is already there — the downloaded file name won't match the video id.
+function trAlreadyHave(t) {
+  const title = (t.title || '').trim().toLowerCase();
+  if (!title) return false;
+  const artist = (t.artist || '').trim().toLowerCase();
+  return library.some(x =>
+    (x.title || '').trim().toLowerCase() === title &&
+    (!artist || (x.artist || '').trim().toLowerCase() === artist));
+}
+
+function renderTrending() {
+  document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.trRegion === trRegion);
+  });
+  const wrap = $('tr-results');
+  const rows = $('tr-rows');
+  const empty = $('tr-empty');
+  const meta = $('tr-meta');
+  if (!wrap || !rows) return;
+
+  if (!trTracks.length) {
+    wrap.hidden = true;
+    if (empty) empty.classList.add('show');
+    if (meta) meta.textContent = '';
+    return;
+  }
+  if (empty) empty.classList.remove('show');
+  if (meta) meta.textContent = tr('trending.count', { n: trTracks.length });
+
+  rows.innerHTML = trTracks.map((t, i) => {
+    const have = trAlreadyHave(t);
+    const label = have ? tr('trending.have') : tr('trending.download');
+    return `
+      <div class="dl-row tr-row" data-tr-row="${i}">
+        <div class="tr-rank">${i + 1}</div>
+        <div class="thumb" style="background-image: url('${escapeHtml(t.thumbnail || '')}')"></div>
+        <div class="title" title="${escapeHtml(t.rawTitle || t.title)}">${escapeHtml(t.title || '')}</div>
+        <div class="channel" title="${escapeHtml(t.artist || '')}">${escapeHtml(t.artist || '')}</div>
+        <div class="duration">${escapeHtml(trFormatDuration(t.duration))}</div>
+        <div class="action">
+          <button type="button" class="dl-download-btn${have ? ' is-done' : ''}" data-tr-dl="${i}"${have ? ' disabled' : ''}>
+            <svg class="i" width="12" height="12"><use href="#i-${have ? 'check' : 'download'}"/></svg>
+            <span>${escapeHtml(label)}</span>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+  wrap.hidden = false;
+  rows.querySelectorAll('[data-tr-dl]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-tr-dl'), 10);
+      if (!isNaN(idx)) downloadTrendingTrack(idx, btn);
+    });
+  });
+}
+
+async function loadTrending(force) {
+  if (trLoading) return;
+  if (!force && trCache.has(trRegion)) {
+    trTracks = trCache.get(trRegion).tracks;
+    setTrStatus('');
+    renderTrending();
+    return;
+  }
+  if (!window.electronAPI || !window.electronAPI.trendingFetch) {
+    setTrStatus(tr('trending.unavailable'), 'error');
+    return;
+  }
+  trLoading = true;
+  trTracks = [];
+  renderTrending();
+  setTrStatus(tr('trending.loading'));
+  const region = trRegion;
+  try {
+    const res = await window.electronAPI.trendingFetch(region);
+    if (region !== trRegion) return; // user switched region mid-fetch
+    if (!res || !res.success) {
+      setTrStatus(tr('trending.error', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    trCache.set(region, { tracks: res.tracks, fetchedAt: res.fetchedAt });
+    trTracks = res.tracks;
+    setTrStatus('');
+    renderTrending();
+  } catch (err) {
+    if (region === trRegion) setTrStatus(tr('trending.error', { e: String(err) }), 'error');
+  } finally {
+    if (region === trRegion) trLoading = false;
+  }
+}
+
+async function downloadTrendingTrack(idx, btn) {
+  const t = trTracks[idx];
+  if (!t || !btn || btn.disabled) return;
+  const rowEl = btn.closest('.dl-row');
+  const actionEl = rowEl && rowEl.querySelector('.action');
+  if (!actionEl) return;
+
+  actionEl.innerHTML = `
+    <div class="dl-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dl-progress-bar"><div class="dl-progress-fill"></div></div>
+      <div class="dl-progress-pct">0%</div>
+    </div>`;
+  trActiveDownloads.set(t.id, rowEl);
+
+  const restore = (labelKey, cls) => {
+    actionEl.innerHTML = `
+      <button type="button" class="dl-download-btn${cls ? ' ' + cls : ''}" data-tr-dl="${idx}"${cls === 'is-done' ? ' disabled' : ''}>
+        <svg class="i" width="12" height="12"><use href="#i-${cls === 'is-done' ? 'check' : 'download'}"/></svg>
+        <span>${escapeHtml(tr(labelKey))}</span>
+      </button>`;
+    const b = actionEl.querySelector('[data-tr-dl]');
+    if (b && cls !== 'is-done') b.addEventListener('click', () => downloadTrendingTrack(idx, b));
+  };
+
+  try {
+    const res = await window.electronAPI.ytDownload({
+      videoId: t.id,
+      url: t.url,
+      suggestedName: t.artist ? `${t.artist} - ${t.title}` : t.title,
+      targetDir: settings.defaultFolder || '',
+    });
+    trActiveDownloads.delete(t.id);
+    if (!res || !res.success) {
+      restore('trending.retry', 'is-error');
+      setTrStatus(tr('trending.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    await importPaths([res.filePath]);
+    restore('trending.have', 'is-done');
+    setTrStatus(tr('trending.downloadOk', { t: t.title }), 'ok');
+  } catch (err) {
+    trActiveDownloads.delete(t.id);
+    restore('trending.retry', 'is-error');
+    setTrStatus(tr('trending.downloadError', { e: String(err) }), 'error');
+  }
+}
+
+if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
+  window.electronAPI.onYtDownloadProgress(({ videoId, phase, percent }) => {
+    const rowEl = videoId ? trActiveDownloads.get(videoId) : null;
+    if (!rowEl) return;
+    const fill = rowEl.querySelector('.dl-progress-fill');
+    const pct = rowEl.querySelector('.dl-progress-pct');
+    const wrap = rowEl.querySelector('.dl-progress');
+    if (!fill || !pct || !wrap) return;
+    if (phase === 'postprocess') {
+      wrap.classList.add('is-indeterminate');
+      pct.textContent = '…';
+      return;
+    }
+    if (typeof percent === 'number' && !isNaN(percent)) {
+      wrap.classList.remove('is-indeterminate');
+      const v = Math.max(0, Math.min(100, percent));
+      fill.style.width = v + '%';
+      pct.textContent = Math.round(v) + '%';
+      wrap.setAttribute('aria-valuenow', String(Math.round(v)));
+    }
+  });
+}
+
+document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    if (trRegion === b.dataset.trRegion) return;
+    trRegion = b.dataset.trRegion;
+    loadTrending(false);
+  });
+});
+const trRefreshBtn = $('tr-refresh');
+if (trRefreshBtn) trRefreshBtn.addEventListener('click', () => loadTrending(true));
 
 function renderYtResults(results) {
   ytLastResults = results || [];

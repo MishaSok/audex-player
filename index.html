@@ -159,6 +159,10 @@
           <svg class="i" width="14" height="14"><use href="#i-scissors"/></svg>
           <span data-i18n="nav.editor">Редактор</span>
         </a>
+        <a href="#" class="nav-item nav-trending" data-view="trending" id="nav-trending">
+          <svg class="i" width="14" height="14"><use href="#i-sparkle"/></svg>
+          <span data-i18n="nav.trending">В тренде</span>
+        </a>
         <a href="#" class="nav-item nav-downloads" data-view="downloads" id="nav-downloads" hidden>
           <svg class="i" width="14" height="14"><use href="#i-download"/></svg>
           <span data-i18n="nav.downloads">Загрузки</span>
@@ -859,6 +863,46 @@
             <div class="empty-title-lg" data-i18n="downloads.queue.empty.title">Очередь пуста</div>
             <div class="empty-text" data-i18n="downloads.queue.empty.text">Добавьте треки в очередь со вкладки «Парсинг», и они начнут скачиваться один за другим.</div>
           </div>
+        </div>
+      </section>
+
+      <!-- Trending -->
+      <section id="view-trending" class="view-section">
+        <header class="topbar">
+          <div class="crumb">
+            <span class="crumb-item active" data-i18n="nav.trending">В тренде</span>
+          </div>
+          <button class="btn-ghost" id="tr-refresh">
+            <svg class="i" width="13" height="13"><use href="#i-activity"/></svg>
+            <span data-i18n="trending.refresh">Обновить</span>
+          </button>
+        </header>
+
+        <div class="tr-head">
+          <div class="seg" id="tr-region-seg">
+            <button class="seg-btn" data-tr-region="global" data-i18n="trending.region.global">Мир</button>
+            <button class="seg-btn" data-tr-region="russia" data-i18n="trending.region.russia">Россия</button>
+            <button class="seg-btn" data-tr-region="ukraine" data-i18n="trending.region.ukraine">Украина</button>
+            <button class="seg-btn" data-tr-region="usa" data-i18n="trending.region.usa">США</button>
+            <button class="seg-btn" data-tr-region="uk" data-i18n="trending.region.uk">Британия</button>
+            <button class="seg-btn" data-tr-region="germany" data-i18n="trending.region.germany">Германия</button>
+            <button class="seg-btn" data-tr-region="france" data-i18n="trending.region.france">Франция</button>
+            <button class="seg-btn" data-tr-region="turkey" data-i18n="trending.region.turkey">Турция</button>
+            <button class="seg-btn" data-tr-region="poland" data-i18n="trending.region.poland">Польша</button>
+          </div>
+          <div class="tr-meta" id="tr-meta"></div>
+        </div>
+
+        <div id="tr-status" class="dl-status" hidden></div>
+
+        <div class="dl-results" id="tr-results" hidden>
+          <div class="dl-rows" id="tr-rows"></div>
+        </div>
+
+        <div id="tr-empty" class="empty-block show">
+          <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-sparkle"/></svg></div>
+          <div class="empty-title-lg" data-i18n="trending.empty.title">Что сейчас слушают</div>
+          <div class="empty-text" data-i18n="trending.empty.text">Чарты YouTube Music по странам. Выберите регион — и скачивайте треки в один клик.</div>
         </div>
       </section>
 

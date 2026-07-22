@@ -416,6 +416,99 @@ ipcMain.handle('window:setPortrait', async (event, payload) => {
   return { success: true };
 });
 
+// ── Trending charts ──
+// YouTube Music publishes per-country "Top 100 Songs" playlists on a single
+// charts channel, and their ids are stable. yt-dlp reads them flat (one request,
+// no per-video lookups), which is why a full 100-track chart lands in a few
+// seconds. Only the chart id travels from the renderer — it is matched against
+// this table rather than being interpolated into a URL, so a bad value can't
+// point yt-dlp at an arbitrary page.
+const TRENDING_CHARTS = {
+  global:  'PL4fGSI1pDJn6puJdseH2Rt9sMvt9E2M4i',
+  russia:  'PL4fGSI1pDJn5C8dBiYt0BTREyCHbZ47qc',
+  ukraine: 'PL4fGSI1pDJn4E_HoW5HB-w5vFPkYfo3dB',
+  usa:     'PL4fGSI1pDJn6O1LS0XSdF3RyO0Rq_LDeI',
+  uk:      'PL4fGSI1pDJn6_f5P3MnzXg9l3GDfnSlXa',
+  germany: 'PL4fGSI1pDJn6KpOXlp0MH8qA9tngXaUJ-',
+  france:  'PL4fGSI1pDJn7bK3y1Hx-qpHBqfr6cesNs',
+  turkey:  'PL4fGSI1pDJn5tdVDtIAZArERm_vv4uFCR',
+  poland:  'PL4fGSI1pDJn68fmsRw9f6g-NzU5UA45v1',
+};
+
+// "Artist - Title (Official Video)" is the chart's naming convention; split it
+// so rows show a real artist column instead of one long string.
+const TRENDING_NOISE = new RegExp(
+  '\\s*[([]\\s*(?:' + [
+    'mv', 'm/v',
+    'official\\s*(?:music\\s*)?video', 'official\\s*audio', 'official\\s*visuali[sz]er',
+    'music\\s*video', 'video\\s*premiere[^)\\]]*', 'visuali[sz]er',
+    'lyrics?(?:\\s*video)?', 'mood\\s*video', 'clip\\s*officiel',
+    'премьера\\s*клипа', 'премьера\\s*песни', 'официальный\\s*клип', 'клип',
+  ].join('|') + ')\\s*[)\\]]\\s*', 'gi');
+function splitTrendingTitle(raw) {
+  let s = String(raw || '').replace(TRENDING_NOISE, ' ').trim();
+  const dash = s.indexOf(' - ');
+  if (dash > 0) {
+    return { artist: s.slice(0, dash).trim(), title: s.slice(dash + 3).trim() || s };
+  }
+  return { artist: '', title: s };
+}
+
+ipcMain.handle('trending:fetch', async (event, payload) => {
+  const region = String((payload && payload.region) || 'global');
+  const listId = TRENDING_CHARTS[region];
+  if (!listId) return { success: false, error: 'Unknown region' };
+  const bin = ytDlpPath();
+  const url = `https://music.youtube.com/playlist?list=${listId}`;
+  const args = ['--flat-playlist', '--dump-json', '--playlist-end', '100',
+                '--no-warnings', '--ignore-config', url];
+  return new Promise((resolve) => {
+    let out = '', err = '';
+    let proc;
+    try {
+      proc = spawn(bin, args);
+    } catch (e) {
+      return resolve({ success: false, error: String((e && e.message) || e) });
+    }
+    // A hung chart fetch must not leave the tab spinning forever.
+    const killer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, 90000);
+    proc.stdout.on('data', d => { out += d.toString(); });
+    proc.stderr.on('data', d => { err += d.toString(); });
+    proc.on('error', (e) => {
+      clearTimeout(killer);
+      resolve({ success: false, error: e && e.code === 'ENOENT'
+        ? 'yt-dlp not found. Install it: pip install -U yt-dlp'
+        : String((e && e.message) || e) });
+    });
+    proc.on('close', () => {
+      clearTimeout(killer);
+      const tracks = [];
+      for (const line of out.split('\n')) {
+        const s = line.trim();
+        if (!s) continue;
+        let j;
+        try { j = JSON.parse(s); } catch (_) { continue; }
+        if (!j.id) continue;
+        const { artist, title } = splitTrendingTitle(j.title);
+        const thumb = Array.isArray(j.thumbnails) && j.thumbnails.length
+          ? j.thumbnails[j.thumbnails.length - 1].url : '';
+        tracks.push({
+          id: j.id,
+          url: j.url || `https://www.youtube.com/watch?v=${j.id}`,
+          rawTitle: j.title || '',
+          title, artist,
+          duration: Number(j.duration) || 0,
+          thumbnail: thumb,
+        });
+      }
+      if (!tracks.length) {
+        return resolve({ success: false, error: err.trim().split('\n').slice(-2).join(' ') || 'Empty chart' });
+      }
+      resolve({ success: true, region, tracks, fetchedAt: Date.now() });
+    });
+  });
+});
+
 // ── Custom background image ──
 // The picked file is *copied* into <userData>/backgrounds/ rather than
 // referenced in place: the setting only stores a path, so a wallpaper the user

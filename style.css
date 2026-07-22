@@ -1978,6 +1978,34 @@ html.is-playing .equalizer > span { animation-play-state: running; }
 }
 .setting-card-tight { margin-top: 12px; }
 
+/* ─── Trending ─── */
+.tr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.tr-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+/* Chart rows are the download rows plus a leading rank column. */
+.dl-row.tr-row {
+  grid-template-columns: 34px 64px minmax(0, 1fr) minmax(0, 220px) 70px 150px;
+}
+.tr-rank {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  text-align: center;
+}
+.dl-rows .tr-row:nth-child(-n+3) .tr-rank {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Segmented choice control (background source / fit) */
 .seg {
   display: inline-flex;
