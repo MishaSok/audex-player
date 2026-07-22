@@ -85,6 +85,7 @@
       <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
       <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M4 18l5-5 4 4 3-3 4 4"/></symbol>
       <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9.5 14h5"/></symbol>
       <!-- Audex logomark: geometric A with 3-bar equalizer -->
       <symbol id="audex-mark" viewBox="0 0 100 100">
         <g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
@@ -1009,6 +1010,10 @@
           <svg class="i" width="13" height="13"><use href="#i-discord"/></svg>
           <span data-i18n="section.discord">Discord Rich Presence</span>
         </button>
+        <button class="settings-tab" data-tab="hotkeys" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-keyboard"/></svg>
+          <span data-i18n="section.hotkeys">Горячие клавиши</span>
+        </button>
         <button class="settings-tab" data-tab="system" role="tab">
           <svg class="i" width="13" height="13"><use href="#i-monitor"/></svg>
           <span data-i18n="section.system">Система</span>
@@ -1192,6 +1197,22 @@
             </div>
             <button class="toggle" data-setting="show-parser-browser"><div class="toggle-knob"></div></button>
           </div>
+        </div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="hotkeys" hidden>
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-keyboard"/></svg>
+          <span data-i18n="section.hotkeys">Горячие клавиши</span>
+        </div>
+        <div class="setting-desc hotkeys-intro" data-i18n="hotkeys.intro">Нажмите на сочетание, чтобы задать своё. Esc — отмена записи, Backspace — очистить.</div>
+        <!-- Rows are rendered by renderHotkeys() in renderer.js. -->
+        <div class="setting-card" id="hotkeys-list"></div>
+        <div class="hotkeys-foot">
+          <div class="setting-desc" data-i18n="hotkeys.escNote">Esc всегда закрывает открытое окно и не переназначается.</div>
+          <button class="btn-ghost" id="hotkeys-reset" data-i18n="hotkeys.resetAll">Сбросить всё</button>
         </div>
       </section>
       </div>

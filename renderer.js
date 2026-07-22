@@ -39,6 +39,7 @@ let settings = Object.assign({
   showParserBrowser: true,
   uiScale: 1,
   settingsTab: 'appearance', // active tab in the Settings view
+  hotkeys: {},               // only user overrides; see HOTKEY_DEFAULTS
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -220,7 +221,7 @@ function applyUiScale(scale) {
     document.documentElement.style.zoom = String(s);
   }
 }
-applyUiScale(settings.uiScale);
+
 
 // ── Persistence ──
 function saveLibrary() {
@@ -588,6 +589,27 @@ const I18N = {
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
     'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс или Spotify при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
     'section.system': 'Система',
+    'section.hotkeys': 'Горячие клавиши',
+    'hotkeys.intro': 'Нажмите на сочетание, чтобы задать своё. Esc — отмена записи, Backspace — очистить.',
+    'hotkeys.escNote': 'Esc всегда закрывает открытое окно и не переназначается.',
+    'hotkeys.resetAll': 'Сбросить всё',
+    'hotkeys.press': 'Нажмите клавиши…',
+    'hotkeys.revert': 'Вернуть по умолчанию',
+    'hotkey.playPause': 'Воспроизведение / пауза',
+    'hotkey.nextTrack': 'Следующий трек',
+    'hotkey.prevTrack': 'Предыдущий трек',
+    'hotkey.seekForward': 'Перемотать вперёд на 5 с',
+    'hotkey.seekBackward': 'Перемотать назад на 5 с',
+    'hotkey.volumeUp': 'Громче',
+    'hotkey.volumeDown': 'Тише',
+    'hotkey.mute': 'Выключить звук',
+    'hotkey.favorite': 'В избранное',
+    'hotkey.shuffle': 'Случайный порядок',
+    'hotkey.repeat': 'Режим повтора',
+    'hotkey.fullscreen': 'Полноэкранный плеер',
+    'hotkey.palette': 'Командная палитра',
+    'hotkey.editTags': 'Редактировать теги',
+    'hotkey.settings': 'Открыть настройки',
     'setting.hardwareAcceleration': 'Аппаратное ускорение',
     'setting.hardwareAccelerationDesc': 'Использует видеокарту для отрисовки интерфейса. Если приложение зависает при запуске или работает с артефактами — выключите. Изменение применится после перезапуска.',
     'setting.uiLanguage': 'Язык интерфейса',
@@ -990,6 +1012,27 @@ const I18N = {
     'setting.showParserBrowser': 'Show the browser window while parsing',
     'setting.showParserBrowserDesc': 'Useful for signing in to Yandex or Spotify on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
     'section.system': 'System',
+    'section.hotkeys': 'Hotkeys',
+    'hotkeys.intro': 'Click a shortcut to set your own. Esc cancels, Backspace clears it.',
+    'hotkeys.escNote': 'Esc always closes the topmost window and cannot be rebound.',
+    'hotkeys.resetAll': 'Reset all',
+    'hotkeys.press': 'Press keys…',
+    'hotkeys.revert': 'Restore default',
+    'hotkey.playPause': 'Play / pause',
+    'hotkey.nextTrack': 'Next track',
+    'hotkey.prevTrack': 'Previous track',
+    'hotkey.seekForward': 'Seek forward 5 s',
+    'hotkey.seekBackward': 'Seek back 5 s',
+    'hotkey.volumeUp': 'Volume up',
+    'hotkey.volumeDown': 'Volume down',
+    'hotkey.mute': 'Mute',
+    'hotkey.favorite': 'Add to favorites',
+    'hotkey.shuffle': 'Shuffle',
+    'hotkey.repeat': 'Repeat mode',
+    'hotkey.fullscreen': 'Fullscreen player',
+    'hotkey.palette': 'Command palette',
+    'hotkey.editTags': 'Edit tags',
+    'hotkey.settings': 'Open settings',
     'setting.hardwareAcceleration': 'Hardware acceleration',
     'setting.hardwareAccelerationDesc': 'Uses the GPU to render the interface. If the app hangs on launch or shows graphical glitches, turn this off. Takes effect after a restart.',
     'setting.uiLanguage': 'Interface language',
@@ -1392,6 +1435,27 @@ const I18N = {
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
     'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex oder Spotify anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
     'section.system': 'System',
+    'section.hotkeys': 'Tastenkürzel',
+    'hotkeys.intro': 'Auf ein Kürzel klicken, um es neu zu belegen. Esc bricht ab, Backspace löscht es.',
+    'hotkeys.escNote': 'Esc schließt immer das oberste Fenster und lässt sich nicht neu belegen.',
+    'hotkeys.resetAll': 'Alle zurücksetzen',
+    'hotkeys.press': 'Tasten drücken…',
+    'hotkeys.revert': 'Standard wiederherstellen',
+    'hotkey.playPause': 'Wiedergabe / Pause',
+    'hotkey.nextTrack': 'Nächster Titel',
+    'hotkey.prevTrack': 'Vorheriger Titel',
+    'hotkey.seekForward': '5 s vorspulen',
+    'hotkey.seekBackward': '5 s zurückspulen',
+    'hotkey.volumeUp': 'Lauter',
+    'hotkey.volumeDown': 'Leiser',
+    'hotkey.mute': 'Stummschalten',
+    'hotkey.favorite': 'Zu Favoriten',
+    'hotkey.shuffle': 'Zufallswiedergabe',
+    'hotkey.repeat': 'Wiederholmodus',
+    'hotkey.fullscreen': 'Vollbild-Player',
+    'hotkey.palette': 'Befehlspalette',
+    'hotkey.editTags': 'Tags bearbeiten',
+    'hotkey.settings': 'Einstellungen öffnen',
     'setting.hardwareAcceleration': 'Hardwarebeschleunigung',
     'setting.hardwareAccelerationDesc': 'Nutzt die Grafikkarte zum Rendern der Oberfläche. Wenn die App beim Start hängt oder Grafikfehler zeigt, schalten Sie sie aus. Wird nach einem Neustart wirksam.',
     'setting.uiLanguage': 'Sprache der Oberfläche',
@@ -1794,6 +1858,27 @@ const I18N = {
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
     'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex ou Spotify au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
     'section.system': 'Système',
+    'section.hotkeys': 'Raccourcis clavier',
+    'hotkeys.intro': "Cliquez sur un raccourci pour le redéfinir. Échap annule, Retour arrière l'efface.",
+    'hotkeys.escNote': 'Échap ferme toujours la fenêtre au premier plan et ne peut pas être redéfini.',
+    'hotkeys.resetAll': 'Tout réinitialiser',
+    'hotkeys.press': 'Appuyez sur les touches…',
+    'hotkeys.revert': 'Rétablir par défaut',
+    'hotkey.playPause': 'Lecture / pause',
+    'hotkey.nextTrack': 'Piste suivante',
+    'hotkey.prevTrack': 'Piste précédente',
+    'hotkey.seekForward': 'Avancer de 5 s',
+    'hotkey.seekBackward': 'Reculer de 5 s',
+    'hotkey.volumeUp': 'Monter le volume',
+    'hotkey.volumeDown': 'Baisser le volume',
+    'hotkey.mute': 'Couper le son',
+    'hotkey.favorite': 'Ajouter aux favoris',
+    'hotkey.shuffle': 'Lecture aléatoire',
+    'hotkey.repeat': 'Mode répétition',
+    'hotkey.fullscreen': 'Lecteur plein écran',
+    'hotkey.palette': 'Palette de commandes',
+    'hotkey.editTags': 'Modifier les tags',
+    'hotkey.settings': 'Ouvrir les paramètres',
     'setting.hardwareAcceleration': 'Accélération matérielle',
     'setting.hardwareAccelerationDesc': "Utilise la carte graphique pour afficher l'interface. Si l'application se bloque au démarrage ou présente des artefacts graphiques, désactivez-la. Prend effet après un redémarrage.",
     'setting.uiLanguage': "Langue de l'interface",
@@ -2196,6 +2281,27 @@ const I18N = {
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
     'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс або Spotify при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
     'section.system': 'Система',
+    'section.hotkeys': 'Гарячі клавіші',
+    'hotkeys.intro': 'Натисніть на сполучення, щоб задати своє. Esc — скасувати, Backspace — очистити.',
+    'hotkeys.escNote': 'Esc завжди закриває відкрите вікно і не перепризначається.',
+    'hotkeys.resetAll': 'Скинути все',
+    'hotkeys.press': 'Натисніть клавіші…',
+    'hotkeys.revert': 'Повернути типове',
+    'hotkey.playPause': 'Відтворення / пауза',
+    'hotkey.nextTrack': 'Наступний трек',
+    'hotkey.prevTrack': 'Попередній трек',
+    'hotkey.seekForward': 'Перемотати вперед на 5 с',
+    'hotkey.seekBackward': 'Перемотати назад на 5 с',
+    'hotkey.volumeUp': 'Гучніше',
+    'hotkey.volumeDown': 'Тихіше',
+    'hotkey.mute': 'Вимкнути звук',
+    'hotkey.favorite': 'До обраного',
+    'hotkey.shuffle': 'Випадковий порядок',
+    'hotkey.repeat': 'Режим повтору',
+    'hotkey.fullscreen': 'Повноекранний програвач',
+    'hotkey.palette': 'Палітра команд',
+    'hotkey.editTags': 'Редагувати теги',
+    'hotkey.settings': 'Відкрити налаштування',
     'setting.hardwareAcceleration': 'Апаратне прискорення',
     'setting.hardwareAccelerationDesc': 'Використовує відеокарту для відмалювання інтерфейсу. Якщо застосунок зависає при запуску або працює з артефактами — вимкніть. Зміна застосується після перезапуску.',
     'setting.uiLanguage': 'Мова інтерфейсу',
@@ -7950,27 +8056,141 @@ $('palette-overlay').addEventListener('click', e => {
   if (e.target.id === 'palette-overlay') closePalette();
 });
 
+// ── Hotkeys ──
+// Every global shortcut is table-driven so the Settings → Hotkeys tab can
+// rebind it. A binding is stored as a normalised combo string ("Ctrl+K",
+// "Space", "Shift+ArrowUp"); `settings.hotkeys` holds only the user's overrides
+// and is merged over HOTKEY_DEFAULTS at read time.
+//
+// Ctrl and Meta are deliberately folded into one "Ctrl" token: the app has
+// always treated Cmd and Ctrl as interchangeable, so one default works on both
+// macOS and Linux/Windows. Escape stays hard-coded below — it closes whatever
+// is on top and would be a footgun to rebind.
+const HOTKEY_ACTIONS = [
+  { id: 'playPause',    def: 'Space',           run: () => togglePlay() },
+  { id: 'nextTrack',    def: 'Ctrl+ArrowRight', run: () => nextTrack() },
+  { id: 'prevTrack',    def: 'Ctrl+ArrowLeft',  run: () => prevTrack() },
+  { id: 'seekForward',  def: 'ArrowRight',      run: () => hkSeek(5) },
+  { id: 'seekBackward', def: 'ArrowLeft',       run: () => hkSeek(-5) },
+  { id: 'volumeUp',     def: 'ArrowUp',         run: () => setVolume(targetVolume + 0.05) },
+  { id: 'volumeDown',   def: 'ArrowDown',       run: () => setVolume(targetVolume - 0.05) },
+  { id: 'mute',         def: 'KeyM',            run: () => toggleMute() },
+  { id: 'favorite',     def: 'KeyL',            run: () => hkFavoriteCurrent() },
+  { id: 'shuffle',      def: 'KeyS',            run: () => { isShuffle = !isShuffle; updateShuffleUI(); } },
+  { id: 'repeat',       def: 'KeyR',            run: () => { repeatMode = (repeatMode + 1) % 3; updateRepeatUI(); } },
+  { id: 'fullscreen',   def: 'KeyF',            run: () => hkToggleFullscreen() },
+  { id: 'palette',      def: 'Ctrl+KeyK',       run: () => hkTogglePalette() },
+  { id: 'editTags',     def: 'Ctrl+KeyE',       run: () => hkEditCurrentTags() },
+  { id: 'settings',     def: 'Ctrl+Comma',      run: () => (isSettingsOpen() ? closeSettings() : openSettings()) },
+];
+const HOTKEY_DEFAULTS = HOTKEY_ACTIONS.reduce((m, a) => { m[a.id] = a.def; return m; }, {});
+
+function hotkeyBindings() {
+  return Object.assign({}, HOTKEY_DEFAULTS, settings.hotkeys || {});
+}
+
+function hkSeek(delta) {
+  if (!audio.src || !isFinite(audio.duration)) return;
+  audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + delta));
+}
+function hkFavoriteCurrent() {
+  if (currentTrackIndex < 0 || !library[currentTrackIndex]) return;
+  toggleFavorite(library[currentTrackIndex].path);
+}
+function hkToggleFullscreen() {
+  if ($('fullscreen-overlay').classList.contains('active')) closeFullscreen();
+  else openFullscreen();
+}
+function hkTogglePalette() {
+  if ($('palette-overlay').classList.contains('active')) closePalette();
+  else openPalette();
+}
+function hkEditCurrentTags() {
+  if (currentTrackIndex < 0 || !library[currentTrackIndex]) return;
+  openMetadataEditor(library[currentTrackIndex].path);
+}
+
+// Turn a keydown into a normalised combo string, or '' for a bare modifier
+// press (which must not be captured as a binding on its own).
+//
+// Keys are identified by `e.code` (physical position), NOT `e.key`. `e.key` is
+// the produced character and therefore layout-dependent: on a Russian layout
+// the S key reports 'с', so a binding captured in one layout would silently
+// stop firing after switching to the other. `e.code` stays 'KeyS' either way.
+// The trade-off is that on a non-QWERTY physical layout the displayed letter
+// follows the position rather than the keycap.
+function comboFromEvent(e) {
+  const code = e.code;
+  if (!code) return '';
+  if (/^(Control|Meta|Alt|Shift|OS)/.test(code)) return '';
+  const parts = [];
+  if (e.ctrlKey || e.metaKey) parts.push('Ctrl');
+  if (e.altKey) parts.push('Alt');
+  if (e.shiftKey) parts.push('Shift');
+  parts.push(code);
+  return parts.join('+');
+}
+
+// Human-readable form for the Settings rows.
+const HOTKEY_GLYPHS = {
+  ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
+  Space: 'Space', Enter: '↵', Backspace: '⌫', Escape: 'Esc',
+  Comma: ',', Period: '.', Slash: '/', Backslash: '\\', Semicolon: ';',
+  Quote: "'", BracketLeft: '[', BracketRight: ']', Minus: '−', Equal: '=',
+  Backquote: '`', Tab: '⇥', Home: 'Home', End: 'End',
+  PageUp: 'PgUp', PageDown: 'PgDn', Insert: 'Ins', Delete: 'Del',
+};
+function codeLabel(code) {
+  if (HOTKEY_GLYPHS[code]) return HOTKEY_GLYPHS[code];
+  if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+  if (/^Digit\d$/.test(code)) return code.slice(5);
+  if (/^Numpad/.test(code)) return 'Num ' + code.slice(6);
+  if (/^F\d{1,2}$/.test(code)) return code;
+  return code;
+}
+function comboLabel(combo) {
+  if (!combo) return '—';
+  return combo.split('+').map(p => (p === 'Ctrl' || p === 'Alt' || p === 'Shift') ? p : codeLabel(p)).join(' + ');
+}
+
+let hotkeyCapture = null; // action id currently listening for a new combo
+
 // Global keyboard shortcuts
 document.addEventListener('keydown', e => {
   const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+
+  // Rebinding mode swallows everything until a combo lands or the user cancels.
+  if (hotkeyCapture) {
     e.preventDefault();
-    if ($('palette-overlay').classList.contains('active')) closePalette();
-    else openPalette();
-  } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e' && currentTrackIndex >= 0 && !isInput) {
-    e.preventDefault();
-    openMetadataEditor(library[currentTrackIndex].path);
-  } else if (e.key === ' ' && !isInput) {
-    e.preventDefault();
-    togglePlay();
-  } else if (e.key === 'Escape') {
+    e.stopPropagation();
+    if (e.code === 'Escape') { hotkeyCapture = null; renderHotkeys(); return; }
+    if (e.code === 'Backspace') { hotkeySet(hotkeyCapture, ''); return; }
+    const combo = comboFromEvent(e);
+    if (combo) hotkeySet(hotkeyCapture, combo);
+    return;
+  }
+
+  if (e.key === 'Escape') {
     if ($('fullscreen-overlay').classList.contains('active')) closeFullscreen();
     else if (isSettingsOpen()) closeSettings();
     else if ($('metadata-modal').classList.contains('active')) $('metadata-modal').classList.remove('active');
     else if ($('new-playlist-modal').classList.contains('active')) $('new-playlist-modal').classList.remove('active');
     else if ($('add-to-playlist-modal').classList.contains('active')) $('add-to-playlist-modal').classList.remove('active');
     else if (librarySelectMode) setLibrarySelectMode(false);
+    return;
   }
+
+  const combo = comboFromEvent(e);
+  if (!combo) return;
+  // A bare key (no Ctrl/Alt) must not fire while the user is typing.
+  const bare = !e.ctrlKey && !e.metaKey && !e.altKey;
+  if (bare && isInput) return;
+
+  const bindings = hotkeyBindings();
+  const action = HOTKEY_ACTIONS.find(a => bindings[a.id] === combo);
+  if (!action) return;
+  e.preventDefault();
+  action.run();
 });
 
 // ── Filters / sort ──
@@ -8141,7 +8361,80 @@ function renderSettings() {
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
   // Discord lives in its own tab now — always expanded, no collapse.
   applySettingsTab(settings.settingsTab);
+  renderHotkeys();
   renderDiscord();
+}
+
+// ── Hotkeys settings UI ──
+// Assigns `combo` to `id`. A combo can only belong to one action, so any other
+// action holding it is cleared first — silently stealing it would leave two
+// rows claiming the same keys while only one ever fires.
+function hotkeySet(id, combo) {
+  const bindings = hotkeyBindings();
+  if (combo) {
+    for (const a of HOTKEY_ACTIONS) {
+      if (a.id !== id && bindings[a.id] === combo) bindings[a.id] = '';
+    }
+  }
+  bindings[id] = combo;
+  // Persist only what differs from the defaults, so future default changes
+  // reach users who never customised that action.
+  const overrides = {};
+  for (const a of HOTKEY_ACTIONS) {
+    if (bindings[a.id] !== HOTKEY_DEFAULTS[a.id]) overrides[a.id] = bindings[a.id];
+  }
+  settings.hotkeys = overrides;
+  saveSettings();
+  hotkeyCapture = null;
+  renderHotkeys();
+}
+
+function renderHotkeys() {
+  const host = $('hotkeys-list');
+  if (!host) return;
+  const bindings = hotkeyBindings();
+  host.innerHTML = HOTKEY_ACTIONS.map(a => {
+    const capturing = hotkeyCapture === a.id;
+    const combo = bindings[a.id];
+    const isCustom = combo !== HOTKEY_DEFAULTS[a.id];
+    return `
+      <div class="setting-row hotkey-row">
+        <div class="setting-text">
+          <div class="setting-label">${escapeHtml(tr('hotkey.' + a.id))}</div>
+        </div>
+        <div class="hotkey-controls">
+          ${isCustom ? `<button class="hotkey-revert" data-hk-revert="${a.id}" title="${escapeHtml(tr('hotkeys.revert'))}">↺</button>` : ''}
+          <button class="hotkey-combo${capturing ? ' is-capturing' : ''}${combo ? '' : ' is-empty'}" data-hk="${a.id}">
+            ${escapeHtml(capturing ? tr('hotkeys.press') : comboLabel(combo))}
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+  host.querySelectorAll('[data-hk]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      hotkeyCapture = hotkeyCapture === btn.dataset.hk ? null : btn.dataset.hk;
+      renderHotkeys();
+    });
+  });
+  host.querySelectorAll('[data-hk-revert]').forEach(btn => {
+    btn.addEventListener('click', () => hotkeySet(btn.dataset.hkRevert, HOTKEY_DEFAULTS[btn.dataset.hkRevert]));
+  });
+}
+
+const hotkeysResetBtn = $('hotkeys-reset');
+if (hotkeysResetBtn) {
+  hotkeysResetBtn.addEventListener('click', () => {
+    settings.hotkeys = {};
+    saveSettings();
+    hotkeyCapture = null;
+    renderHotkeys();
+  });
+}
+// Leaving the tab (or closing Settings) must not strand a live capture.
+function cancelHotkeyCapture() {
+  if (!hotkeyCapture) return;
+  hotkeyCapture = null;
+  renderHotkeys();
 }
 
 // ── Settings modal ──
@@ -8161,6 +8454,7 @@ function openSettings() {
 function closeSettings() {
   const m = $('settings-modal');
   if (m) m.classList.remove('active');
+  cancelHotkeyCapture();
 }
 const settingsCloseBtn = $('btn-close-settings');
 if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', closeSettings);
@@ -8181,6 +8475,7 @@ function applySettingsTab(tab) {
   if (!valid) tab = 'appearance';
   tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   panels.forEach(p => { p.hidden = p.dataset.panel !== tab; });
+  if (tab !== 'hotkeys') cancelHotkeyCapture();
 }
 document.querySelectorAll('#settings-tabs .settings-tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -8886,7 +9181,7 @@ function warmMissingCoversInBackground() {
 
 applyLanguage(settings.language);
 splashStatus('splash.loading');
-renderSettings();
+
 updateShuffleUI();
 updateRepeatUI();
 (async () => {

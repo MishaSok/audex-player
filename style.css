@@ -1927,6 +1927,55 @@ html.is-playing .equalizer > span { animation-play-state: running; }
 }
 .setting-card-tight { margin-top: 12px; }
 
+/* Hotkeys tab */
+.hotkeys-intro { margin: 0 0 12px; }
+.hotkey-row { align-items: center; }
+.hotkey-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hotkey-combo {
+  appearance: none;
+  min-width: 132px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--panel-alt);
+  color: var(--text-strong);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
+}
+.hotkey-combo:hover { border-color: var(--accent); }
+.hotkey-combo.is-empty { color: var(--text-dim); }
+.hotkey-combo.is-capturing {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-family: inherit;
+}
+.hotkey-revert {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 7px;
+  cursor: pointer;
+}
+.hotkey-revert:hover { color: var(--text-strong); border-color: var(--border-strong); }
+.hotkeys-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
 /* Settings tabbed navigation — vertical sidebar, always on the left at every
    window size (no responsive stacking; the card scales instead). */
 .settings-layout {
