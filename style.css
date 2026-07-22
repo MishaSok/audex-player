@@ -2959,6 +2959,32 @@ html:has(.palette-overlay.active) .dl-progress-fill {
   border-bottom: 1px solid var(--border);
 }
 .select-list .sl-item:last-child { border-bottom: none; }
+/* Editor track picker rows carry artwork; scoped to the picker so the
+   add-to-playlist list keeps its plain text rows. */
+#ed-pick-list .sl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ed-pick-cover {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--panel-alt) center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.ed-pick-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .select-list .sl-item:hover {
   background: var(--hover-bg);
   color: var(--text-strong);
@@ -4181,6 +4207,18 @@ html:has(.palette-overlay.active) .dl-progress-fill {
   flex-shrink: 0;
   background: var(--panel-alt) center/cover no-repeat;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Shown only when the track carries no artwork — matches the letter fallback
+   used by the mini-player, the fullscreen cover and the tag editor. */
+.ed-cover-letter {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text-dim);
+  user-select: none;
 }
 .ed-meta { min-width: 0; }
 .ed-title {
@@ -4362,6 +4400,57 @@ html:has(.palette-overlay.active) .dl-progress-fill {
   flex-direction: column;
   gap: 6px;
 }
+/* Gain slider — centred on 0 dB: drag left to attenuate, right to amplify. */
+.ed-opt-gain { min-width: 268px; }
+.ed-gain-ctl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ed-gain-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 150px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+  cursor: pointer;
+}
+.ed-gain-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+.ed-gain-val {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+  min-width: 58px;
+}
+.ed-gain-reset {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-alt);
+  color: var(--text-dim);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.ed-gain-reset:hover { color: var(--text-strong); border-color: var(--accent); }
+.ed-gain-warn {
+  font-size: 11px;
+  color: var(--danger);
+  max-width: 268px;
+}
+
 .ed-opt-overwrite {
   flex-direction: row;
   align-items: center;

@@ -509,7 +509,7 @@
 
         <div id="ed-workspace" hidden>
           <div class="ed-head">
-            <div class="ed-cover" id="ed-cover"></div>
+            <div class="ed-cover" id="ed-cover"><span class="ed-cover-letter" id="ed-cover-letter"></span></div>
             <div class="ed-meta">
               <div class="ed-title" id="ed-track-title">—</div>
               <div class="ed-artist" id="ed-track-artist">—</div>
@@ -559,6 +559,16 @@
             <div class="ed-opt-row">
               <label class="ed-label" for="ed-fade-out" data-i18n="editor.fadeOut">Затухание, с</label>
               <input type="number" id="ed-fade-out" class="ed-num-input" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="ed-opt-row ed-opt-gain" title="Минус — тише, плюс — громче. 0 дБ — без изменений." data-i18n-title="editor.gainHint">
+              <label class="ed-label" for="ed-gain" data-i18n="editor.gain">Громкость, дБ</label>
+              <div class="ed-gain-ctl">
+                <input type="range" id="ed-gain" class="ed-gain-range" min="-24" max="24" step="0.5" value="0">
+                <output class="ed-gain-val" id="ed-gain-val">0 dB</output>
+                <button type="button" class="ed-gain-reset" id="ed-gain-reset" title="Сбросить" data-i18n-title="editor.reset">0</button>
+              </div>
+              <!-- Clipping warning, filled by JS when the boost exceeds headroom. -->
+              <div class="ed-gain-warn" id="ed-gain-warn" hidden></div>
             </div>
             <div class="ed-opt-row ed-opt-overwrite">
               <div class="setting-text">

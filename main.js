@@ -716,6 +716,9 @@ ipcMain.handle('audio:trim', async (event, payload) => {
   const end = Number(payload && payload.end) || 0;
   const fadeIn = Math.max(0, Number(payload && payload.fadeIn) || 0);
   const fadeOut = Math.max(0, Number(payload && payload.fadeOut) || 0);
+  // Gain in dB: negative makes the cut quieter, positive louder. Clamped to a
+  // sane range so a bad renderer value can't ask ffmpeg for absurd gain.
+  const gain = Math.max(-40, Math.min(40, Number(payload && payload.gain) || 0));
   const overwrite = !!(payload && payload.overwrite);
 
   if (!src || !fs.existsSync(src)) return { success: false, error: 'Файл не найден' };
@@ -740,8 +743,12 @@ ipcMain.handle('audio:trim', async (event, payload) => {
   const tmpPath = path.join(dir, `.audex-trim-${Date.now()}${ext}`);
 
   const args = ['-hide_banner', '-loglevel', 'error', '-y', '-ss', String(start), '-i', src, '-t', String(dur)];
-  if (fadeIn > 0 || fadeOut > 0) {
+  // Any filter (fade or gain) rules out the stream copy and forces a re-encode.
+  if (fadeIn > 0 || fadeOut > 0 || gain !== 0) {
     const filters = [];
+    // Gain first, so the fades shape the already-scaled signal and always end
+    // at true silence.
+    if (gain !== 0) filters.push(`volume=${gain}dB`);
     if (fadeIn > 0) filters.push(`afade=t=in:st=0:d=${fadeIn}`);
     if (fadeOut > 0) filters.push(`afade=t=out:st=${Math.max(0, dur - fadeOut)}:d=${fadeOut}`);
     args.push('-af', filters.join(','), '-c:a', 'libmp3lame', '-b:a', '320k');

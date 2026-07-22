@@ -300,6 +300,9 @@ const I18N = {
     'editor.reset': 'Сбросить',
     'editor.fadeIn': 'Нарастание, с',
     'editor.fadeOut': 'Затухание, с',
+    'editor.gain': 'Громкость, дБ',
+    'editor.gainHint': 'Минус — тише, плюс — громче. 0 дБ — без изменений.',
+    'editor.gainClip': 'Пик превысит 0 дБ на {d} дБ — возможны искажения',
     'editor.overwrite': 'Перезаписать оригинал',
     'editor.overwriteDesc': 'По умолчанию рядом создаётся новый файл «— (обрезано)». Включите, чтобы заменить исходный файл.',
     'editor.save': 'Обрезать и сохранить',
@@ -699,6 +702,9 @@ const I18N = {
     'editor.reset': 'Reset',
     'editor.fadeIn': 'Fade in, s',
     'editor.fadeOut': 'Fade out, s',
+    'editor.gain': 'Volume, dB',
+    'editor.gainHint': 'Minus is quieter, plus is louder. 0 dB leaves it unchanged.',
+    'editor.gainClip': 'Peak will exceed 0 dB by {d} dB — clipping likely',
     'editor.overwrite': 'Overwrite original',
     'editor.overwriteDesc': 'By default a new “— (обрезано)” file is created next to it. Enable to replace the source file.',
     'editor.save': 'Trim and save',
@@ -1098,6 +1104,9 @@ const I18N = {
     'editor.reset': 'Zurücksetzen',
     'editor.fadeIn': 'Einblenden, s',
     'editor.fadeOut': 'Ausblenden, s',
+    'editor.gain': 'Lautstärke, dB',
+    'editor.gainHint': 'Minus ist leiser, Plus ist lauter. 0 dB lässt sie unverändert.',
+    'editor.gainClip': 'Spitze überschreitet 0 dB um {d} dB — Übersteuerung wahrscheinlich',
     'editor.overwrite': 'Original überschreiben',
     'editor.overwriteDesc': 'Standardmäßig wird daneben eine neue Datei „— (обрезано)“ erstellt. Aktivieren, um die Quelldatei zu ersetzen.',
     'editor.save': 'Zuschneiden und speichern',
@@ -1497,6 +1506,9 @@ const I18N = {
     'editor.reset': 'Réinitialiser',
     'editor.fadeIn': 'Fondu entrant, s',
     'editor.fadeOut': 'Fondu sortant, s',
+    'editor.gain': 'Volume, dB',
+    'editor.gainHint': 'Moins pour baisser, plus pour monter. 0 dB ne change rien.',
+    'editor.gainClip': 'Le pic dépassera 0 dB de {d} dB — saturation probable',
     'editor.overwrite': "Écraser l'original",
     'editor.overwriteDesc': "Par défaut, un nouveau fichier « — (обрезано) » est créé à côté. Activez pour remplacer le fichier source.",
     'editor.save': 'Découper et enregistrer',
@@ -1896,6 +1908,9 @@ const I18N = {
     'editor.reset': 'Скинути',
     'editor.fadeIn': 'Наростання, с',
     'editor.fadeOut': 'Затухання, с',
+    'editor.gain': 'Гучність, дБ',
+    'editor.gainHint': 'Мінус — тихіше, плюс — гучніше. 0 дБ — без змін.',
+    'editor.gainClip': 'Пік перевищить 0 дБ на {d} дБ — можливі спотворення',
     'editor.overwrite': 'Перезаписати оригінал',
     'editor.overwriteDesc': 'Типово поруч створюється новий файл «— (обрезано)». Увімкніть, щоб замінити вихідний файл.',
     'editor.save': 'Обрізати та зберегти',
@@ -2662,6 +2677,10 @@ let edEnd = 0;
 let edPreview = null;      // transient Audio for previewing the selection
 let edPreviewRaf = null;
 let edLoadToken = 0;       // guards against a slow decode landing after a switch
+let edPeakAmp = 0;         // true sample peak of the loaded track, 0..1
+let edGainDb = 0;          // gain applied on save, in dB (0 = untouched)
+let edGainCtx = null;      // shared AudioContext used to preview the gain
+let edGainNode = null;     // gain node of the current preview, if any
 
 function edFormatTime(sec) {
   if (!isFinite(sec) || sec < 0) sec = 0;
@@ -2732,7 +2751,9 @@ async function edDecodePeaks(arrayBuffer, bars) {
   for (let i = 0; i < bars; i++) {
     out[i] = Math.max(0.04, Math.min(1, Math.pow(peaks[i] * norm, 0.7)));
   }
-  return { peaks: out, duration: buf.duration };
+  // `peak` is the true (un-normalised) sample peak, 0..1 — the gain control
+  // needs it to work out how much headroom is left before clipping.
+  return { peaks: out, duration: buf.duration, peak: globalMax };
 }
 
 function edPaintBars() {
@@ -2777,6 +2798,51 @@ function edPaintRuler() {
   el.innerHTML = html;
 }
 
+// Gain, in dB, applied to the cut on save. Negative attenuates, positive
+// amplifies. The readout and the clipping warning are refreshed together; the
+// warning compares the boost against the track's remaining headroom
+// (-20·log10(peak)), so it only fires when the result would actually clip.
+function edSetGain(db, opts) {
+  edGainDb = Math.max(-24, Math.min(24, Math.round((Number(db) || 0) * 2) / 2));
+  const slider = $('ed-gain');
+  if (slider && !(opts && opts.fromSlider)) slider.value = String(edGainDb);
+  const val = $('ed-gain-val');
+  if (val) val.textContent = `${edGainDb > 0 ? '+' : ''}${edGainDb.toFixed(1)} dB`;
+  // Keep an in-flight preview in sync with the slider. With a gain node any dB
+  // works; without one we can only attenuate (an element's volume caps at 1).
+  const ratio = Math.pow(10, edGainDb / 20);
+  if (edGainNode) edGainNode.gain.value = ratio;
+  else if (edPreview) edPreview.volume = Math.min(1, ratio);
+  const warn = $('ed-gain-warn');
+  if (warn) {
+    const headroom = edPeakAmp > 0 ? -20 * Math.log10(edPeakAmp) : Infinity;
+    const over = edGainDb - headroom;
+    // Only ever warn about a boost. Loud masters routinely decode to a peak
+    // just above 1.0 (inter-sample overshoot), so headroom is often slightly
+    // negative — that must not raise a warning at 0 dB, where we stream-copy
+    // and change nothing at all, nor when the user is attenuating.
+    if (edGainDb > 0 && isFinite(over) && over > 0.05) {
+      warn.textContent = tr('editor.gainClip', { d: over.toFixed(1) });
+      warn.hidden = false;
+    } else {
+      warn.hidden = true;
+      warn.textContent = '';
+    }
+  }
+}
+
+// Paints the editor header artwork, falling back to the track's initial when
+// there is none. Safe to call repeatedly — used both on open and once a lazily
+// fetched cover arrives.
+function edPaintCover() {
+  const el = $('ed-cover');
+  const letter = $('ed-cover-letter');
+  if (!el || !edTrack) return;
+  const cover = edTrack.cover || coverCache[edTrack.path] || '';
+  el.style.backgroundImage = cover ? `url('${cover}')` : '';
+  if (letter) letter.textContent = cover ? '' : (edTrack.title || '?').trim()[0] || '?';
+}
+
 function edRepaint() {
   edPaintBars();
   edPaintSelection();
@@ -2793,13 +2859,21 @@ async function openEditorFor(track) {
   $('ed-track-title').textContent = track.title || '—';
   $('ed-track-artist').textContent = track.artist || '—';
   $('ed-track-file').textContent = track.path || '';
-  const cover = track.cover || coverCache[track.path] || '';
-  $('ed-cover').style.backgroundImage = cover ? `url('${cover}')` : '';
+  edPaintCover();
+  // The cover may not be cached yet (the disk-cache warm and the background
+  // backfill are both async). Pull it on demand and repaint when it lands —
+  // guarded so a track switched mid-fetch doesn't get the wrong artwork.
+  if (!edTrack.cover && !coverCache[track.path] && track.hasCover !== false) {
+    ensureCoverFor(track, true).then(() => { if (edTrack === track) edPaintCover(); });
+  }
   // Provisional bounds from tag duration so the UI is usable while decoding.
   edDuration = Number(track.duration) || 0;
   edStart = 0;
   edEnd = edDuration;
   edPeaks = null;
+  // Reset gain per track; headroom is unknown until the decode lands.
+  edPeakAmp = 0;
+  edSetGain(0);
   edRepaint();
   edPaintRuler();
   setEdStatus(tr('editor.decoding'));
@@ -2811,6 +2885,8 @@ async function openEditorFor(track) {
     const res = await edDecodePeaks(ab, ED_BARS);
     if (token !== edLoadToken) return; // user switched tracks mid-decode
     edPeaks = res.peaks;
+    edPeakAmp = Number(res.peak) || 0;
+    edSetGain(edGainDb); // re-evaluate the clipping warning now headroom is known
     if (res.duration > 0) {
       // Decoded duration is authoritative — tag duration is often rounded.
       const keepFull = Math.abs(edEnd - edDuration) < 0.05;
@@ -2849,6 +2925,10 @@ function stopEditorPreview() {
     try { edPreview.pause(); edPreview.src = ''; } catch (_) {}
     edPreview = null;
   }
+  if (edGainNode) {
+    try { edGainNode.disconnect(); } catch (_) {}
+    edGainNode = null;
+  }
   const ph = $('ed-playhead');
   if (ph) ph.hidden = true;
   const lbl = $('ed-preview-label');
@@ -2862,6 +2942,26 @@ function toggleEditorPreview() {
   if (!audio.paused) { audio.pause(); isPlaying = false; stopCrossfadeTail(); updatePlayButtonUI(); }
   const a = new Audio();
   edPreview = a;
+  // Amplifying past 1.0 needs a WebAudio gain node; attenuating doesn't. Only
+  // take the WebAudio path when actually boosting, so the common gain-free
+  // preview keeps working exactly as it did even if routing were to fail.
+  const ratio = Math.pow(10, edGainDb / 20);
+  edGainNode = null;
+  if (edGainDb > 0) {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!edGainCtx) edGainCtx = new Ctx();
+      if (edGainCtx.state === 'suspended') edGainCtx.resume().catch(() => {});
+      const node = edGainCtx.createGain();
+      node.gain.value = ratio;
+      edGainCtx.createMediaElementSource(a).connect(node).connect(edGainCtx.destination);
+      edGainNode = node;
+    } catch (_) {
+      edGainNode = null; // fall back to unamplified preview
+    }
+  } else {
+    a.volume = Math.min(1, ratio);
+  }
   a.addEventListener('loadedmetadata', () => {
     if (edPreview !== a) return;
     try { a.currentTime = edStart; } catch (_) {}
@@ -2898,6 +2998,7 @@ async function saveEditorTrim() {
       end: edEnd,
       fadeIn,
       fadeOut,
+      gain: edGainDb,
       overwrite,
     });
     if (!res || !res.success) {
@@ -2940,12 +3041,20 @@ function renderEdPickList(filter) {
     list.innerHTML = `<div class="sl-empty">${escapeHtml(tr('editor.pickEmpty'))}</div>`;
     return;
   }
-  list.innerHTML = items.map(t => `
+  list.innerHTML = items.map(t => {
+    const c = t.cover || coverCache[t.path] || '';
+    const thumb = c
+      ? `<span class="ed-pick-cover" style="background-image:url('${c}')"></span>`
+      : `<span class="ed-pick-cover">${escapeHtml((t.title || '?').trim()[0] || '?')}</span>`;
+    return `
     <div class="sl-item" data-ed-pick="${escapeHtml(t.path)}">
-      ${escapeHtml(t.title || '—')}
-      <span style="color:var(--text-dim);font-size:11px;margin-left:6px">${escapeHtml(t.artist || '—')}</span>
-    </div>
-  `).join('');
+      ${thumb}
+      <span class="ed-pick-text">
+        ${escapeHtml(t.title || '—')}
+        <span style="color:var(--text-dim);font-size:11px;margin-left:6px">${escapeHtml(t.artist || '—')}</span>
+      </span>
+    </div>`;
+  }).join('');
   list.querySelectorAll('[data-ed-pick]').forEach(btn => {
     btn.addEventListener('click', () => {
       const t = trackByPath(btn.getAttribute('data-ed-pick'));
@@ -2998,9 +3107,12 @@ function renderEdPickList(filter) {
   $('ed-reset-btn').addEventListener('click', () => {
     edStart = 0;
     edEnd = edDuration;
+    edSetGain(0);
     edRepaint();
     setEdStatus('');
   });
+  $('ed-gain').addEventListener('input', e => edSetGain(e.target.value, { fromSlider: true }));
+  $('ed-gain-reset').addEventListener('click', () => edSetGain(0));
   $('ed-save-btn').addEventListener('click', saveEditorTrim);
   $('ed-overwrite-toggle').addEventListener('click', () => {
     $('ed-overwrite-toggle').classList.toggle('on');
