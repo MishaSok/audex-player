@@ -98,6 +98,9 @@
     </defs>
   </svg>
 
+  <!-- Custom background layer; painted by applyAppearance() in renderer.js. -->
+  <div id="app-bg" aria-hidden="true"><div id="app-bg-image"></div><div id="app-bg-dim"></div></div>
+
   <div id="app">
     <!-- Update banner -->
     <div id="update-banner" class="update-banner" hidden>
@@ -1082,6 +1085,80 @@
                 <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
               </button>
               <button type="button" class="btn-ghost stepper-reset" id="scale-reset" data-i18n="setting.uiScaleReset">Сбросить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-image"/></svg>
+          <span data-i18n="section.background">Фон</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.bgSource">Фоновое изображение</div>
+              <div class="setting-desc" data-i18n="setting.bgSourceDesc">Своя картинка или обложка текущего трека под интерфейсом.</div>
+            </div>
+            <div class="seg" id="bg-source-seg">
+              <button class="seg-btn" data-bg-source="none" data-i18n="bg.none">Нет</button>
+              <button class="seg-btn" data-bg-source="image" data-i18n="bg.image">Картинка</button>
+              <button class="seg-btn" data-bg-source="cover" data-i18n="bg.cover">Обложка</button>
+            </div>
+          </div>
+          <div class="setting-row" id="bg-file-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.bgFile">Файл</div>
+              <div class="setting-path" id="bg-file-name">—</div>
+              <div class="setting-desc" data-i18n="setting.bgFileDesc">Копируется внутрь приложения, поэтому оригинал можно перемещать.</div>
+            </div>
+            <div class="bg-file-actions">
+              <button class="btn-ghost" id="bg-pick-btn">
+                <svg class="i" width="13" height="13"><use href="#i-image"/></svg>
+                <span data-i18n="btn.choose">Выбрать…</span>
+              </button>
+              <button class="btn-ghost" id="bg-clear-btn" data-i18n="bg.clear">Убрать</button>
+            </div>
+          </div>
+          <div class="setting-row" id="bg-fit-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.bgFit">Вписывание</div>
+            </div>
+            <div class="seg" id="bg-fit-seg">
+              <button class="seg-btn" data-bg-fit="cover" data-i18n="bg.fit.cover">Заполнить</button>
+              <button class="seg-btn" data-bg-fit="contain" data-i18n="bg.fit.contain">Целиком</button>
+              <button class="seg-btn" data-bg-fit="center" data-i18n="bg.fit.center">По центру</button>
+              <button class="seg-btn" data-bg-fit="tile" data-i18n="bg.fit.tile">Плитка</button>
+            </div>
+          </div>
+          <div class="setting-row" id="bg-blur-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.bgBlur">Размытие</div>
+            </div>
+            <div class="range-ctl">
+              <input type="range" id="bg-blur" class="ui-range" min="0" max="60" step="1" value="0">
+              <output class="range-val" id="bg-blur-val">0 px</output>
+            </div>
+          </div>
+          <div class="setting-row" id="bg-dim-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.bgDim">Затемнение</div>
+              <div class="setting-desc" data-i18n="setting.bgDimDesc">Чем больше, тем читаемее текст поверх картинки.</div>
+            </div>
+            <div class="range-ctl">
+              <input type="range" id="bg-dim" class="ui-range" min="0" max="95" step="1" value="35">
+              <output class="range-val" id="bg-dim-val">35 %</output>
+            </div>
+          </div>
+          <div class="setting-row" id="bg-alpha-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.surfaceAlpha">Непрозрачность панелей</div>
+              <div class="setting-desc" data-i18n="setting.surfaceAlphaDesc">Насколько сквозь боковое меню и панель плеера видно фон.</div>
+            </div>
+            <div class="range-ctl">
+              <input type="range" id="surface-alpha" class="ui-range" min="20" max="100" step="1" value="100">
+              <output class="range-val" id="surface-alpha-val">100 %</output>
             </div>
           </div>
         </div>

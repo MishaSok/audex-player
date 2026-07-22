@@ -41,6 +41,13 @@ let settings = Object.assign({
   settingsTab: 'appearance', // active tab in the Settings view
   hotkeys: {},               // only user overrides; see HOTKEY_DEFAULTS
   hotkeysGlobal: {},         // action id -> true when registered system-wide
+  bgSource: 'none',          // 'none' | 'image' | 'cover'
+  bgImage: '',               // file:// URL of the copy in <userData>/backgrounds
+  bgImageName: '',           // original filename, shown in Settings
+  bgBlur: 0,                 // px
+  bgDim: 35,                 // % of the theme background laid over the image
+  bgFit: 'cover',            // cover | contain | center | tile
+  surfaceAlpha: 100,         // % opacity of sidebar/playbar/cards over the image
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -187,6 +194,45 @@ function applyAccent(hex) {
 }
 applyAccent(settings.accent);
 
+// ── Custom background ──
+// bgSource: 'none' | 'image' (a file the user picked) | 'cover' (the artwork of
+// whatever is playing). Everything is driven off CSS custom properties so the
+// track-cover mode can repaint on each track change without rebuilding state.
+const BG_FIT_CSS = {
+  cover:   { size: 'cover',   repeat: 'no-repeat' },
+  contain: { size: 'contain', repeat: 'no-repeat' },
+  center:  { size: 'auto',    repeat: 'no-repeat' },
+  tile:    { size: 'auto',    repeat: 'repeat' },
+};
+function currentBackgroundUrl() {
+  if (settings.bgSource === 'image') return settings.bgImage || '';
+  if (settings.bgSource === 'cover') {
+    const t = currentTrackIndex >= 0 ? library[currentTrackIndex] : null;
+    if (!t) return '';
+    return t.cover || coverCache[t.path] || '';
+  }
+  return '';
+}
+function applyAppearance() {
+  const url = currentBackgroundUrl();
+  const on = !!url;
+  root.classList.toggle('has-custom-bg', on);
+  const layer = document.getElementById('app-bg-image');
+  if (layer) {
+    layer.style.backgroundImage = on ? `url("${String(url).replace(/"/g, '%22')}")` : '';
+    const fit = BG_FIT_CSS[settings.bgFit] || BG_FIT_CSS.cover;
+    layer.style.backgroundSize = fit.size;
+    layer.style.backgroundRepeat = fit.repeat;
+  }
+  const blur = Math.max(0, Math.min(60, Number(settings.bgBlur) || 0));
+  root.style.setProperty('--bg-blur', blur + 'px');
+  // A CSS blur samples past the element's edges, so scale up just enough that
+  // the faded border stays off-screen.
+  root.style.setProperty('--bg-scale', String(1 + blur / 100));
+  root.style.setProperty('--bg-dim', String(Math.max(0, Math.min(100, Number(settings.bgDim) || 0)) / 100));
+  root.style.setProperty('--surface-alpha', String(Math.max(20, Math.min(100, Number(settings.surfaceAlpha) || 100)) / 100));
+}
+
 // ── Theme combobox options ──
 // Built-in themes (dark/light/system) use i18n labels; designer palettes use
 // their proper names. `emoji` is shown both in the menu and the select trigger.
@@ -222,7 +268,8 @@ function applyUiScale(scale) {
     document.documentElement.style.zoom = String(s);
   }
 }
-
+applyUiScale(settings.uiScale);
+applyAppearance();
 
 // ── Persistence ──
 function saveLibrary() {
@@ -554,6 +601,26 @@ const I18N = {
     'settings.title': 'Настройки',
     'settings.subtitle': 'Внешний вид, источники музыки и поведение приложения.',
     'section.appearance': 'Внешний вид',
+    'section.background': 'Фон',
+    'setting.bgSource': 'Фоновое изображение',
+    'setting.bgSourceDesc': 'Своя картинка или обложка текущего трека под интерфейсом.',
+    'bg.none': 'Нет',
+    'bg.image': 'Картинка',
+    'bg.cover': 'Обложка',
+    'setting.bgFile': 'Файл',
+    'setting.bgFileDesc': 'Копируется внутрь приложения, поэтому оригинал можно перемещать.',
+    'bg.noFile': 'Файл не выбран',
+    'bg.clear': 'Убрать',
+    'setting.bgFit': 'Вписывание',
+    'bg.fit.cover': 'Заполнить',
+    'bg.fit.contain': 'Целиком',
+    'bg.fit.center': 'По центру',
+    'bg.fit.tile': 'Плитка',
+    'setting.bgBlur': 'Размытие',
+    'setting.bgDim': 'Затемнение',
+    'setting.bgDimDesc': 'Чем больше, тем читаемее текст поверх картинки.',
+    'setting.surfaceAlpha': 'Непрозрачность панелей',
+    'setting.surfaceAlphaDesc': 'Насколько сквозь боковое меню и панель плеера видно фон.',
     'section.music': 'Музыка',
     'section.downloads': 'Скачивание из интернета',
     'section.language': 'Язык',
@@ -988,6 +1055,26 @@ const I18N = {
     'settings.title': 'Settings',
     'settings.subtitle': 'Appearance, music sources, and app behavior.',
     'section.appearance': 'Appearance',
+    'section.background': 'Background',
+    'setting.bgSource': 'Background image',
+    'setting.bgSourceDesc': 'Your own picture, or the current track artwork, behind the interface.',
+    'bg.none': 'None',
+    'bg.image': 'Image',
+    'bg.cover': 'Artwork',
+    'setting.bgFile': 'File',
+    'setting.bgFileDesc': 'Copied into the app, so you can move the original afterwards.',
+    'bg.noFile': 'No file chosen',
+    'bg.clear': 'Remove',
+    'setting.bgFit': 'Fit',
+    'bg.fit.cover': 'Fill',
+    'bg.fit.contain': 'Whole',
+    'bg.fit.center': 'Centre',
+    'bg.fit.tile': 'Tile',
+    'setting.bgBlur': 'Blur',
+    'setting.bgDim': 'Dim',
+    'setting.bgDimDesc': 'The higher it is, the more readable text stays over the picture.',
+    'setting.surfaceAlpha': 'Panel opacity',
+    'setting.surfaceAlphaDesc': 'How much of the background shows through the sidebar and player bar.',
     'section.music': 'Music',
     'section.downloads': 'Download from the internet',
     'section.language': 'Language',
@@ -1422,6 +1509,26 @@ const I18N = {
     'settings.title': 'Einstellungen',
     'settings.subtitle': 'Aussehen, Musikquellen und App-Verhalten.',
     'section.appearance': 'Aussehen',
+    'section.background': 'Hintergrund',
+    'setting.bgSource': 'Hintergrundbild',
+    'setting.bgSourceDesc': 'Eigenes Bild oder das Cover des laufenden Titels hinter der Oberfläche.',
+    'bg.none': 'Keiner',
+    'bg.image': 'Bild',
+    'bg.cover': 'Cover',
+    'setting.bgFile': 'Datei',
+    'setting.bgFileDesc': 'Wird in die App kopiert, das Original kann danach verschoben werden.',
+    'bg.noFile': 'Keine Datei gewählt',
+    'bg.clear': 'Entfernen',
+    'setting.bgFit': 'Anpassung',
+    'bg.fit.cover': 'Füllen',
+    'bg.fit.contain': 'Ganz',
+    'bg.fit.center': 'Zentriert',
+    'bg.fit.tile': 'Kacheln',
+    'setting.bgBlur': 'Unschärfe',
+    'setting.bgDim': 'Abdunkeln',
+    'setting.bgDimDesc': 'Je höher, desto lesbarer bleibt Text über dem Bild.',
+    'setting.surfaceAlpha': 'Deckkraft der Flächen',
+    'setting.surfaceAlphaDesc': 'Wie stark der Hintergrund durch Seitenleiste und Player-Leiste scheint.',
     'section.music': 'Musik',
     'section.downloads': 'Aus dem Internet herunterladen',
     'section.language': 'Sprache',
@@ -1856,6 +1963,26 @@ const I18N = {
     'settings.title': 'Paramètres',
     'settings.subtitle': "Apparence, sources musicales et comportement de l'application.",
     'section.appearance': 'Apparence',
+    'section.background': 'Arrière-plan',
+    'setting.bgSource': "Image d'arrière-plan",
+    'setting.bgSourceDesc': "Votre image, ou la pochette du morceau en cours, derrière l'interface.",
+    'bg.none': 'Aucun',
+    'bg.image': 'Image',
+    'bg.cover': 'Pochette',
+    'setting.bgFile': 'Fichier',
+    'setting.bgFileDesc': "Copiée dans l'application : l'original peut ensuite être déplacé.",
+    'bg.noFile': 'Aucun fichier choisi',
+    'bg.clear': 'Retirer',
+    'setting.bgFit': 'Ajustement',
+    'bg.fit.cover': 'Remplir',
+    'bg.fit.contain': 'Entière',
+    'bg.fit.center': 'Centrée',
+    'bg.fit.tile': 'Mosaïque',
+    'setting.bgBlur': 'Flou',
+    'setting.bgDim': 'Assombrissement',
+    'setting.bgDimDesc': "Plus il est élevé, plus le texte reste lisible sur l'image.",
+    'setting.surfaceAlpha': 'Opacité des panneaux',
+    'setting.surfaceAlphaDesc': "Dans quelle mesure l'arrière-plan transparaît sous la barre latérale et le lecteur.",
     'section.music': 'Musique',
     'section.downloads': "Téléchargement depuis Internet",
     'section.language': 'Langue',
@@ -2290,6 +2417,26 @@ const I18N = {
     'settings.title': 'Налаштування',
     'settings.subtitle': 'Зовнішній вигляд, джерела музики та поведінка застосунку.',
     'section.appearance': 'Зовнішній вигляд',
+    'section.background': 'Тло',
+    'setting.bgSource': 'Фонове зображення',
+    'setting.bgSourceDesc': 'Власна картинка або обкладинка поточного треку під інтерфейсом.',
+    'bg.none': 'Немає',
+    'bg.image': 'Картинка',
+    'bg.cover': 'Обкладинка',
+    'setting.bgFile': 'Файл',
+    'setting.bgFileDesc': 'Копіюється всередину програми, тож оригінал можна переміщувати.',
+    'bg.noFile': 'Файл не вибрано',
+    'bg.clear': 'Прибрати',
+    'setting.bgFit': 'Вписування',
+    'bg.fit.cover': 'Заповнити',
+    'bg.fit.contain': 'Цілком',
+    'bg.fit.center': 'По центру',
+    'bg.fit.tile': 'Плитка',
+    'setting.bgBlur': 'Розмиття',
+    'setting.bgDim': 'Затемнення',
+    'setting.bgDimDesc': 'Що більше, то читабельніший текст поверх картинки.',
+    'setting.surfaceAlpha': 'Непрозорість панелей',
+    'setting.surfaceAlphaDesc': 'Наскільки крізь бічне меню та панель плеєра видно тло.',
     'section.music': 'Музика',
     'section.downloads': 'Завантаження з інтернету',
     'section.language': 'Мова',
@@ -6486,6 +6633,8 @@ function animateSwap(snap, direction, kind) {
 }
 
 function updateNowPlayingUI(track) {
+  // Repaint the backdrop when it follows the artwork of the playing track.
+  if (settings.bgSource === 'cover') applyAppearance();
   const coverSrc = track.cover || null;
   const isTrackChange = lastNowPlayingPath !== null && lastNowPlayingPath !== track.path;
   const direction = isTrackChange ? trackChangeDirection : 0;
@@ -8471,6 +8620,115 @@ const TOGGLE_KEY_MAP = {
   'show-parser-browser': 'showParserBrowser',
 };
 
+// ── Background settings UI ──
+// Rows that only make sense for a real image are hidden for 'none'; the file
+// picker row is additionally hidden in 'cover' mode, where the artwork is the
+// source and there is no file to choose.
+function renderBackgroundSettings() {
+  const src = ['none', 'image', 'cover'].includes(settings.bgSource) ? settings.bgSource : 'none';
+  document.querySelectorAll('#bg-source-seg .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.bgSource === src);
+  });
+  document.querySelectorAll('#bg-fit-seg .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.bgFit === (settings.bgFit || 'cover'));
+  });
+  const nameEl = $('bg-file-name');
+  if (nameEl) nameEl.textContent = settings.bgImageName || (settings.bgImage ? '—' : tr('bg.noFile'));
+
+  const show = (id, on) => { const el = $(id); if (el) el.hidden = !on; };
+  show('bg-file-row', src === 'image');
+  show('bg-fit-row', src !== 'none');
+  show('bg-blur-row', src !== 'none');
+  show('bg-dim-row', src !== 'none');
+  show('bg-alpha-row', src !== 'none');
+
+  const set = (id, valId, value, suffix) => {
+    const el = $(id); const out = $(valId);
+    if (el) el.value = String(value);
+    if (out) out.textContent = `${value} ${suffix}`;
+  };
+  set('bg-blur', 'bg-blur-val', Math.round(Number(settings.bgBlur) || 0), 'px');
+  set('bg-dim', 'bg-dim-val', Math.round(Number(settings.bgDim) || 0), '%');
+  set('surface-alpha', 'surface-alpha-val', Math.round(Number(settings.surfaceAlpha) || 100), '%');
+}
+
+function wireBackgroundSettings() {
+  document.querySelectorAll('#bg-source-seg .seg-btn').forEach(b => {
+    b.addEventListener('click', async () => {
+      settings.bgSource = b.dataset.bgSource;
+      // Choosing "image" with nothing picked yet goes straight to the dialog.
+      if (settings.bgSource === 'image' && !settings.bgImage) {
+        saveSettings();
+        renderBackgroundSettings();
+        await pickBackgroundImage();
+        return;
+      }
+      saveSettings();
+      applyAppearance();
+      renderBackgroundSettings();
+    });
+  });
+  document.querySelectorAll('#bg-fit-seg .seg-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      settings.bgFit = b.dataset.bgFit;
+      saveSettings();
+      applyAppearance();
+      renderBackgroundSettings();
+    });
+  });
+  const slider = (id, key) => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      settings[key] = Number(el.value);
+      applyAppearance();
+      renderBackgroundSettings();
+    });
+    // Persist on release rather than on every frame of the drag.
+    el.addEventListener('change', () => saveSettings());
+  };
+  slider('bg-blur', 'bgBlur');
+  slider('bg-dim', 'bgDim');
+  slider('surface-alpha', 'surfaceAlpha');
+
+  const pick = $('bg-pick-btn');
+  if (pick) pick.addEventListener('click', () => pickBackgroundImage());
+  const clear = $('bg-clear-btn');
+  if (clear) clear.addEventListener('click', async () => {
+    settings.bgImage = '';
+    settings.bgImageName = '';
+    if (settings.bgSource === 'image') settings.bgSource = 'none';
+    saveSettings();
+    applyAppearance();
+    renderBackgroundSettings();
+    try { await window.electronAPI.clearBackground(); } catch (_) {}
+  });
+}
+
+async function pickBackgroundImage() {
+  if (!window.electronAPI || !window.electronAPI.pickBackground) return;
+  try {
+    const res = await window.electronAPI.pickBackground();
+    if (!res || !res.success) {
+      // Cancelling with no image yet would leave "image" selected but blank.
+      if (res && res.canceled && !settings.bgImage && settings.bgSource === 'image') {
+        settings.bgSource = 'none';
+        saveSettings();
+      }
+      renderBackgroundSettings();
+      applyAppearance();
+      return;
+    }
+    settings.bgImage = res.url;
+    settings.bgImageName = res.name || '';
+    settings.bgSource = 'image';
+    saveSettings();
+    applyAppearance();
+    renderBackgroundSettings();
+  } catch (_) { /* dialog unavailable */ }
+}
+wireBackgroundSettings();
+
 function renderAccentPalette() {
   const host = $('accent-palette');
   if (!host) return;
@@ -8558,6 +8816,7 @@ function renderSettings() {
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
   // Discord lives in its own tab now — always expanded, no collapse.
   applySettingsTab(settings.settingsTab);
+  renderBackgroundSettings();
   renderHotkeys();
   renderDiscord();
 }

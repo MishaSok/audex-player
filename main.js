@@ -416,6 +416,49 @@ ipcMain.handle('window:setPortrait', async (event, payload) => {
   return { success: true };
 });
 
+// ── Custom background image ──
+// The picked file is *copied* into <userData>/backgrounds/ rather than
+// referenced in place: the setting only stores a path, so a wallpaper the user
+// later moves or deletes would otherwise silently blank the background. Old
+// copies are pruned so the folder can't grow without bound.
+ipcMain.handle('appearance:pickBackground', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'bmp'] }],
+  });
+  if (canceled || !filePaths.length) return { success: false, canceled: true };
+  const src = filePaths[0];
+  try {
+    const dir = path.join(app.getPath('userData'), 'backgrounds');
+    fs.mkdirSync(dir, { recursive: true });
+    const ext = (path.extname(src) || '.jpg').toLowerCase();
+    const hash = crypto.createHash('sha1').update(src + String(Date.now())).digest('hex').slice(0, 16);
+    const dest = path.join(dir, hash + ext);
+    await fs.promises.copyFile(src, dest);
+    // Keep only the newest copy — there is a single active background.
+    for (const name of await fs.promises.readdir(dir)) {
+      if (name !== path.basename(dest)) {
+        try { await fs.promises.unlink(path.join(dir, name)); } catch (_) {}
+      }
+    }
+    return { success: true, url: pathToFileURL(dest).href, name: path.basename(src) };
+  } catch (err) {
+    return { success: false, error: String((err && err.message) || err) };
+  }
+});
+
+ipcMain.handle('appearance:clearBackground', async () => {
+  try {
+    const dir = path.join(app.getPath('userData'), 'backgrounds');
+    if (fs.existsSync(dir)) {
+      for (const name of await fs.promises.readdir(dir)) {
+        try { await fs.promises.unlink(path.join(dir, name)); } catch (_) {}
+      }
+    }
+  } catch (_) { /* best effort */ }
+  return { success: true };
+});
+
 ipcMain.handle('dialog:openFiles', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({
     properties: ['openFile', 'multiSelections', 'openDirectory'],

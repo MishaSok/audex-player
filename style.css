@@ -227,6 +227,57 @@ input { font-family: inherit; color: inherit; }
   min-height: 0;
 }
 
+/* ─── Custom background ───
+   A fixed layer behind the whole shell. The image sits in its own child so it
+   can be blurred without smearing the dim overlay on top of it; that child is
+   scaled up slightly because a CSS blur samples past the element's edges and
+   would otherwise leave a translucent border around the screen. */
+#app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: none;
+  overflow: hidden;
+}
+:root.has-custom-bg #app-bg { display: block; }
+/* Lift the shell above the backdrop; without this the fixed layer covers it. */
+:root.has-custom-bg #app,
+:root.has-custom-bg .playbar,
+:root.has-custom-bg .update-banner { position: relative; z-index: 1; }
+:root.has-custom-bg body { background: transparent; }
+
+#app-bg-image {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transform: scale(var(--bg-scale, 1));
+  filter: blur(var(--bg-blur, 0px));
+  will-change: transform;
+}
+#app-bg-dim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: var(--bg-dim, 0.35);
+}
+
+/* Surfaces go translucent so the background actually reads through. The
+   backdrop blur keeps text legible over busy images. */
+:root.has-custom-bg .sidebar,
+:root.has-custom-bg .playbar {
+  background: color-mix(in srgb, var(--panel) calc(var(--surface-alpha, 1) * 100%), transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+:root.has-custom-bg .setting-card,
+:root.has-custom-bg .ed-options,
+:root.has-custom-bg .ed-wave-wrap {
+  background: color-mix(in srgb, var(--panel) calc(var(--surface-alpha, 1) * 100%), transparent);
+}
+
 /* ─── Sidebar ─── */
 .sidebar {
   width: 248px;
@@ -1926,6 +1977,70 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   border-radius: 8px;
 }
 .setting-card-tight { margin-top: 12px; }
+
+/* Segmented choice control (background source / fit) */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--active-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.seg-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 11px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+  white-space: nowrap;
+}
+.seg-btn:hover { color: var(--text); }
+.seg-btn.active {
+  background: var(--panel-elev);
+  color: var(--text-strong);
+}
+
+/* Slider + readout used by the background controls */
+.range-ctl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.ui-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 150px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+  cursor: pointer;
+}
+.ui-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+}
+.range-val {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  min-width: 48px;
+}
+.bg-file-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 /* Hotkeys tab */
 .hotkeys-intro { margin: 0 0 12px; }

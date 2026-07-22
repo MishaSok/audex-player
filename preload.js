@@ -66,6 +66,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('tray:command', listener);
     return () => ipcRenderer.removeListener('tray:command', listener);
   },
+  pickBackground: () => ipcRenderer.invoke('appearance:pickBackground'),
+  clearBackground: () => ipcRenderer.invoke('appearance:clearBackground'),
   registerGlobalHotkeys: (list) => ipcRenderer.invoke('hotkeys:registerGlobal', list),
   onGlobalHotkey: (cb) => {
     const listener = (_e, data) => cb(data);
