@@ -40,6 +40,7 @@ let settings = Object.assign({
   uiScale: 1,
   settingsTab: 'appearance', // active tab in the Settings view
   hotkeys: {},               // only user overrides; see HOTKEY_DEFAULTS
+  hotkeysGlobal: {},         // action id -> true when registered system-wide
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -590,11 +591,22 @@ const I18N = {
     'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс или Spotify при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
     'section.system': 'Система',
     'section.hotkeys': 'Горячие клавиши',
-    'hotkeys.intro': 'Нажмите на сочетание, чтобы задать своё. Esc — отмена записи, Backspace — очистить.',
+    'hotkeys.intro': 'Нажмите на сочетание, затем — нужную клавишу или кнопку мыши. Esc — отмена, Backspace — очистить.',
+    'hotkeys.globalNote': 'Значок монитора включает работу сочетания, когда окно свёрнуто. Нужен модификатор (Ctrl, Alt или Shift); кнопки мыши так не работают.',
     'hotkeys.escNote': 'Esc всегда закрывает открытое окно и не переназначается.',
     'hotkeys.resetAll': 'Сбросить всё',
     'hotkeys.press': 'Нажмите клавиши…',
     'hotkeys.revert': 'Вернуть по умолчанию',
+    'hotkeys.global': 'Работает, когда окно свёрнуто (глобально в системе)',
+    'hotkeys.globalNeedsMod': 'Для глобальной работы нужен модификатор: Ctrl, Alt или Shift',
+    'hotkeys.globalNoMouse': 'Кнопки мыши не могут работать глобально',
+    'hotkeys.globalUnsupported': 'Эту клавишу нельзя зарегистрировать глобально',
+    'hotkeys.globalFailed': 'Сочетание занято другим приложением',
+    'hotkeys.globalUnavailable': 'Глобальные сочетания недоступны в сессии Wayland. Используйте медиаклавиши — они работают через MPRIS.',
+    'mouse.middle': 'Сред. кнопка',
+    'mouse.back': 'Мышь «Назад»',
+    'mouse.forward': 'Мышь «Вперёд»',
+    'mouse.other': 'Мышь {n}',
     'hotkey.playPause': 'Воспроизведение / пауза',
     'hotkey.nextTrack': 'Следующий трек',
     'hotkey.prevTrack': 'Предыдущий трек',
@@ -1013,11 +1025,22 @@ const I18N = {
     'setting.showParserBrowserDesc': 'Useful for signing in to Yandex or Spotify on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
     'section.system': 'System',
     'section.hotkeys': 'Hotkeys',
-    'hotkeys.intro': 'Click a shortcut to set your own. Esc cancels, Backspace clears it.',
+    'hotkeys.intro': 'Click a shortcut, then press a key or a mouse button. Esc cancels, Backspace clears it.',
+    'hotkeys.globalNote': 'The monitor icon makes a shortcut work while the window is minimised. It needs a modifier (Ctrl, Alt or Shift); mouse buttons cannot do this.',
     'hotkeys.escNote': 'Esc always closes the topmost window and cannot be rebound.',
     'hotkeys.resetAll': 'Reset all',
     'hotkeys.press': 'Press keys…',
     'hotkeys.revert': 'Restore default',
+    'hotkeys.global': 'Works while the window is minimised (system-wide)',
+    'hotkeys.globalNeedsMod': 'A global shortcut needs a modifier: Ctrl, Alt or Shift',
+    'hotkeys.globalNoMouse': 'Mouse buttons cannot work globally',
+    'hotkeys.globalUnsupported': 'This key cannot be registered globally',
+    'hotkeys.globalFailed': 'Combo already taken by another application',
+    'hotkeys.globalUnavailable': 'Global shortcuts are unavailable on a Wayland session. Use the media keys — they work through MPRIS.',
+    'mouse.middle': 'Middle click',
+    'mouse.back': 'Mouse Back',
+    'mouse.forward': 'Mouse Fwd',
+    'mouse.other': 'Mouse {n}',
     'hotkey.playPause': 'Play / pause',
     'hotkey.nextTrack': 'Next track',
     'hotkey.prevTrack': 'Previous track',
@@ -1436,11 +1459,22 @@ const I18N = {
     'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex oder Spotify anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
     'section.system': 'System',
     'section.hotkeys': 'Tastenkürzel',
-    'hotkeys.intro': 'Auf ein Kürzel klicken, um es neu zu belegen. Esc bricht ab, Backspace löscht es.',
+    'hotkeys.intro': 'Auf ein Kürzel klicken, dann Taste oder Maustaste drücken. Esc bricht ab, Backspace löscht es.',
+    'hotkeys.globalNote': 'Das Monitor-Symbol lässt ein Kürzel auch bei minimiertem Fenster wirken. Es braucht einen Modifikator (Ctrl, Alt oder Shift); Maustasten können das nicht.',
     'hotkeys.escNote': 'Esc schließt immer das oberste Fenster und lässt sich nicht neu belegen.',
     'hotkeys.resetAll': 'Alle zurücksetzen',
     'hotkeys.press': 'Tasten drücken…',
     'hotkeys.revert': 'Standard wiederherstellen',
+    'hotkeys.global': 'Funktioniert auch bei minimiertem Fenster (systemweit)',
+    'hotkeys.globalNeedsMod': 'Ein globales Kürzel braucht einen Modifikator: Ctrl, Alt oder Shift',
+    'hotkeys.globalNoMouse': 'Maustasten können nicht global funktionieren',
+    'hotkeys.globalUnsupported': 'Diese Taste lässt sich nicht global registrieren',
+    'hotkeys.globalFailed': 'Kürzel bereits von einer anderen Anwendung belegt',
+    'hotkeys.globalUnavailable': 'Globale Kürzel sind in einer Wayland-Sitzung nicht verfügbar. Nutzen Sie die Medientasten — sie laufen über MPRIS.',
+    'mouse.middle': 'Mittlere Taste',
+    'mouse.back': 'Maus «Zurück»',
+    'mouse.forward': 'Maus «Vor»',
+    'mouse.other': 'Maus {n}',
     'hotkey.playPause': 'Wiedergabe / Pause',
     'hotkey.nextTrack': 'Nächster Titel',
     'hotkey.prevTrack': 'Vorheriger Titel',
@@ -1859,11 +1893,22 @@ const I18N = {
     'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex ou Spotify au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
     'section.system': 'Système',
     'section.hotkeys': 'Raccourcis clavier',
-    'hotkeys.intro': "Cliquez sur un raccourci pour le redéfinir. Échap annule, Retour arrière l'efface.",
+    'hotkeys.intro': "Cliquez sur un raccourci, puis appuyez sur une touche ou un bouton de souris. Échap annule, Retour arrière l'efface.",
+    'hotkeys.globalNote': "L'icône moniteur fait fonctionner un raccourci même fenêtre réduite. Il faut un modificateur (Ctrl, Alt ou Shift) ; les boutons de souris ne le permettent pas.",
     'hotkeys.escNote': 'Échap ferme toujours la fenêtre au premier plan et ne peut pas être redéfini.',
     'hotkeys.resetAll': 'Tout réinitialiser',
     'hotkeys.press': 'Appuyez sur les touches…',
     'hotkeys.revert': 'Rétablir par défaut',
+    'hotkeys.global': 'Fonctionne même fenêtre réduite (au niveau du système)',
+    'hotkeys.globalNeedsMod': 'Un raccourci global exige un modificateur : Ctrl, Alt ou Shift',
+    'hotkeys.globalNoMouse': 'Les boutons de souris ne peuvent pas fonctionner globalement',
+    'hotkeys.globalUnsupported': 'Cette touche ne peut pas être enregistrée globalement',
+    'hotkeys.globalFailed': 'Raccourci déjà utilisé par une autre application',
+    'hotkeys.globalUnavailable': 'Les raccourcis globaux ne sont pas disponibles sous Wayland. Utilisez les touches multimédia : elles passent par MPRIS.',
+    'mouse.middle': 'Clic milieu',
+    'mouse.back': 'Souris « Retour »',
+    'mouse.forward': 'Souris « Avant »',
+    'mouse.other': 'Souris {n}',
     'hotkey.playPause': 'Lecture / pause',
     'hotkey.nextTrack': 'Piste suivante',
     'hotkey.prevTrack': 'Piste précédente',
@@ -2282,11 +2327,22 @@ const I18N = {
     'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс або Spotify при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
     'section.system': 'Система',
     'section.hotkeys': 'Гарячі клавіші',
-    'hotkeys.intro': 'Натисніть на сполучення, щоб задати своє. Esc — скасувати, Backspace — очистити.',
+    'hotkeys.intro': 'Натисніть на сполучення, потім — клавішу або кнопку миші. Esc — скасувати, Backspace — очистити.',
+    'hotkeys.globalNote': 'Значок монітора вмикає роботу сполучення, коли вікно згорнуте. Потрібен модифікатор (Ctrl, Alt або Shift); кнопки миші так не працюють.',
     'hotkeys.escNote': 'Esc завжди закриває відкрите вікно і не перепризначається.',
     'hotkeys.resetAll': 'Скинути все',
     'hotkeys.press': 'Натисніть клавіші…',
     'hotkeys.revert': 'Повернути типове',
+    'hotkeys.global': 'Працює, коли вікно згорнуте (глобально в системі)',
+    'hotkeys.globalNeedsMod': 'Для глобальної роботи потрібен модифікатор: Ctrl, Alt або Shift',
+    'hotkeys.globalNoMouse': 'Кнопки миші не можуть працювати глобально',
+    'hotkeys.globalUnsupported': 'Цю клавішу не можна зареєструвати глобально',
+    'hotkeys.globalFailed': 'Сполучення зайняте іншою програмою',
+    'hotkeys.globalUnavailable': 'Глобальні сполучення недоступні в сесії Wayland. Використовуйте медіаклавіші — вони працюють через MPRIS.',
+    'mouse.middle': 'Сер. кнопка',
+    'mouse.back': 'Миша «Назад»',
+    'mouse.forward': 'Миша «Вперед»',
+    'mouse.other': 'Миша {n}',
     'hotkey.playPause': 'Відтворення / пауза',
     'hotkey.nextTrack': 'Наступний трек',
     'hotkey.prevTrack': 'Попередній трек',
@@ -8123,11 +8179,24 @@ function comboFromEvent(e) {
   const code = e.code;
   if (!code) return '';
   if (/^(Control|Meta|Alt|Shift|OS)/.test(code)) return '';
+  return hkWithModifiers(e, code);
+}
+
+// Mouse buttons are bindable too — the side buttons in particular are what
+// people want for next/previous track. Left (0) and right (2) are deliberately
+// not bindable: left drives the entire UI and right opens the context menus,
+// so capturing either would make the app unusable.
+function comboFromMouse(e) {
+  if (e.button === 0 || e.button === 2) return '';
+  return hkWithModifiers(e, 'Mouse' + e.button);
+}
+
+function hkWithModifiers(e, token) {
   const parts = [];
   if (e.ctrlKey || e.metaKey) parts.push('Ctrl');
   if (e.altKey) parts.push('Alt');
   if (e.shiftKey) parts.push('Shift');
-  parts.push(code);
+  parts.push(token);
   return parts.join('+');
 }
 
@@ -8141,6 +8210,11 @@ const HOTKEY_GLYPHS = {
   PageUp: 'PgUp', PageDown: 'PgDn', Insert: 'Ins', Delete: 'Del',
 };
 function codeLabel(code) {
+  // Browser button numbers: 1 = middle, 3 = X1 ("back"), 4 = X2 ("forward").
+  if (code === 'Mouse1') return tr('mouse.middle');
+  if (code === 'Mouse3') return tr('mouse.back');
+  if (code === 'Mouse4') return tr('mouse.forward');
+  if (/^Mouse\d+$/.test(code)) return tr('mouse.other', { n: code.slice(5) });
   if (HOTKEY_GLYPHS[code]) return HOTKEY_GLYPHS[code];
   if (/^Key[A-Z]$/.test(code)) return code.slice(3);
   if (/^Digit\d$/.test(code)) return code.slice(5);
@@ -8151,6 +8225,92 @@ function codeLabel(code) {
 function comboLabel(combo) {
   if (!combo) return '—';
   return combo.split('+').map(p => (p === 'Ctrl' || p === 'Alt' || p === 'Shift') ? p : codeLabel(p)).join(' + ');
+}
+
+// ── Global hotkeys ──
+// A combo can additionally be registered with the OS so it fires while the
+// window is minimised. That grab is system-wide, so two rules apply:
+//   * mouse buttons can't be registered at all (Electron's globalShortcut is
+//     keyboard-only);
+//   * a bare key is refused — grabbing "Space" or "S" globally would swallow
+//     that key in every other application, including whatever the user would
+//     need to undo it.
+const ACCEL_KEYS = {
+  ArrowUp: 'Up', ArrowDown: 'Down', ArrowLeft: 'Left', ArrowRight: 'Right',
+  Space: 'Space', Enter: 'Return', Tab: 'Tab', Backspace: 'Backspace',
+  Comma: ',', Period: '.', Slash: '/', Backslash: '\\', Semicolon: ';',
+  Quote: "'", BracketLeft: '[', BracketRight: ']', Minus: '-', Equal: '=',
+  Backquote: '`', Home: 'Home', End: 'End', PageUp: 'PageUp', PageDown: 'PageDown',
+  Insert: 'Insert', Delete: 'Delete',
+};
+function comboToAccelerator(combo) {
+  if (!combo) return '';
+  const parts = combo.split('+');
+  const key = parts[parts.length - 1];
+  if (/^Mouse\d+$/.test(key)) return '';
+  let accelKey = ACCEL_KEYS[key];
+  if (!accelKey) {
+    if (/^Key[A-Z]$/.test(key)) accelKey = key.slice(3);
+    else if (/^Digit\d$/.test(key)) accelKey = key.slice(5);
+    else if (/^F\d{1,2}$/.test(key)) accelKey = key;
+    else return '';
+  }
+  const mods = [];
+  if (parts.includes('Ctrl')) mods.push('CommandOrControl');
+  if (parts.includes('Alt')) mods.push('Alt');
+  if (parts.includes('Shift')) mods.push('Shift');
+  return mods.concat(accelKey).join('+');
+}
+// Why a given combo can't go global — drives the disabled state and tooltip.
+function globalBlockReason(combo) {
+  if (!combo) return 'empty';
+  const parts = combo.split('+');
+  if (/^Mouse\d+$/.test(parts[parts.length - 1])) return 'mouse';
+  const hasMod = parts.includes('Ctrl') || parts.includes('Alt') || parts.includes('Shift');
+  if (!hasMod) return 'needsModifier';
+  if (!comboToAccelerator(combo)) return 'unsupported';
+  return '';
+}
+function hotkeyGlobals() {
+  return settings.hotkeysGlobal || {};
+}
+function isGlobalOn(id) {
+  return !!hotkeyGlobals()[id];
+}
+
+let globalHotkeyFailures = new Set(); // ids the OS refused (combo already taken)
+let globalHotkeysSupported = true;    // false on Wayland, where no grab is possible
+
+// Push the current global set to the main process. Called on boot and after any
+// binding change.
+async function syncGlobalHotkeys() {
+  if (!window.electronAPI || !window.electronAPI.registerGlobalHotkeys) return;
+  const bindings = hotkeyBindings();
+  const globals = hotkeyGlobals();
+  const list = [];
+  for (const a of HOTKEY_ACTIONS) {
+    if (!globals[a.id]) continue;
+    const accelerator = comboToAccelerator(bindings[a.id]);
+    if (accelerator) list.push({ id: a.id, accelerator });
+  }
+  try {
+    const res = await window.electronAPI.registerGlobalHotkeys(list);
+    const failed = new Set((res && res.failed) || []);
+    const supported = !res || res.supported !== false;
+    const changed = supported !== globalHotkeysSupported ||
+      failed.size !== globalHotkeyFailures.size ||
+      [...failed].some(id => !globalHotkeyFailures.has(id));
+    globalHotkeyFailures = failed;
+    globalHotkeysSupported = supported;
+    if (changed) renderHotkeys();
+  } catch (_) { /* main process unavailable — local hotkeys still work */ }
+}
+
+if (window.electronAPI && window.electronAPI.onGlobalHotkey) {
+  window.electronAPI.onGlobalHotkey(({ id }) => {
+    const action = HOTKEY_ACTIONS.find(a => a.id === id);
+    if (action) action.run();
+  });
 }
 
 let hotkeyCapture = null; // action id currently listening for a new combo
@@ -8190,8 +8350,45 @@ document.addEventListener('keydown', e => {
   const action = HOTKEY_ACTIONS.find(a => bindings[a.id] === combo);
   if (!action) return;
   e.preventDefault();
+  // A successfully registered global grab already delivers this combo through
+  // the main process. Running it here too would fire the action twice on any
+  // platform where the key still reaches the focused window.
+  if (isGlobalOn(action.id) && !globalHotkeyFailures.has(action.id) && comboToAccelerator(combo)) return;
   action.run();
 });
+
+// Mouse-button shortcuts. Bound on the capture phase so a side button still
+// works over rows, buttons and other click handlers.
+document.addEventListener('mousedown', e => {
+  const combo = comboFromMouse(e);
+  if (!combo) return; // left / right button — never bindable
+
+  if (hotkeyCapture) {
+    e.preventDefault();
+    e.stopPropagation();
+    hotkeySet(hotkeyCapture, combo);
+    return;
+  }
+
+  const bindings = hotkeyBindings();
+  const action = HOTKEY_ACTIONS.find(a => bindings[a.id] === combo);
+  if (!action) return;
+  e.preventDefault();
+  e.stopPropagation();
+  action.run();
+}, true);
+
+// The back/forward buttons also raise auxclick, which is what actually drives
+// history navigation — swallow it for bound buttons so the view doesn't move.
+document.addEventListener('auxclick', e => {
+  const combo = comboFromMouse(e);
+  if (!combo) return;
+  const bindings = hotkeyBindings();
+  if (hotkeyCapture || HOTKEY_ACTIONS.some(a => bindings[a.id] === combo)) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
 
 // ── Filters / sort ──
 document.querySelectorAll('#view-library .chip[data-filter]').forEach(chip => {
@@ -8384,9 +8581,28 @@ function hotkeySet(id, combo) {
     if (bindings[a.id] !== HOTKEY_DEFAULTS[a.id]) overrides[a.id] = bindings[a.id];
   }
   settings.hotkeys = overrides;
+  // A combo that can no longer be a global grab (cleared, or rebound to a mouse
+  // button / bare key) must not stay flagged as one.
+  if (settings.hotkeysGlobal && settings.hotkeysGlobal[id] && globalBlockReason(bindings[id])) {
+    delete settings.hotkeysGlobal[id];
+  }
   saveSettings();
   hotkeyCapture = null;
   renderHotkeys();
+  syncGlobalHotkeys();
+}
+
+// Turn the system-wide grab for one action on or off.
+function hotkeyToggleGlobal(id) {
+  const bindings = hotkeyBindings();
+  if (globalBlockReason(bindings[id])) return; // guarded in the UI too
+  const globals = Object.assign({}, hotkeyGlobals());
+  if (globals[id]) delete globals[id];
+  else globals[id] = true;
+  settings.hotkeysGlobal = globals;
+  saveSettings();
+  renderHotkeys();
+  syncGlobalHotkeys();
 }
 
 function renderHotkeys() {
@@ -8397,12 +8613,27 @@ function renderHotkeys() {
     const capturing = hotkeyCapture === a.id;
     const combo = bindings[a.id];
     const isCustom = combo !== HOTKEY_DEFAULTS[a.id];
+    const block = globalBlockReason(combo);
+    const on = isGlobalOn(a.id) && !block;
+    const failed = on && globalHotkeysSupported && globalHotkeyFailures.has(a.id);
+    const gTitle = !globalHotkeysSupported ? tr('hotkeys.globalUnavailable')
+      : failed ? tr('hotkeys.globalFailed')
+      : block === 'mouse' ? tr('hotkeys.globalNoMouse')
+      : block === 'needsModifier' ? tr('hotkeys.globalNeedsMod')
+      : block ? tr('hotkeys.globalUnsupported')
+      : tr('hotkeys.global');
     return `
       <div class="setting-row hotkey-row">
         <div class="setting-text">
           <div class="setting-label">${escapeHtml(tr('hotkey.' + a.id))}</div>
+          ${failed ? `<div class="setting-desc hotkey-warn">${escapeHtml(tr('hotkeys.globalFailed'))}</div>` : ''}
+          ${on && !globalHotkeysSupported ? `<div class="setting-desc hotkey-warn">${escapeHtml(tr('hotkeys.globalUnavailable'))}</div>` : ''}
         </div>
         <div class="hotkey-controls">
+          <button class="hotkey-global${on ? ' is-on' : ''}${failed ? ' is-failed' : ''}"
+                  data-hk-global="${a.id}" ${block ? 'disabled' : ''} title="${escapeHtml(gTitle)}">
+            <svg class="i" width="13" height="13"><use href="#i-monitor"/></svg>
+          </button>
           ${isCustom ? `<button class="hotkey-revert" data-hk-revert="${a.id}" title="${escapeHtml(tr('hotkeys.revert'))}">↺</button>` : ''}
           <button class="hotkey-combo${capturing ? ' is-capturing' : ''}${combo ? '' : ' is-empty'}" data-hk="${a.id}">
             ${escapeHtml(capturing ? tr('hotkeys.press') : comboLabel(combo))}
@@ -8410,6 +8641,9 @@ function renderHotkeys() {
         </div>
       </div>`;
   }).join('');
+  host.querySelectorAll('[data-hk-global]').forEach(btn => {
+    btn.addEventListener('click', () => hotkeyToggleGlobal(btn.dataset.hkGlobal));
+  });
   host.querySelectorAll('[data-hk]').forEach(btn => {
     btn.addEventListener('click', () => {
       hotkeyCapture = hotkeyCapture === btn.dataset.hk ? null : btn.dataset.hk;
@@ -8425,9 +8659,11 @@ const hotkeysResetBtn = $('hotkeys-reset');
 if (hotkeysResetBtn) {
   hotkeysResetBtn.addEventListener('click', () => {
     settings.hotkeys = {};
+    settings.hotkeysGlobal = {};
     saveSettings();
     hotkeyCapture = null;
     renderHotkeys();
+    syncGlobalHotkeys();
   });
 }
 // Leaving the tab (or closing Settings) must not strand a live capture.
@@ -9181,7 +9417,8 @@ function warmMissingCoversInBackground() {
 
 applyLanguage(settings.language);
 splashStatus('splash.loading');
-
+renderSettings();
+syncGlobalHotkeys();
 updateShuffleUI();
 updateRepeatUI();
 (async () => {

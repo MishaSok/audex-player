@@ -66,4 +66,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('tray:command', listener);
     return () => ipcRenderer.removeListener('tray:command', listener);
   },
+  registerGlobalHotkeys: (list) => ipcRenderer.invoke('hotkeys:registerGlobal', list),
+  onGlobalHotkey: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('hotkeys:trigger', listener);
+    return () => ipcRenderer.removeListener('hotkeys:trigger', listener);
+  },
 });

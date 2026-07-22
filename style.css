@@ -1956,6 +1956,29 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   color: var(--accent);
   font-family: inherit;
 }
+/* System-wide grab toggle: lit when the combo is registered with the OS. */
+.hotkey-global {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 5px 7px;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+.hotkey-global:hover:not(:disabled) { color: var(--text-strong); border-color: var(--accent); }
+.hotkey-global.is-on {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--active-bg);
+}
+.hotkey-global.is-failed { color: var(--danger); border-color: var(--danger); }
+.hotkey-global:disabled { opacity: .35; cursor: not-allowed; }
+.hotkey-warn { color: var(--danger); margin-top: 3px; }
 .hotkey-revert {
   appearance: none;
   border: 1px solid transparent;

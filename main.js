@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, screen, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen, Tray, Menu, nativeImage, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const net = require('net');
@@ -67,6 +67,72 @@ function sendTrayCommand(action) {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   try { mainWindow.webContents.send('tray:command', { action }); } catch (_) {}
 }
+
+// ── Global (system-wide) hotkeys ──
+// The renderer owns the binding table and hands us a ready list of
+// { id, accelerator } pairs; we register them with the OS so they fire while
+// the window is minimised or unfocused, and forward each hit back by id.
+// Registration is all-or-nothing per accelerator: another app may already own
+// a combo, in which case register() returns false and we report the id back so
+// the Settings UI can flag it instead of silently doing nothing.
+let registeredGlobalHotkeys = [];
+function clearGlobalHotkeys() {
+  for (const acc of registeredGlobalHotkeys) {
+    try { globalShortcut.unregister(acc); } catch (_) {}
+  }
+  registeredGlobalHotkeys = [];
+}
+
+// Wayland deliberately forbids applications from grabbing global keys — the
+// compositor owns them — so globalShortcut.register() fails for *every*
+// accelerator there, including obviously free ones. Probe once with a combo
+// nothing realistically owns so the UI can say "not available in this session"
+// instead of wrongly blaming another app for taking the shortcut.
+// (On Wayland the working path is MPRIS: the media keys and any compositor
+// shortcut wired to org.mpris.MediaPlayer2 already drive playback.)
+const GLOBAL_PROBE_ACCELERATOR = 'Control+Alt+Shift+F24';
+let globalShortcutsSupported = null;
+function probeGlobalShortcutSupport() {
+  if (globalShortcutsSupported !== null) return globalShortcutsSupported;
+  let ok = false;
+  try {
+    ok = globalShortcut.register(GLOBAL_PROBE_ACCELERATOR, () => {});
+    if (ok) globalShortcut.unregister(GLOBAL_PROBE_ACCELERATOR);
+  } catch (_) {
+    ok = false;
+  }
+  globalShortcutsSupported = ok;
+  return ok;
+}
+
+ipcMain.handle('hotkeys:registerGlobal', (event, list) => {
+  clearGlobalHotkeys();
+  const supported = probeGlobalShortcutSupport();
+  if (!supported) {
+    return { success: true, supported: false, failed: [], registered: 0 };
+  }
+  const failed = [];
+  for (const item of Array.isArray(list) ? list : []) {
+    const accelerator = String((item && item.accelerator) || '');
+    const id = String((item && item.id) || '');
+    if (!accelerator || !id) continue;
+    let ok = false;
+    try {
+      ok = globalShortcut.register(accelerator, () => {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        try { mainWindow.webContents.send('hotkeys:trigger', { id }); } catch (_) {}
+      });
+    } catch (_) {
+      ok = false; // malformed accelerator — treat like a taken combo
+    }
+    if (ok) registeredGlobalHotkeys.push(accelerator);
+    else failed.push(id);
+  }
+  return { success: true, supported: true, failed, registered: registeredGlobalHotkeys.length };
+});
+
+// Leaving a grab behind would keep the combo dead for the rest of the session.
+app.on('will-quit', clearGlobalHotkeys);
 
 const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac']);
 
