@@ -78,6 +78,7 @@
       <symbol id="i-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
       <symbol id="i-report" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="0.6"/><rect x="12.5" y="7" width="3" height="10" rx="0.6"/><rect x="18" y="13.5" width="3" height="3.5" rx="0.6"/></symbol>
       <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-scissors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 7.6 20 18"/><path d="M8 16.4 20 6"/></symbol>
       <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></symbol>
       <symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></symbol>
       <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></symbol>
@@ -114,7 +115,11 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark"><svg class="i" width="22" height="22"><use href="#audex-mark"/></svg></div>
-        <div class="brand-text">Audex</div>
+        <div class="brand-titles">
+          <div class="brand-text">Audex</div>
+          <!-- Filled at boot from the Settings .version-tag — don't hardcode. -->
+          <div class="brand-version" id="brand-version"></div>
+        </div>
       </div>
 
       <nav class="nav-menu">
@@ -146,6 +151,10 @@
           <svg class="i" width="14" height="14"><use href="#i-shield"/></svg>
           <span data-i18n="nav.health">Состояние</span>
         </a>
+        <a href="#" class="nav-item" data-view="editor" id="nav-editor" hidden>
+          <svg class="i" width="14" height="14"><use href="#i-scissors"/></svg>
+          <span data-i18n="nav.editor">Редактор</span>
+        </a>
         <a href="#" class="nav-item nav-downloads" data-view="downloads" id="nav-downloads" hidden>
           <svg class="i" width="14" height="14"><use href="#i-download"/></svg>
           <span data-i18n="nav.downloads">Загрузки</span>
@@ -169,7 +178,7 @@
           <svg class="i" width="13" height="13"><use href="#i-plus"/></svg>
           <span data-i18n="nav.openFiles">Открыть файлы</span>
         </button>
-        <a href="#" class="nav-item nav-settings" data-view="settings">
+        <a href="#" class="nav-item nav-settings" data-action="open-settings">
           <svg class="i" width="14" height="14"><use href="#i-settings"/></svg>
           <span data-i18n="nav.settings">Настройки</span>
         </a>
@@ -479,6 +488,97 @@
       </section>
 
       <!-- Downloads -->
+      <section id="view-editor" class="view-section">
+        <header class="topbar">
+          <div class="crumb">
+            <span class="crumb-item link" data-view="library" data-i18n="crumb.collection">Коллекция</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-item active" data-i18n="nav.editor">Редактор</span>
+          </div>
+          <button class="btn-primary" id="ed-pick-btn">
+            <svg class="i" width="13" height="13"><use href="#i-library"/></svg>
+            <span data-i18n="editor.pick">Выбрать трек</span>
+          </button>
+        </header>
+
+        <div id="ed-empty" class="empty-block show">
+          <div class="empty-icon"><svg class="i" width="24" height="24"><use href="#i-scissors"/></svg></div>
+          <div class="empty-title-lg" data-i18n="editor.empty.title">Обрезка треков</div>
+          <div class="empty-text" data-i18n="editor.empty.text">Выберите трек, отметьте начало и конец фрагмента на волне и сохраните его отдельным файлом. Оригинал остаётся нетронутым, если не выбрать перезапись.</div>
+        </div>
+
+        <div id="ed-workspace" hidden>
+          <div class="ed-head">
+            <div class="ed-cover" id="ed-cover"></div>
+            <div class="ed-meta">
+              <div class="ed-title" id="ed-track-title">—</div>
+              <div class="ed-artist" id="ed-track-artist">—</div>
+              <div class="ed-file" id="ed-track-file"></div>
+            </div>
+          </div>
+
+          <div class="ed-wave-wrap">
+            <div class="ed-wave" id="ed-wave">
+              <div class="ed-wave-bars" id="ed-wave-bars"></div>
+              <div class="ed-dim ed-dim-left" id="ed-dim-left"></div>
+              <div class="ed-dim ed-dim-right" id="ed-dim-right"></div>
+              <div class="ed-playhead" id="ed-playhead" hidden></div>
+              <div class="ed-handle ed-handle-start" id="ed-handle-start"><span></span></div>
+              <div class="ed-handle ed-handle-end" id="ed-handle-end"><span></span></div>
+            </div>
+            <div class="ed-ruler" id="ed-ruler"></div>
+          </div>
+
+          <div class="ed-controls">
+            <div class="ed-field">
+              <label class="ed-label" for="ed-start" data-i18n="editor.start">Начало</label>
+              <input type="text" id="ed-start" class="ed-time-input" inputmode="decimal" placeholder="0:00.0">
+            </div>
+            <div class="ed-field">
+              <label class="ed-label" for="ed-end" data-i18n="editor.end">Конец</label>
+              <input type="text" id="ed-end" class="ed-time-input" inputmode="decimal" placeholder="0:00.0">
+            </div>
+            <div class="ed-field">
+              <span class="ed-label" data-i18n="editor.selection">Длительность фрагмента</span>
+              <div class="ed-duration" id="ed-duration">0:00.0</div>
+            </div>
+            <div class="ed-field ed-field-actions">
+              <button class="btn-ghost" id="ed-preview-btn">
+                <svg class="i" width="13" height="13"><use href="#i-play"/></svg>
+                <span id="ed-preview-label" data-i18n="editor.preview">Прослушать фрагмент</span>
+              </button>
+              <button class="btn-ghost" id="ed-reset-btn" data-i18n="editor.reset">Сбросить</button>
+            </div>
+          </div>
+
+          <div class="ed-options">
+            <div class="ed-opt-row">
+              <label class="ed-label" for="ed-fade-in" data-i18n="editor.fadeIn">Нарастание, с</label>
+              <input type="number" id="ed-fade-in" class="ed-num-input" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="ed-opt-row">
+              <label class="ed-label" for="ed-fade-out" data-i18n="editor.fadeOut">Затухание, с</label>
+              <input type="number" id="ed-fade-out" class="ed-num-input" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="ed-opt-row ed-opt-overwrite">
+              <div class="setting-text">
+                <div class="setting-label" data-i18n="editor.overwrite">Перезаписать оригинал</div>
+                <div class="setting-desc" data-i18n="editor.overwriteDesc">По умолчанию рядом создаётся новый файл «— (обрезано)». Включите, чтобы заменить исходный файл.</div>
+              </div>
+              <button class="toggle" id="ed-overwrite-toggle"><div class="toggle-knob"></div></button>
+            </div>
+          </div>
+
+          <div class="ed-footer">
+            <div id="ed-status" class="dl-status" hidden></div>
+            <button class="btn-primary" id="ed-save-btn">
+              <svg class="i" width="13" height="13"><use href="#i-scissors"/></svg>
+              <span data-i18n="editor.save">Обрезать и сохранить</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section id="view-downloads" class="view-section">
         <header class="topbar">
           <div class="crumb">
@@ -748,251 +848,6 @@
         </div>
       </section>
 
-      <!-- Settings -->
-      <section id="view-settings" class="view-section">
-        <header class="topbar">
-          <div class="crumb">
-            <span class="crumb-item active" data-i18n="nav.settings">Настройки</span>
-          </div>
-          <div class="version-tag">Audex 1.1.7</div>
-        </header>
-
-        <div class="settings-page">
-          <div class="settings-head">
-            <div class="settings-title" data-i18n="settings.title">Настройки</div>
-            <div class="settings-sub" data-i18n="settings.subtitle">Внешний вид, источники музыки и поведение приложения.</div>
-          </div>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <svg class="i" width="11" height="11"><use href="#i-sun"/></svg>
-              <span data-i18n="section.appearance">Внешний вид</span>
-            </div>
-            <div class="setting-card setting-card-tight">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.theme">Тема</div>
-                  <div class="setting-desc" data-i18n="setting.themeDesc">Цветовая схема приложения.</div>
-                </div>
-                <div class="select" id="theme-select">
-                  <button class="select-btn">
-                    <span id="theme-current"></span>
-                    <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
-                  </button>
-                  <div class="select-menu">
-                    <div class="select-opt" data-theme="dark"><span class="opt-emoji">🌙</span><span data-i18n="theme.dark">Тёмная</span></div>
-                    <div class="select-opt" data-theme="light"><span class="opt-emoji">☀️</span><span data-i18n="theme.light">Светлая</span></div>
-                    <div class="select-opt" data-theme="system"><span class="opt-emoji">🖥️</span><span data-i18n="theme.system">Системная</span></div>
-                    <div class="select-opt" data-theme="nocturne"><span class="opt-emoji">🌌</span><span>Nocturne</span></div>
-                    <div class="select-opt" data-theme="terracotta"><span class="opt-emoji">🏺</span><span>Terracotta</span></div>
-                    <div class="select-opt" data-theme="forest"><span class="opt-emoji">🌲</span><span>Forest</span></div>
-                    <div class="select-opt" data-theme="vapor"><span class="opt-emoji">🌆</span><span>Vapor</span></div>
-                    <div class="select-opt" data-theme="noir"><span class="opt-emoji">🎬</span><span>Crimson Noir</span></div>
-                    <div class="select-opt" data-theme="arctic"><span class="opt-emoji">❄️</span><span>Arctic</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-card setting-card-tight">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.accent">Цвет акцента</div>
-                  <div class="setting-desc" data-i18n="setting.accentDesc">Подсветка активных элементов и текущего трека.</div>
-                </div>
-                <div class="accent-palette" id="accent-palette"></div>
-              </div>
-            </div>
-
-            <div class="setting-card setting-card-tight">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.uiScale">Масштаб интерфейса</div>
-                  <div class="setting-desc" data-i18n="setting.uiScaleDesc">Делает весь интерфейс крупнее или мельче. Применяется сразу.</div>
-                </div>
-                <div class="scale-stepper">
-                  <button type="button" class="stepper-btn" id="scale-dec" title="−" aria-label="−">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
-                  </button>
-                  <span class="stepper-value" id="scale-current">100%</span>
-                  <button type="button" class="stepper-btn" id="scale-inc" title="+" aria-label="+">
-                    <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
-                  </button>
-                  <button type="button" class="btn-ghost stepper-reset" id="scale-reset" data-i18n="setting.uiScaleReset">Сбросить</button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <svg class="i" width="11" height="11"><use href="#i-library"/></svg>
-              <span data-i18n="section.music">Музыка</span>
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.defaultFolder">Папка по умолчанию</div>
-                  <div class="setting-path" id="default-folder-path">—</div>
-                  <div class="setting-desc" data-i18n="setting.defaultFolderDesc">Откуда загружать треки при запуске.</div>
-                </div>
-                <button class="btn-ghost" id="btn-choose-default-folder">
-                  <svg class="i" width="13" height="13"><use href="#i-folder-open"/></svg>
-                  <span data-i18n="btn.choose">Выбрать…</span>
-                </button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.scanSubdirs">Сканировать подпапки</div>
-                  <div class="setting-desc" data-i18n="setting.scanSubdirsDesc">Учитывать вложенные директории при индексации.</div>
-                </div>
-                <button class="toggle" data-setting="scan-subdirs"><div class="toggle-knob"></div></button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.healthCheck">Проверка качества (Health-check)</div>
-                  <div class="setting-desc" data-i18n="setting.healthCheckDesc">Раздел «Состояние библиотеки» и столбец «Качество» в списках треков. Выключено — колонка и раздел скрыты полностью.</div>
-                </div>
-                <button class="toggle" data-setting="health-check"><div class="toggle-knob"></div></button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.reports">Отчёт о прослушивании</div>
-                  <div class="setting-desc" data-i18n="setting.reportsDesc">Раздел «Отчёт» со статистикой прослушивания. Статистика собирается всегда, даже когда раздел скрыт.</div>
-                </div>
-                <button class="toggle" data-setting="reports"><div class="toggle-knob"></div></button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.crossfade">Плавный переход между треками</div>
-                  <div class="setting-desc" data-i18n="setting.crossfadeDesc">Треки перетекают друг в друга: конец текущего затихает, пока следующий нарастает. Действует и в конце трека, и при ручном переключении.</div>
-                </div>
-                <button class="toggle" data-setting="crossfade"><div class="toggle-knob"></div></button>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <svg class="i" width="11" height="11"><use href="#i-download"/></svg>
-              <span data-i18n="section.downloads">Скачивание из интернета</span>
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label">
-                    <span data-i18n="setting.showDownloads">Показать вкладку «Загрузки»</span>
-                    <span class="setting-badge" data-i18n="badge.wip">в разработке</span>
-                  </div>
-                  <div class="setting-desc" data-i18n="setting.showDownloadsDesc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
-                </div>
-                <button class="toggle" data-setting="downloads"><div class="toggle-knob"></div></button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.showParserBrowser">Показывать окно браузера при парсинге</div>
-                  <div class="setting-desc" data-i18n="setting.showParserBrowserDesc">Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.</div>
-                </div>
-                <button class="toggle" data-setting="show-parser-browser"><div class="toggle-knob"></div></button>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <svg class="i" width="11" height="11"><use href="#i-monitor"/></svg>
-              <span data-i18n="section.system">Система</span>
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.hardwareAcceleration">Аппаратное ускорение</div>
-                  <div class="setting-desc" data-i18n="setting.hardwareAccelerationDesc">Использует видеокарту для отрисовки интерфейса. Если приложение зависает при запуске или работает с артефактами — выключите. Изменение применится после перезапуска.</div>
-                </div>
-                <button class="toggle" id="toggle-hwaccel"><div class="toggle-knob"></div></button>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <span class="lang-glyph">文</span>
-              <span data-i18n="section.language">Язык</span>
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.uiLanguage">Язык интерфейса</div>
-                  <div class="setting-desc" data-i18n="setting.uiLanguageDesc">Применяется сразу.</div>
-                </div>
-                <div class="select" id="lang-select">
-                  <button class="select-btn">
-                    <span id="lang-current">English</span>
-                    <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
-                  </button>
-                  <div class="select-menu">
-                    <div class="select-opt" data-lang="en">English</div>
-                    <div class="select-opt" data-lang="ru">Русский</div>
-                    <div class="select-opt" data-lang="de">Deutsch</div>
-                    <div class="select-opt" data-lang="fr">Français</div>
-                    <div class="select-opt" data-lang="uk">Українська</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section" id="discord-section">
-            <div class="section-label section-label-toggle" id="discord-toggle" role="button" tabindex="0">
-              <svg class="i" width="11" height="11"><use href="#i-discord"/></svg>
-              <span data-i18n="section.discord">Discord Rich Presence</span>
-              <svg class="i section-chevron" width="13" height="13"><use href="#i-chevron-down"/></svg>
-            </div>
-            <div id="discord-body"></div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label">
-              <svg class="i" width="11" height="11"><use href="#i-link"/></svg>
-              <span data-i18n="section.contacts">Контакты</span>
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.github">GitHub</div>
-                  <div class="setting-desc" data-i18n="setting.githubDesc">Исходный код проекта на GitHub.</div>
-                </div>
-                <button class="btn-ghost" data-open-url="https://github.com/MishaSok/audex-player">
-                  <svg class="i" width="13" height="13"><use href="#i-github"/></svg>
-                  <span>github.com/MishaSok/audex-player</span>
-                </button>
-              </div>
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.telegram">Telegram</div>
-                  <div class="setting-desc" data-i18n="setting.telegramDesc">Нашли баг или есть предложение — пишите в Telegram.</div>
-                </div>
-                <button class="btn-ghost" data-open-url="https://t.me/JuicexNet">
-                  <svg class="i" width="13" height="13"><use href="#i-telegram"/></svg>
-                  <span>@JuicexNet</span>
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section class="setting-section">
-            <div class="section-label" data-i18n="section.about">О приложении</div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-text">
-                  <div class="setting-label" data-i18n="setting.version">Версия</div>
-                  <div class="setting-desc">1.1.7 · Electron · Linux</div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
     </main>
   </div>
 
@@ -1111,6 +966,301 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay settings-modal">
+    <div class="settings-card">
+      <div class="settings-card-head">
+        <div class="settings-head">
+          <div class="settings-title" data-i18n="settings.title">Настройки</div>
+          <div class="settings-sub" data-i18n="settings.subtitle">Внешний вид, источники музыки и поведение приложения.</div>
+        </div>
+        <div class="settings-card-head-right">
+          <div class="version-tag">Audex 1.1.7</div>
+          <button class="btn-ic" id="btn-close-settings" title="Закрыть" data-i18n-title="btn.close">
+            <svg class="i" width="14" height="14"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="settings-layout">
+      <div class="settings-tabs" id="settings-tabs" role="tablist">
+        <button class="settings-tab active" data-tab="appearance" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-sun"/></svg>
+          <span data-i18n="section.appearance">Внешний вид</span>
+        </button>
+        <button class="settings-tab" data-tab="music" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-library"/></svg>
+          <span data-i18n="section.music">Музыка</span>
+        </button>
+        <button class="settings-tab" data-tab="downloads" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-download"/></svg>
+          <span data-i18n="section.downloads">Скачивание из интернета</span>
+        </button>
+        <button class="settings-tab" data-tab="discord" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-discord"/></svg>
+          <span data-i18n="section.discord">Discord Rich Presence</span>
+        </button>
+        <button class="settings-tab" data-tab="system" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-monitor"/></svg>
+          <span data-i18n="section.system">Система</span>
+        </button>
+        <button class="settings-tab" data-tab="about" role="tab">
+          <svg class="i" width="13" height="13"><use href="#i-link"/></svg>
+          <span data-i18n="section.about">О приложении</span>
+        </button>
+      </div>
+
+      <div class="settings-content">
+      <div class="settings-panel" data-panel="appearance">
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-sun"/></svg>
+          <span data-i18n="section.appearance">Внешний вид</span>
+        </div>
+        <div class="setting-card setting-card-tight">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.theme">Тема</div>
+              <div class="setting-desc" data-i18n="setting.themeDesc">Цветовая схема приложения.</div>
+            </div>
+            <div class="select" id="theme-select">
+              <button class="select-btn">
+                <span id="theme-current"></span>
+                <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
+              </button>
+              <div class="select-menu">
+                <div class="select-opt" data-theme="dark"><span class="opt-emoji">🌙</span><span data-i18n="theme.dark">Тёмная</span></div>
+                <div class="select-opt" data-theme="light"><span class="opt-emoji">☀️</span><span data-i18n="theme.light">Светлая</span></div>
+                <div class="select-opt" data-theme="system"><span class="opt-emoji">🖥️</span><span data-i18n="theme.system">Системная</span></div>
+                <div class="select-opt" data-theme="nocturne"><span class="opt-emoji">🌌</span><span>Nocturne</span></div>
+                <div class="select-opt" data-theme="terracotta"><span class="opt-emoji">🏺</span><span>Terracotta</span></div>
+                <div class="select-opt" data-theme="forest"><span class="opt-emoji">🌲</span><span>Forest</span></div>
+                <div class="select-opt" data-theme="vapor"><span class="opt-emoji">🌆</span><span>Vapor</span></div>
+                <div class="select-opt" data-theme="noir"><span class="opt-emoji">🎬</span><span>Crimson Noir</span></div>
+                <div class="select-opt" data-theme="arctic"><span class="opt-emoji">❄️</span><span>Arctic</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-card setting-card-tight">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.accent">Цвет акцента</div>
+              <div class="setting-desc" data-i18n="setting.accentDesc">Подсветка активных элементов и текущего трека.</div>
+            </div>
+            <div class="accent-palette" id="accent-palette"></div>
+          </div>
+        </div>
+
+        <div class="setting-card setting-card-tight">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.uiScale">Масштаб интерфейса</div>
+              <div class="setting-desc" data-i18n="setting.uiScaleDesc">Делает весь интерфейс крупнее или мельче. Применяется сразу.</div>
+            </div>
+            <div class="scale-stepper">
+              <button type="button" class="stepper-btn" id="scale-dec" title="−" aria-label="−">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg>
+              </button>
+              <span class="stepper-value" id="scale-current">100%</span>
+              <button type="button" class="stepper-btn" id="scale-inc" title="+" aria-label="+">
+                <svg class="i" width="12" height="12"><use href="#i-plus"/></svg>
+              </button>
+              <button type="button" class="btn-ghost stepper-reset" id="scale-reset" data-i18n="setting.uiScaleReset">Сбросить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="setting-section">
+        <div class="section-label">
+          <span class="lang-glyph">文</span>
+          <span data-i18n="section.language">Язык</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.uiLanguage">Язык интерфейса</div>
+              <div class="setting-desc" data-i18n="setting.uiLanguageDesc">Применяется сразу.</div>
+            </div>
+            <div class="select" id="lang-select">
+              <button class="select-btn">
+                <span id="lang-current">English</span>
+                <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
+              </button>
+              <div class="select-menu">
+                <div class="select-opt" data-lang="en">English</div>
+                <div class="select-opt" data-lang="ru">Русский</div>
+                <div class="select-opt" data-lang="de">Deutsch</div>
+                <div class="select-opt" data-lang="fr">Français</div>
+                <div class="select-opt" data-lang="uk">Українська</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="music" hidden>
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-library"/></svg>
+          <span data-i18n="section.music">Музыка</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.defaultFolder">Папка по умолчанию</div>
+              <div class="setting-path" id="default-folder-path">—</div>
+              <div class="setting-desc" data-i18n="setting.defaultFolderDesc">Откуда загружать треки при запуске.</div>
+            </div>
+            <button class="btn-ghost" id="btn-choose-default-folder">
+              <svg class="i" width="13" height="13"><use href="#i-folder-open"/></svg>
+              <span data-i18n="btn.choose">Выбрать…</span>
+            </button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.scanSubdirs">Сканировать подпапки</div>
+              <div class="setting-desc" data-i18n="setting.scanSubdirsDesc">Учитывать вложенные директории при индексации.</div>
+            </div>
+            <button class="toggle" data-setting="scan-subdirs"><div class="toggle-knob"></div></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.healthCheck">Проверка качества (Health-check)</div>
+              <div class="setting-desc" data-i18n="setting.healthCheckDesc">Раздел «Состояние библиотеки» и столбец «Качество» в списках треков. Выключено — колонка и раздел скрыты полностью.</div>
+            </div>
+            <button class="toggle" data-setting="health-check"><div class="toggle-knob"></div></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.reports">Отчёт о прослушивании</div>
+              <div class="setting-desc" data-i18n="setting.reportsDesc">Раздел «Отчёт» со статистикой прослушивания. Статистика собирается всегда, даже когда раздел скрыт.</div>
+            </div>
+            <button class="toggle" data-setting="reports"><div class="toggle-knob"></div></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.editor">Редактор (обрезка треков)</div>
+              <div class="setting-desc" data-i18n="setting.editorDesc">Раздел «Редактор» для обрезки треков: выбираете фрагмент на волне и сохраняете его в новый файл.</div>
+            </div>
+            <button class="toggle" data-setting="editor"><div class="toggle-knob"></div></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.crossfade">Плавный переход между треками</div>
+              <div class="setting-desc" data-i18n="setting.crossfadeDesc">Треки перетекают друг в друга: конец текущего затихает, пока следующий нарастает. Действует и в конце трека, и при ручном переключении.</div>
+            </div>
+            <button class="toggle" data-setting="crossfade"><div class="toggle-knob"></div></button>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="downloads" hidden>
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-download"/></svg>
+          <span data-i18n="section.downloads">Скачивание из интернета</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label">
+                <span data-i18n="setting.showDownloads">Показать вкладку «Загрузки»</span>
+                <span class="setting-badge" data-i18n="badge.wip">в разработке</span>
+              </div>
+              <div class="setting-desc" data-i18n="setting.showDownloadsDesc">Откроет в боковом меню раздел для скачивания треков по ссылке.</div>
+            </div>
+            <button class="toggle" data-setting="downloads"><div class="toggle-knob"></div></button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.showParserBrowser">Показывать окно браузера при парсинге</div>
+              <div class="setting-desc" data-i18n="setting.showParserBrowserDesc">Нужно, чтобы войти в Яндекс при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.</div>
+            </div>
+            <button class="toggle" data-setting="show-parser-browser"><div class="toggle-knob"></div></button>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="system" hidden>
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-monitor"/></svg>
+          <span data-i18n="section.system">Система</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.hardwareAcceleration">Аппаратное ускорение</div>
+              <div class="setting-desc" data-i18n="setting.hardwareAccelerationDesc">Использует видеокарту для отрисовки интерфейса. Если приложение зависает при запуске или работает с артефактами — выключите. Изменение применится после перезапуска.</div>
+            </div>
+            <button class="toggle" id="toggle-hwaccel"><div class="toggle-knob"></div></button>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="discord" hidden>
+      <section class="setting-section" id="discord-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-discord"/></svg>
+          <span data-i18n="section.discord">Discord Rich Presence</span>
+        </div>
+        <div id="discord-body"></div>
+      </section>
+      </div>
+
+      <div class="settings-panel" data-panel="about" hidden>
+      <section class="setting-section">
+        <div class="section-label">
+          <svg class="i" width="11" height="11"><use href="#i-link"/></svg>
+          <span data-i18n="section.contacts">Контакты</span>
+        </div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.github">GitHub</div>
+              <div class="setting-desc" data-i18n="setting.githubDesc">Исходный код проекта на GitHub.</div>
+            </div>
+            <button class="btn-ghost" data-open-url="https://github.com/MishaSok/audex-player">
+              <svg class="i" width="13" height="13"><use href="#i-github"/></svg>
+              <span>github.com/MishaSok/audex-player</span>
+            </button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.telegram">Telegram</div>
+              <div class="setting-desc" data-i18n="setting.telegramDesc">Нашли баг или есть предложение — пишите в Telegram.</div>
+            </div>
+            <button class="btn-ghost" data-open-url="https://t.me/JuicexNet">
+              <svg class="i" width="13" height="13"><use href="#i-telegram"/></svg>
+              <span>@JuicexNet</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="setting-section">
+        <div class="section-label" data-i18n="section.about">О приложении</div>
+        <div class="setting-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <div class="setting-label" data-i18n="setting.version">Версия</div>
+              <div class="setting-desc">1.1.7 · Electron · Linux</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Confirm Delete Modal -->
   <div id="confirm-modal" class="modal-overlay">
     <div class="modal-card">
@@ -1165,6 +1315,18 @@
       <div class="select-list" id="add-to-playlist-list"></div>
       <div class="modal-actions">
         <button id="btn-cancel-add-pl" class="btn-ghost" data-i18n="btn.close">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor: track picker -->
+  <div id="ed-pick-modal" class="modal-overlay">
+    <div class="modal-card modal-card-md">
+      <div class="modal-title" data-i18n="editor.pick">Выбрать трек</div>
+      <input type="text" class="modal-input" id="ed-pick-search" data-i18n-placeholder="editor.pickSearch" placeholder="Поиск по названию или исполнителю">
+      <div class="select-list" id="ed-pick-list"></div>
+      <div class="modal-actions">
+        <button id="ed-pick-cancel" class="btn-ghost" data-i18n="btn.close">Закрыть</button>
       </div>
     </div>
   </div>
@@ -1258,6 +1420,7 @@
     <button class="cm-item" data-action="reveal"><svg class="i" width="11" height="11"><use href="#i-folder"/></svg><span data-i18n="cm.reveal">Показать в папке</span></button>
     <div class="cm-divider"></div>
     <button class="cm-item cm-highlight" data-action="edit-tags"><svg class="i" width="11" height="11"><use href="#i-edit"/></svg><span data-i18n="cm.editTags">Редактировать теги…</span><span class="cm-sh">⌘E</span></button>
+    <button class="cm-item" data-action="trim" id="cm-trim" hidden><svg class="i" width="11" height="11"><use href="#i-scissors"/></svg><span data-i18n="cm.trim">Обрезать трек…</span></button>
     <div class="cm-divider"></div>
     <button class="cm-item cm-danger" data-action="delete"><svg class="i" width="11" height="11"><use href="#i-trash"/></svg><span data-i18n="cm.delete">Удалить из библиотеки</span><span class="cm-sh">⌫</span></button>
   </div>

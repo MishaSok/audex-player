@@ -255,11 +255,24 @@ input { font-family: inherit; color: inherit; }
   justify-content: center;
   flex-shrink: 0;
 }
+.brand-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
 .brand-text {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.3px;
+  line-height: 1.1;
   color: var(--text-strong);
+}
+.brand-version {
+  font-size: 10.5px;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.2px;
+  color: var(--text-dim);
 }
 
 .nav-menu {
@@ -1846,22 +1859,46 @@ html.is-playing .equalizer > span { animation-play-state: running; }
 }
 
 /* ─── Settings ─── */
-.settings-page {
-  max-width: 720px;
-  padding-bottom: 32px;
+/* Settings is a modal dialog. The card is a fixed-height flex column: a static
+   header, then a row of [vertical tabs | scrolling panel]. Only the panel
+   scrolls, so the tab rail stays put however long a section gets. */
+.settings-card {
+  width: min(1040px, 94vw);
+  height: min(760px, 88vh);
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-.settings-head { margin-bottom: 28px; }
+.settings-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.settings-card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
 .settings-title {
   font-family: 'Playfair Display', serif;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   color: var(--text-strong);
 }
 .settings-sub {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--text-muted);
 }
 .setting-section { margin-bottom: 32px; }
@@ -1889,6 +1926,64 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   border-radius: 8px;
 }
 .setting-card-tight { margin-top: 12px; }
+
+/* Settings tabbed navigation — vertical sidebar, always on the left at every
+   window size (no responsive stacking; the card scales instead). */
+.settings-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+.settings-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 216px;
+  flex-shrink: 0;
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+.settings-tab {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.settings-tab span { flex: 1; }
+.settings-tab .i { opacity: .7; flex-shrink: 0; }
+.settings-tab:hover {
+  background: var(--active-bg);
+  color: var(--text);
+}
+.settings-tab.active {
+  background: var(--active-bg);
+  border-color: var(--border);
+  color: var(--text-strong);
+}
+.settings-tab.active .i { opacity: 1; color: var(--accent); }
+.settings-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 24px;
+}
+.settings-panel[hidden] { display: none; }
+.settings-panel > .setting-section:first-child { margin-top: 0; }
+.settings-panel > .setting-section:last-child { margin-bottom: 0; }
 
 .scale-stepper {
   display: inline-flex;
@@ -2755,6 +2850,7 @@ html.is-playing .equalizer > span { animation-play-state: running; }
 }
 .modal-overlay.active { display: flex; animation: modalScrimIn 200ms cubic-bezier(0.22, 1, 0.36, 1); }
 .modal-overlay.active .modal-card,
+.modal-overlay.active .settings-card,
 .modal-overlay.active .editor-card { animation: modalCardIn 280ms cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* Perf: a blurred full-screen overlay (tag editor, palette, etc.) re-runs its
@@ -3861,6 +3957,10 @@ html:has(.palette-overlay.active) .dl-progress-fill {
    the cramped 1024–1100 range stays usable. All rules are inside the media
    query — when the window grows back, the defaults take over unchanged. */
 @media (max-width: 1100px) {
+  /* Settings — the tab rail stays vertical on the left at every window size
+     (deliberate: no stacking). Only the rail narrows to give panels room. */
+  .settings-tabs { width: 180px; }
+
   /* Sidebar — shrink width and tighten padding. Returns to 248px above 1100. */
   .sidebar {
     width: 200px;
@@ -3879,7 +3979,8 @@ html:has(.palette-overlay.active) .dl-progress-fill {
     max-width: 260px;
     min-width: 140px;
   }
-  .version-tag { display: none; }
+  /* The version tag now lives in the Settings modal header (and is the boot
+     overlay's version source), so it is no longer hidden on narrow windows. */
 
   /* Track table — hide the Album column (4th cell of .thead and .trow). The
      grid template loses its 0.7fr slot, gap shrinks slightly to give the
@@ -4065,3 +4166,214 @@ html:has(.palette-overlay.active) .dl-progress-fill {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── Editor (track trimming) ─── */
+.ed-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0 20px;
+}
+.ed-cover {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--panel-alt) center/cover no-repeat;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.ed-meta { min-width: 0; }
+.ed-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ed-artist {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.ed-file {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ed-wave-wrap { margin-bottom: 18px; }
+.ed-wave {
+  position: relative;
+  height: 148px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  cursor: crosshair;
+}
+.ed-wave-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 12px 0;
+}
+.ed-wave-bars i {
+  flex: 1;
+  min-width: 1px;
+  background: var(--text-faint);
+  border-radius: 1px;
+  transition: background 0.15s;
+}
+.ed-wave-bars i.in-sel { background: var(--accent); }
+.ed-dim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--bg);
+  opacity: 0.62;
+  pointer-events: none;
+}
+.ed-dim-left { left: 0; }
+.ed-dim-right { right: 0; }
+.ed-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--text-strong);
+  pointer-events: none;
+  z-index: 3;
+}
+.ed-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 13px;
+  margin-left: -6.5px;
+  cursor: ew-resize;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ed-handle span {
+  display: block;
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.ed-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 26px;
+  margin-top: -13px;
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.9;
+}
+.ed-handle:hover::after { opacity: 1; }
+.ed-ruler {
+  position: relative;
+  height: 18px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.ed-ruler span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.ed-ruler span:first-child { transform: none; }
+.ed-ruler span:last-child { transform: translateX(-100%); }
+.ed-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.ed-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-field-actions {
+  flex-direction: row;
+  gap: 8px;
+  margin-left: auto;
+}
+.ed-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+.ed-time-input,
+.ed-num-input {
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: var(--text-strong);
+  font-family: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  padding: 7px 10px;
+  width: 108px;
+  outline: none;
+}
+.ed-num-input { width: 78px; }
+.ed-time-input:focus,
+.ed-num-input:focus { border-color: var(--accent); }
+.ed-duration {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  padding: 4px 0;
+}
+.ed-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 22px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.ed-opt-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-opt-overwrite {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  max-width: 420px;
+}
+.ed-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+.ed-footer .dl-status { margin: 0; flex: 1; }
+.ed-footer .btn-primary { margin-left: auto; }

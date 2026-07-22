@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   parseMetadata: (filePath) => ipcRenderer.invoke('music:parseMetadata', filePath),
   loadCoverCache: (paths) => ipcRenderer.invoke('covers:load', paths),
   readAudioFile: (filePath) => ipcRenderer.invoke('audio:readFile', filePath),
+  trimAudio: (payload) => ipcRenderer.invoke('audio:trim', payload),
   writeMetadata: (filePath, tags) => ipcRenderer.invoke('music:writeMetadata', { filePath, tags }),
   revealInFolder: (filePath) => ipcRenderer.invoke('shell:revealInFolder', filePath),
   deleteFile: (filePath) => ipcRenderer.invoke('shell:deleteFile', filePath),

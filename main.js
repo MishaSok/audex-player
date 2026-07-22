@@ -704,6 +704,72 @@ ipcMain.handle('update:check', async () => {
   }
 });
 
+// ── Track trimming (editor) ──
+// Cuts [start, end] out of an audio file with the bundled ffmpeg. Without fades
+// we stream-copy (-c copy): instant and lossless, cutting on frame boundaries.
+// Fades require re-encoding, so those go through libmp3lame at 320k CBR.
+// Output is always written to a temp file first and only then moved into place,
+// so an interrupted run can never truncate the user's original.
+ipcMain.handle('audio:trim', async (event, payload) => {
+  const src = payload && payload.filePath ? String(payload.filePath) : '';
+  const start = Math.max(0, Number(payload && payload.start) || 0);
+  const end = Number(payload && payload.end) || 0;
+  const fadeIn = Math.max(0, Number(payload && payload.fadeIn) || 0);
+  const fadeOut = Math.max(0, Number(payload && payload.fadeOut) || 0);
+  const overwrite = !!(payload && payload.overwrite);
+
+  if (!src || !fs.existsSync(src)) return { success: false, error: 'Файл не найден' };
+  if (!(end > start)) return { success: false, error: 'Конец должен быть больше начала' };
+
+  const ffmpeg = resolveBundledFfmpeg();
+  if (!ffmpeg) return { success: false, error: 'ffmpeg не найден' };
+
+  const dir = path.dirname(src);
+  const ext = path.extname(src);
+  const base = path.basename(src, ext);
+  const dur = end - start;
+
+  let outPath;
+  if (overwrite) {
+    outPath = src;
+  } else {
+    outPath = path.join(dir, `${base} (обрезано)${ext}`);
+    let n = 2;
+    while (fs.existsSync(outPath)) outPath = path.join(dir, `${base} (обрезано ${n++})${ext}`);
+  }
+  const tmpPath = path.join(dir, `.audex-trim-${Date.now()}${ext}`);
+
+  const args = ['-hide_banner', '-loglevel', 'error', '-y', '-ss', String(start), '-i', src, '-t', String(dur)];
+  if (fadeIn > 0 || fadeOut > 0) {
+    const filters = [];
+    if (fadeIn > 0) filters.push(`afade=t=in:st=0:d=${fadeIn}`);
+    if (fadeOut > 0) filters.push(`afade=t=out:st=${Math.max(0, dur - fadeOut)}:d=${fadeOut}`);
+    args.push('-af', filters.join(','), '-c:a', 'libmp3lame', '-b:a', '320k');
+  } else {
+    args.push('-c', 'copy');
+  }
+  // Carry cover art and tags over to the cut file.
+  args.push('-map_metadata', '0', '-id3v2_version', '3', tmpPath);
+
+  try {
+    await new Promise((resolve, reject) => {
+      const proc = spawn(ffmpeg, args);
+      let stderr = '';
+      proc.stderr.on('data', d => { stderr += d.toString(); });
+      proc.on('error', reject);
+      proc.on('close', code => {
+        if (code === 0) resolve();
+        else reject(new Error(stderr.trim().split('\n').slice(-3).join(' ') || `ffmpeg exited with ${code}`));
+      });
+    });
+    await fs.promises.rename(tmpPath, outPath);
+    return { success: true, filePath: outPath, overwritten: overwrite };
+  } catch (err) {
+    try { if (fs.existsSync(tmpPath)) await fs.promises.unlink(tmpPath); } catch (_) {}
+    return { success: false, error: String(err && err.message || err).slice(0, 300) };
+  }
+});
+
 ipcMain.handle('shell:deleteFile', async (event, filePath) => {
   if (!filePath) return { success: false, error: 'No path' };
   if (!fs.existsSync(filePath)) return { success: true, missing: true };

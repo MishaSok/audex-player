@@ -33,10 +33,12 @@ let settings = Object.assign({
   scanSubdirs: true,
   healthCheck: false,
   reports: false,
+  editor: false,
   crossfade: false,
   downloads: true,
   showParserBrowser: true,
   uiScale: 1,
+  settingsTab: 'appearance', // active tab in the Settings view
 }, JSON.parse(localStorage.getItem(LS.settings) || '{}'));
 let recents = JSON.parse(localStorage.getItem(LS.recents) || '[]');
 
@@ -281,6 +283,32 @@ const I18N = {
     'nav.playlists': 'Плейлисты',
     'nav.favorites': 'Избранное',
     'nav.downloads': 'Загрузки',
+    'nav.editor': 'Редактор',
+    'cm.trim': 'Обрезать трек…',
+    'setting.editor': 'Редактор (обрезка треков)',
+    'setting.editorDesc': 'Раздел «Редактор» для обрезки треков: выбираете фрагмент на волне и сохраняете его в новый файл.',
+    'editor.pick': 'Выбрать трек',
+    'editor.pickSearch': 'Поиск по названию или исполнителю',
+    'editor.pickEmpty': 'Ничего не найдено',
+    'editor.empty.title': 'Обрезка треков',
+    'editor.empty.text': 'Выберите трек, отметьте начало и конец фрагмента на волне и сохраните его отдельным файлом. Оригинал остаётся нетронутым, если не выбрать перезапись.',
+    'editor.start': 'Начало',
+    'editor.end': 'Конец',
+    'editor.selection': 'Длительность фрагмента',
+    'editor.preview': 'Прослушать фрагмент',
+    'editor.previewStop': 'Остановить',
+    'editor.reset': 'Сбросить',
+    'editor.fadeIn': 'Нарастание, с',
+    'editor.fadeOut': 'Затухание, с',
+    'editor.overwrite': 'Перезаписать оригинал',
+    'editor.overwriteDesc': 'По умолчанию рядом создаётся новый файл «— (обрезано)». Включите, чтобы заменить исходный файл.',
+    'editor.save': 'Обрезать и сохранить',
+    'editor.decoding': 'Читаем аудио…',
+    'editor.decodeError': 'Не удалось прочитать аудио',
+    'editor.saving': 'Обрезаем…',
+    'editor.saved': 'Сохранено: {f}',
+    'editor.saveError': 'Ошибка обрезки: {e}',
+    'editor.tooShort': 'Фрагмент слишком короткий',
     'nav.search': 'Поиск',
     'nav.recents': 'Недавнее',
     'nav.openFiles': 'Открыть файлы',
@@ -654,6 +682,32 @@ const I18N = {
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favorites',
     'nav.downloads': 'Downloads',
+    'nav.editor': 'Editor',
+    'cm.trim': 'Trim track…',
+    'setting.editor': 'Editor (track trimming)',
+    'setting.editorDesc': 'The “Editor” section for trimming tracks: pick a fragment on the waveform and save it as a new file.',
+    'editor.pick': 'Choose track',
+    'editor.pickSearch': 'Search by title or artist',
+    'editor.pickEmpty': 'Nothing found',
+    'editor.empty.title': 'Trim tracks',
+    'editor.empty.text': 'Pick a track, mark the start and end of a fragment on the waveform, and save it as a separate file. The original stays untouched unless you enable overwrite.',
+    'editor.start': 'Start',
+    'editor.end': 'End',
+    'editor.selection': 'Fragment length',
+    'editor.preview': 'Preview fragment',
+    'editor.previewStop': 'Stop',
+    'editor.reset': 'Reset',
+    'editor.fadeIn': 'Fade in, s',
+    'editor.fadeOut': 'Fade out, s',
+    'editor.overwrite': 'Overwrite original',
+    'editor.overwriteDesc': 'By default a new “— (обрезано)” file is created next to it. Enable to replace the source file.',
+    'editor.save': 'Trim and save',
+    'editor.decoding': 'Reading audio…',
+    'editor.decodeError': 'Could not read the audio',
+    'editor.saving': 'Trimming…',
+    'editor.saved': 'Saved: {f}',
+    'editor.saveError': 'Trim failed: {e}',
+    'editor.tooShort': 'Fragment is too short',
     'nav.search': 'Search',
     'nav.recents': 'Recent',
     'nav.openFiles': 'Open files',
@@ -1027,6 +1081,32 @@ const I18N = {
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favoriten',
     'nav.downloads': 'Downloads',
+    'nav.editor': 'Editor',
+    'cm.trim': 'Titel zuschneiden…',
+    'setting.editor': 'Editor (Titel zuschneiden)',
+    'setting.editorDesc': 'Der Bereich „Editor“ zum Zuschneiden von Titeln: Ausschnitt in der Wellenform wählen und als neue Datei speichern.',
+    'editor.pick': 'Titel wählen',
+    'editor.pickSearch': 'Suche nach Titel oder Interpret',
+    'editor.pickEmpty': 'Nichts gefunden',
+    'editor.empty.title': 'Titel zuschneiden',
+    'editor.empty.text': 'Wähle einen Titel, markiere Anfang und Ende in der Wellenform und speichere den Ausschnitt als eigene Datei. Das Original bleibt unangetastet, sofern Überschreiben nicht aktiviert ist.',
+    'editor.start': 'Anfang',
+    'editor.end': 'Ende',
+    'editor.selection': 'Länge des Ausschnitts',
+    'editor.preview': 'Ausschnitt anhören',
+    'editor.previewStop': 'Stoppen',
+    'editor.reset': 'Zurücksetzen',
+    'editor.fadeIn': 'Einblenden, s',
+    'editor.fadeOut': 'Ausblenden, s',
+    'editor.overwrite': 'Original überschreiben',
+    'editor.overwriteDesc': 'Standardmäßig wird daneben eine neue Datei „— (обрезано)“ erstellt. Aktivieren, um die Quelldatei zu ersetzen.',
+    'editor.save': 'Zuschneiden und speichern',
+    'editor.decoding': 'Audio wird gelesen…',
+    'editor.decodeError': 'Audio konnte nicht gelesen werden',
+    'editor.saving': 'Wird zugeschnitten…',
+    'editor.saved': 'Gespeichert: {f}',
+    'editor.saveError': 'Zuschneiden fehlgeschlagen: {e}',
+    'editor.tooShort': 'Ausschnitt ist zu kurz',
     'nav.search': 'Suche',
     'nav.recents': 'Zuletzt',
     'nav.openFiles': 'Dateien öffnen',
@@ -1400,6 +1480,32 @@ const I18N = {
     'nav.playlists': 'Playlists',
     'nav.favorites': 'Favoris',
     'nav.downloads': 'Téléchargements',
+    'nav.editor': 'Éditeur',
+    'cm.trim': 'Découper la piste…',
+    'setting.editor': 'Éditeur (découpe de pistes)',
+    'setting.editorDesc': "La section « Éditeur » pour découper des pistes : choisissez un extrait sur la forme d'onde et enregistrez-le dans un nouveau fichier.",
+    'editor.pick': 'Choisir une piste',
+    'editor.pickSearch': 'Rechercher par titre ou artiste',
+    'editor.pickEmpty': 'Aucun résultat',
+    'editor.empty.title': 'Découper des pistes',
+    'editor.empty.text': "Choisissez une piste, marquez le début et la fin d'un extrait sur la forme d'onde et enregistrez-le dans un fichier séparé. L'original reste intact sauf si vous activez l'écrasement.",
+    'editor.start': 'Début',
+    'editor.end': 'Fin',
+    'editor.selection': "Durée de l'extrait",
+    'editor.preview': "Écouter l'extrait",
+    'editor.previewStop': 'Arrêter',
+    'editor.reset': 'Réinitialiser',
+    'editor.fadeIn': 'Fondu entrant, s',
+    'editor.fadeOut': 'Fondu sortant, s',
+    'editor.overwrite': "Écraser l'original",
+    'editor.overwriteDesc': "Par défaut, un nouveau fichier « — (обрезано) » est créé à côté. Activez pour remplacer le fichier source.",
+    'editor.save': 'Découper et enregistrer',
+    'editor.decoding': "Lecture de l'audio…",
+    'editor.decodeError': "Impossible de lire l'audio",
+    'editor.saving': 'Découpe en cours…',
+    'editor.saved': 'Enregistré : {f}',
+    'editor.saveError': 'Échec de la découpe : {e}',
+    'editor.tooShort': "L'extrait est trop court",
     'nav.search': 'Recherche',
     'nav.recents': 'Récents',
     'nav.openFiles': 'Ouvrir des fichiers',
@@ -1773,6 +1879,32 @@ const I18N = {
     'nav.playlists': 'Плейлисти',
     'nav.favorites': 'Улюблене',
     'nav.downloads': 'Завантаження',
+    'nav.editor': 'Редактор',
+    'cm.trim': 'Обрізати трек…',
+    'setting.editor': 'Редактор (обрізання треків)',
+    'setting.editorDesc': 'Розділ «Редактор» для обрізання треків: обираєте фрагмент на хвилі та зберігаєте його в новий файл.',
+    'editor.pick': 'Вибрати трек',
+    'editor.pickSearch': 'Пошук за назвою або виконавцем',
+    'editor.pickEmpty': 'Нічого не знайдено',
+    'editor.empty.title': 'Обрізання треків',
+    'editor.empty.text': 'Виберіть трек, позначте початок і кінець фрагмента на хвилі та збережіть його окремим файлом. Оригінал лишається недоторканим, якщо не увімкнути перезапис.',
+    'editor.start': 'Початок',
+    'editor.end': 'Кінець',
+    'editor.selection': 'Тривалість фрагмента',
+    'editor.preview': 'Прослухати фрагмент',
+    'editor.previewStop': 'Зупинити',
+    'editor.reset': 'Скинути',
+    'editor.fadeIn': 'Наростання, с',
+    'editor.fadeOut': 'Затухання, с',
+    'editor.overwrite': 'Перезаписати оригінал',
+    'editor.overwriteDesc': 'Типово поруч створюється новий файл «— (обрезано)». Увімкніть, щоб замінити вихідний файл.',
+    'editor.save': 'Обрізати та зберегти',
+    'editor.decoding': 'Читаємо аудіо…',
+    'editor.decodeError': 'Не вдалося прочитати аудіо',
+    'editor.saving': 'Обрізаємо…',
+    'editor.saved': 'Збережено: {f}',
+    'editor.saveError': 'Помилка обрізання: {e}',
+    'editor.tooShort': 'Фрагмент занадто короткий',
     'nav.search': 'Пошук',
     'nav.recents': 'Нещодавнє',
     'nav.openFiles': 'Відкрити файли',
@@ -2471,6 +2603,7 @@ function sortedFilteredLibrary() {
 // ── Render: navigation ──
 function setView(view) {
   if (librarySelectMode && view !== 'library') setLibrarySelectMode(false);
+  if (currentView === 'editor' && view !== 'editor') stopEditorPreview();
   currentView = view;
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.view === view);
@@ -2486,7 +2619,6 @@ function setView(view) {
   else if (view === 'artist-detail') renderArtistDetail(activeArtistName);
   else if (view === 'report') renderReport();
   else if (view === 'health') renderHealth();
-  else if (view === 'settings') renderSettings();
 }
 
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -2500,6 +2632,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
       setTimeout(() => item.classList.remove('is-pinging'), 600);
       return openPalette();
     }
+    if (item.dataset.action === 'open-settings') return openSettings();
     if (item.dataset.view) {
       // A direct click on the Library nav item shows the full library, not a
       // lingering Health-check result filter.
@@ -2514,6 +2647,374 @@ document.querySelectorAll('.crumb-item.link').forEach(el => {
     setView(el.dataset.view);
   });
 });
+
+// ── Editor (track trimming) ──
+// Gated by settings.editor. Decodes the track once into a dense peak array,
+// paints it as bars, and lets the user drag two handles to pick [start, end].
+// The actual cut happens in the main process (ffmpeg, 'audio:trim'); preview
+// uses its own Audio element so it can never disturb the main playback state.
+const ED_BARS = 260;
+let edTrack = null;        // library track being edited
+let edPeaks = null;        // Float32Array-like, ED_BARS entries
+let edDuration = 0;        // seconds
+let edStart = 0;
+let edEnd = 0;
+let edPreview = null;      // transient Audio for previewing the selection
+let edPreviewRaf = null;
+let edLoadToken = 0;       // guards against a slow decode landing after a switch
+
+function edFormatTime(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = sec - m * 60;
+  return `${m}:${s.toFixed(1).padStart(4, '0')}`;
+}
+
+// Accepts "m:ss.d", "ss.d" or plain seconds; returns null when unparseable.
+function edParseTime(text) {
+  const t = String(text || '').trim().replace(',', '.');
+  if (!t) return null;
+  const parts = t.split(':');
+  let sec;
+  if (parts.length === 2) {
+    const m = parseFloat(parts[0]), s = parseFloat(parts[1]);
+    if (isNaN(m) || isNaN(s)) return null;
+    sec = m * 60 + s;
+  } else {
+    sec = parseFloat(t);
+    if (isNaN(sec)) return null;
+  }
+  return Math.max(0, sec);
+}
+
+function setEdStatus(text, kind) {
+  const el = $('ed-status');
+  if (!el) return;
+  el.classList.remove('is-error', 'is-ok');
+  if (!text) { el.hidden = true; el.textContent = ''; return; }
+  if (kind === 'error') el.classList.add('is-error');
+  else if (kind === 'ok') el.classList.add('is-ok');
+  el.hidden = false;
+  el.textContent = text;
+}
+
+// Decode at ED_BARS resolution — the shared decodePeaks() is fixed to the
+// playbar's much coarser WAVE_BARS, which would look blocky at editor size.
+async function edDecodePeaks(arrayBuffer, bars) {
+  if (!waveDecodeCtx) {
+    const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Ctx) throw new Error('OfflineAudioContext unavailable');
+    waveDecodeCtx = new Ctx(1, 1, 8000);
+  }
+  const buf = await waveDecodeCtx.decodeAudioData(arrayBuffer);
+  const chCount = buf.numberOfChannels;
+  const len = buf.length;
+  const channels = [];
+  for (let c = 0; c < chCount; c++) channels.push(buf.getChannelData(c));
+  const peaks = new Float32Array(bars);
+  const bucket = Math.max(1, Math.floor(len / bars));
+  let globalMax = 0;
+  for (let i = 0; i < bars; i++) {
+    const s = i * bucket;
+    const e = i === bars - 1 ? len : Math.min(len, s + bucket);
+    let max = 0;
+    for (let j = s; j < e; j++) {
+      for (let c = 0; c < chCount; c++) {
+        const v = Math.abs(channels[c][j]);
+        if (v > max) max = v;
+      }
+    }
+    peaks[i] = max;
+    if (max > globalMax) globalMax = max;
+  }
+  const norm = globalMax > 0 ? 1 / globalMax : 0;
+  const out = new Array(bars);
+  for (let i = 0; i < bars; i++) {
+    out[i] = Math.max(0.04, Math.min(1, Math.pow(peaks[i] * norm, 0.7)));
+  }
+  return { peaks: out, duration: buf.duration };
+}
+
+function edPaintBars() {
+  const host = $('ed-wave-bars');
+  if (!host) return;
+  if (!edPeaks) {
+    host.innerHTML = `<i style="height:6%"></i>`.repeat(60);
+    return;
+  }
+  const sPct = edDuration > 0 ? edStart / edDuration : 0;
+  const ePct = edDuration > 0 ? edEnd / edDuration : 1;
+  host.innerHTML = edPeaks.map((p, i) => {
+    const at = (i + 0.5) / edPeaks.length;
+    const cls = at >= sPct && at <= ePct ? ' class="in-sel"' : '';
+    return `<i${cls} style="height:${(p * 100).toFixed(1)}%"></i>`;
+  }).join('');
+}
+
+function edPaintSelection() {
+  const wave = $('ed-wave');
+  if (!wave || edDuration <= 0) return;
+  const sPct = (edStart / edDuration) * 100;
+  const ePct = (edEnd / edDuration) * 100;
+  $('ed-dim-left').style.width = `${sPct}%`;
+  $('ed-dim-right').style.width = `${100 - ePct}%`;
+  $('ed-handle-start').style.left = `${sPct}%`;
+  $('ed-handle-end').style.left = `${ePct}%`;
+  $('ed-start').value = edFormatTime(edStart);
+  $('ed-end').value = edFormatTime(edEnd);
+  $('ed-duration').textContent = edFormatTime(Math.max(0, edEnd - edStart));
+}
+
+function edPaintRuler() {
+  const el = $('ed-ruler');
+  if (!el || edDuration <= 0) return;
+  const marks = 5;
+  let html = '';
+  for (let i = 0; i <= marks; i++) {
+    const t = (edDuration * i) / marks;
+    html += `<span style="left:${(i / marks) * 100}%">${edFormatTime(t)}</span>`;
+  }
+  el.innerHTML = html;
+}
+
+function edRepaint() {
+  edPaintBars();
+  edPaintSelection();
+}
+
+async function openEditorFor(track) {
+  if (!track) return;
+  if (settings.editor === false) { settings.editor = true; saveSettings(); applyEditorVisibility(); renderSettings(); }
+  edTrack = track;
+  stopEditorPreview();
+  setView('editor');
+  $('ed-empty').classList.remove('show');
+  $('ed-workspace').hidden = false;
+  $('ed-track-title').textContent = track.title || '—';
+  $('ed-track-artist').textContent = track.artist || '—';
+  $('ed-track-file').textContent = track.path || '';
+  const cover = track.cover || coverCache[track.path] || '';
+  $('ed-cover').style.backgroundImage = cover ? `url('${cover}')` : '';
+  // Provisional bounds from tag duration so the UI is usable while decoding.
+  edDuration = Number(track.duration) || 0;
+  edStart = 0;
+  edEnd = edDuration;
+  edPeaks = null;
+  edRepaint();
+  edPaintRuler();
+  setEdStatus(tr('editor.decoding'));
+
+  const token = ++edLoadToken;
+  try {
+    const bytes = await window.electronAPI.readAudioFile(track.path);
+    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const res = await edDecodePeaks(ab, ED_BARS);
+    if (token !== edLoadToken) return; // user switched tracks mid-decode
+    edPeaks = res.peaks;
+    if (res.duration > 0) {
+      // Decoded duration is authoritative — tag duration is often rounded.
+      const keepFull = Math.abs(edEnd - edDuration) < 0.05;
+      edDuration = res.duration;
+      if (keepFull) edEnd = edDuration;
+      edEnd = Math.min(edEnd, edDuration);
+    }
+    edRepaint();
+    edPaintRuler();
+    setEdStatus('');
+  } catch (err) {
+    if (token !== edLoadToken) return;
+    setEdStatus(tr('editor.decodeError'), 'error');
+  }
+}
+
+function edSetStart(sec) {
+  edStart = Math.max(0, Math.min(sec, edEnd - 0.1));
+  edRepaint();
+}
+function edSetEnd(sec) {
+  edEnd = Math.min(edDuration, Math.max(sec, edStart + 0.1));
+  edRepaint();
+}
+
+function edPosFromEvent(e) {
+  const wave = $('ed-wave');
+  const rect = wave.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  return pct * edDuration;
+}
+
+function stopEditorPreview() {
+  if (edPreviewRaf) { cancelAnimationFrame(edPreviewRaf); edPreviewRaf = null; }
+  if (edPreview) {
+    try { edPreview.pause(); edPreview.src = ''; } catch (_) {}
+    edPreview = null;
+  }
+  const ph = $('ed-playhead');
+  if (ph) ph.hidden = true;
+  const lbl = $('ed-preview-label');
+  if (lbl) lbl.textContent = tr('editor.preview');
+}
+
+function toggleEditorPreview() {
+  if (edPreview) { stopEditorPreview(); return; }
+  if (!edTrack || edEnd <= edStart) return;
+  // Pause main playback so the two don't overlap.
+  if (!audio.paused) { audio.pause(); isPlaying = false; stopCrossfadeTail(); updatePlayButtonUI(); }
+  const a = new Audio();
+  edPreview = a;
+  a.addEventListener('loadedmetadata', () => {
+    if (edPreview !== a) return;
+    try { a.currentTime = edStart; } catch (_) {}
+    a.play().catch(() => stopEditorPreview());
+  }, { once: true });
+  a.src = 'file://' + edTrack.path;
+  const lbl = $('ed-preview-label');
+  if (lbl) lbl.textContent = tr('editor.previewStop');
+  const ph = $('ed-playhead');
+  if (ph) ph.hidden = false;
+  const tick = () => {
+    if (edPreview !== a) return;
+    if (a.currentTime >= edEnd) { stopEditorPreview(); return; }
+    if (ph && edDuration > 0) ph.style.left = `${(a.currentTime / edDuration) * 100}%`;
+    edPreviewRaf = requestAnimationFrame(tick);
+  };
+  edPreviewRaf = requestAnimationFrame(tick);
+}
+
+async function saveEditorTrim() {
+  if (!edTrack) return;
+  const saveBtn = $('ed-save-btn');
+  if (edEnd - edStart < 0.1) { setEdStatus(tr('editor.tooShort'), 'error'); return; }
+  const overwrite = $('ed-overwrite-toggle').classList.contains('on');
+  const fadeIn = Math.max(0, parseFloat($('ed-fade-in').value) || 0);
+  const fadeOut = Math.max(0, parseFloat($('ed-fade-out').value) || 0);
+  stopEditorPreview();
+  if (saveBtn) saveBtn.disabled = true;
+  setEdStatus(tr('editor.saving'));
+  try {
+    const res = await window.electronAPI.trimAudio({
+      filePath: edTrack.path,
+      start: edStart,
+      end: edEnd,
+      fadeIn,
+      fadeOut,
+      overwrite,
+    });
+    if (!res || !res.success) {
+      setEdStatus(tr('editor.saveError', { e: (res && res.error) || 'unknown' }), 'error');
+      return;
+    }
+    if (overwrite) {
+      // The file changed underneath us: drop cached artwork/peaks and re-read tags.
+      delete wavePeaksCache[edTrack.path];
+      saveWavePeaks();
+      const fresh = await window.electronAPI.parseMetadata(edTrack.path);
+      if (fresh) {
+        Object.assign(edTrack, fresh, { cover: fresh.cover || edTrack.cover });
+        const meta = libraryMeta.find(m => m.path === edTrack.path);
+        if (meta) Object.assign(meta, { ...fresh, cover: undefined });
+        saveLibrary();
+      }
+      refreshCurrentViewRows();
+    } else {
+      await importPaths([res.filePath]);
+    }
+    setEdStatus(tr('editor.saved', { f: res.filePath.split('/').pop() }), 'ok');
+    if (overwrite) openEditorFor(edTrack); // re-decode the shortened file
+  } catch (err) {
+    setEdStatus(tr('editor.saveError', { e: String(err) }), 'error');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+// Track picker modal
+function renderEdPickList(filter) {
+  const list = $('ed-pick-list');
+  if (!list) return;
+  const q = (filter || '').trim().toLowerCase();
+  const items = library
+    .filter(t => !q || (t.title || '').toLowerCase().includes(q) || (t.artist || '').toLowerCase().includes(q))
+    .slice(0, 200);
+  if (!items.length) {
+    list.innerHTML = `<div class="sl-empty">${escapeHtml(tr('editor.pickEmpty'))}</div>`;
+    return;
+  }
+  list.innerHTML = items.map(t => `
+    <div class="sl-item" data-ed-pick="${escapeHtml(t.path)}">
+      ${escapeHtml(t.title || '—')}
+      <span style="color:var(--text-dim);font-size:11px;margin-left:6px">${escapeHtml(t.artist || '—')}</span>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-ed-pick]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = trackByPath(btn.getAttribute('data-ed-pick'));
+      $('ed-pick-modal').classList.remove('active');
+      if (t) openEditorFor(t);
+    });
+  });
+}
+
+(function wireEditor() {
+  const wave = $('ed-wave');
+  if (!wave) return;
+
+  // Handle dragging
+  let dragging = null; // 'start' | 'end'
+  const onDown = (which) => (e) => { e.preventDefault(); e.stopPropagation(); dragging = which; };
+  $('ed-handle-start').addEventListener('mousedown', onDown('start'));
+  $('ed-handle-end').addEventListener('mousedown', onDown('end'));
+  window.addEventListener('mousemove', e => {
+    if (!dragging || edDuration <= 0) return;
+    const pos = edPosFromEvent(e);
+    if (dragging === 'start') edSetStart(pos); else edSetEnd(pos);
+  });
+  window.addEventListener('mouseup', () => { dragging = null; });
+
+  // Click on the waveform moves the nearer handle — quicker than grabbing it.
+  wave.addEventListener('mousedown', e => {
+    if (dragging || edDuration <= 0) return;
+    const pos = edPosFromEvent(e);
+    if (Math.abs(pos - edStart) <= Math.abs(pos - edEnd)) edSetStart(pos);
+    else edSetEnd(pos);
+  });
+
+  const commitStart = () => {
+    const v = edParseTime($('ed-start').value);
+    if (v === null) { edPaintSelection(); return; }
+    edSetStart(Math.min(v, edDuration));
+  };
+  const commitEnd = () => {
+    const v = edParseTime($('ed-end').value);
+    if (v === null) { edPaintSelection(); return; }
+    edSetEnd(Math.min(v, edDuration));
+  };
+  $('ed-start').addEventListener('change', commitStart);
+  $('ed-start').addEventListener('keydown', e => { if (e.key === 'Enter') commitStart(); });
+  $('ed-end').addEventListener('change', commitEnd);
+  $('ed-end').addEventListener('keydown', e => { if (e.key === 'Enter') commitEnd(); });
+
+  $('ed-preview-btn').addEventListener('click', toggleEditorPreview);
+  $('ed-reset-btn').addEventListener('click', () => {
+    edStart = 0;
+    edEnd = edDuration;
+    edRepaint();
+    setEdStatus('');
+  });
+  $('ed-save-btn').addEventListener('click', saveEditorTrim);
+  $('ed-overwrite-toggle').addEventListener('click', () => {
+    $('ed-overwrite-toggle').classList.toggle('on');
+  });
+
+  $('ed-pick-btn').addEventListener('click', () => {
+    $('ed-pick-search').value = '';
+    renderEdPickList('');
+    $('ed-pick-modal').classList.add('active');
+    setTimeout(() => $('ed-pick-search').focus(), 50);
+  });
+  $('ed-pick-cancel').addEventListener('click', () => $('ed-pick-modal').classList.remove('active'));
+  $('ed-pick-search').addEventListener('input', e => renderEdPickList(e.target.value));
+})();
 
 // ── Downloads tabs ──
 document.querySelectorAll('.dl-tabs .dl-tab').forEach(btn => {
@@ -5778,7 +6279,7 @@ function updateNowPlayingUI(track) {
   updateFullscreenQueue();
   updateMediaSessionMetadata(track);
   pushDiscordActivity(true);
-  if (currentView === 'settings') renderDiscordPreviewOnly();
+  if (isSettingsOpen()) renderDiscordPreviewOnly();
 }
 
 function updatePlayButtonUI() {
@@ -6515,9 +7016,9 @@ function renderReport() {
 }
 
 // ── Audio events ──
-audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); plStartIfNeeded(); pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
-audio.addEventListener('pause', () => { plTick(); isPlaying = false; updatePlayButtonUI(); savePlayLog(); pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
-audio.addEventListener('seeked', () => { pushDiscordActivity(true); if (currentView === 'settings') renderDiscordPreviewOnly(); });
+audio.addEventListener('play', () => { isPlaying = true; updatePlayButtonUI(); plStartIfNeeded(); pushDiscordActivity(true); if (isSettingsOpen()) renderDiscordPreviewOnly(); });
+audio.addEventListener('pause', () => { plTick(); isPlaying = false; updatePlayButtonUI(); savePlayLog(); pushDiscordActivity(true); if (isSettingsOpen()) renderDiscordPreviewOnly(); });
+audio.addEventListener('seeked', () => { pushDiscordActivity(true); if (isSettingsOpen()) renderDiscordPreviewOnly(); });
 audio.addEventListener('timeupdate', () => {
   const cur = audio.currentTime, dur = audio.duration;
   $('time-current').textContent = formatTime(cur);
@@ -6544,7 +7045,7 @@ audio.addEventListener('timeupdate', () => {
   plTick();
   if (plSaveAccum >= 15) { plSaveAccum = 0; savePlayLog(); }   // persist periodically, not every tick
   // Keep the Discord preview timer ticking (once per second, settings view only).
-  if (currentView === 'settings' && settings.discord.showTimer) {
+  if (isSettingsOpen() && settings.discord.showTimer) {
     const sec = Math.floor(cur);
     if (sec !== discordPreviewSec) { discordPreviewSec = sec; renderDiscordPreviewOnly(); }
   }
@@ -7085,6 +7586,8 @@ function openContextMenu(e, path) {
   const menu = $('track-context-menu');
   $('cm-fav-label').textContent = favorites.includes(path) ? tr('btn.unfavorite') : tr('btn.favorite');
   $('cm-remove-from-pl').hidden = !(currentView === 'playlist-detail' && activePlaylistId);
+  const cmTrim = $('cm-trim');
+  if (cmTrim) cmTrim.hidden = !settings.editor;
   $('cm-select').hidden = currentView !== 'library';
   menu.classList.add('open');
   // position
@@ -7120,6 +7623,7 @@ document.querySelectorAll('#track-context-menu .cm-item').forEach(btn => {
     else if (action === 'favorite') toggleFavorite(path);
     else if (action === 'reveal') window.electronAPI.revealInFolder(path);
     else if (action === 'edit-tags') openMetadataEditor(path);
+    else if (action === 'trim') { if (track) openEditorFor(track); }
     else if (action === 'add-to-playlist') openAddToPlaylistModal(path);
     else if (action === 'remove-from-playlist') {
       const pl = playlists.find(p => p.id === activePlaylistId);
@@ -7319,7 +7823,7 @@ function runPaletteAction(action) {
   if (!action) return;
   if (action.kind === 'play-track') playTrackByPath(action.path, library);
   else if (action.kind === 'open-files') $('btn-add-files').click();
-  else if (action.kind === 'goto-settings') setView('settings');
+  else if (action.kind === 'goto-settings') openSettings();
   else if (action.kind === 'goto-playlists') setView('playlists');
   else if (action.kind === 'goto-favorites') setView('favorites');
 }
@@ -7349,6 +7853,7 @@ document.addEventListener('keydown', e => {
     togglePlay();
   } else if (e.key === 'Escape') {
     if ($('fullscreen-overlay').classList.contains('active')) closeFullscreen();
+    else if (isSettingsOpen()) closeSettings();
     else if ($('metadata-modal').classList.contains('active')) $('metadata-modal').classList.remove('active');
     else if ($('new-playlist-modal').classList.contains('active')) $('new-playlist-modal').classList.remove('active');
     else if ($('add-to-playlist-modal').classList.contains('active')) $('add-to-playlist-modal').classList.remove('active');
@@ -7431,6 +7936,7 @@ const TOGGLE_KEY_MAP = {
   'scan-subdirs': 'scanSubdirs',
   'health-check': 'healthCheck',
   'reports': 'reports',
+  'editor': 'editor',
   'crossfade': 'crossfade',
   'downloads': 'downloads',
   'show-parser-browser': 'showParserBrowser',
@@ -7521,28 +8027,56 @@ function renderSettings() {
   const inc = $('scale-inc');
   if (dec) dec.disabled = settings.uiScale <= UI_SCALE_STEPS[0] + 1e-6;
   if (inc) inc.disabled = settings.uiScale >= UI_SCALE_STEPS[UI_SCALE_STEPS.length - 1] - 1e-6;
-  // Discord section starts collapsed (it's large); state persists in settings.
-  const dcSection = $('discord-section');
-  if (dcSection) dcSection.classList.toggle('is-collapsed', settings.discordCollapsed !== false);
+  // Discord lives in its own tab now — always expanded, no collapse.
+  applySettingsTab(settings.settingsTab);
   renderDiscord();
 }
 
-// Collapse/expand the Discord Rich Presence settings section (wired once).
-const discordToggle = $('discord-toggle');
-if (discordToggle) {
-  const toggleDiscordSection = () => {
-    const sec = $('discord-section');
-    if (!sec) return;
-    const collapsed = !sec.classList.contains('is-collapsed');
-    sec.classList.toggle('is-collapsed', collapsed);
-    settings.discordCollapsed = collapsed;
-    saveSettings();
-  };
-  discordToggle.addEventListener('click', toggleDiscordSection);
-  discordToggle.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDiscordSection(); }
+// ── Settings modal ──
+// Settings is a modal dialog, not a view — it overlays whatever view is open,
+// so `currentView` never becomes 'settings'. Code that needs to know whether
+// the Settings UI is on screen (the live Discord preview) uses isSettingsOpen().
+function isSettingsOpen() {
+  const m = $('settings-modal');
+  return !!m && m.classList.contains('active');
+}
+function openSettings() {
+  const m = $('settings-modal');
+  if (!m) return;
+  m.classList.add('active');
+  renderSettings();
+}
+function closeSettings() {
+  const m = $('settings-modal');
+  if (m) m.classList.remove('active');
+}
+const settingsCloseBtn = $('btn-close-settings');
+if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', closeSettings);
+const settingsModal = $('settings-modal');
+if (settingsModal) {
+  // Click on the scrim (not the card) closes.
+  settingsModal.addEventListener('click', e => {
+    if (e.target === settingsModal) closeSettings();
   });
 }
+
+// ── Settings tabs ──
+// Show one settings panel at a time; the active tab persists in settings.
+function applySettingsTab(tab) {
+  const tabs = document.querySelectorAll('#settings-tabs .settings-tab');
+  const panels = document.querySelectorAll('#settings-modal .settings-panel');
+  const valid = Array.from(tabs).some(t => t.dataset.tab === tab);
+  if (!valid) tab = 'appearance';
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  panels.forEach(p => { p.hidden = p.dataset.panel !== tab; });
+}
+document.querySelectorAll('#settings-tabs .settings-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    settings.settingsTab = t.dataset.tab;
+    saveSettings();
+    applySettingsTab(settings.settingsTab);
+  });
+});
 
 const themeSelect = $('theme-select');
 themeSelect.querySelector('.select-btn').addEventListener('click', e => {
@@ -7572,6 +8106,7 @@ document.querySelectorAll('.toggle').forEach(t => {
     if (key === 'downloads') applyDownloadsVisibility();
     if (key === 'healthCheck') applyHealthCheckVisibility();
     if (key === 'reports') applyReportsVisibility();
+    if (key === 'editor') applyEditorVisibility();
   });
 });
 
@@ -7703,6 +8238,18 @@ function applyReportsVisibility() {
   if (!settings.reports && currentView === 'report') setView('library');
 }
 applyReportsVisibility();
+
+// Toggle for the track-trimming editor: hides the nav item and the "Обрезать"
+// context-menu entry, and redirects away from the view when off.
+function applyEditorVisibility() {
+  const navEditor = $('nav-editor');
+  if (navEditor) navEditor.hidden = !settings.editor;
+  if (!settings.editor) {
+    stopEditorPreview();
+    if (currentView === 'editor') setView('library');
+  }
+}
+applyEditorVisibility();
 
 // ── Discord Rich Presence ─────────────────────────────────────────────────────
 // Renders the Settings → Discord panel and keeps the activity in sync with
@@ -7994,7 +8541,7 @@ function scheduleDiscordReconnect() {
     discordReconnectTimer = null;
     if (!settings.discord.enabled || discordConnected) return;
     const ok = await tryDiscordConnect();
-    if (ok) { if (currentView === 'settings') renderDiscord(); }
+    if (ok) { if (isSettingsOpen()) renderDiscord(); }
     else scheduleDiscordReconnect();
   }, DISCORD_RECONNECT_MS);
 }
@@ -8037,7 +8584,7 @@ if (window.electronAPI && window.electronAPI.onDiscordStatus) {
   window.electronAPI.onDiscordStatus(({ connected, user }) => {
     discordConnected = !!connected;
     discordUser = user || null;
-    if (currentView === 'settings') renderDiscord();
+    if (isSettingsOpen()) renderDiscord();
     if (!connected && settings.discord.enabled) scheduleDiscordReconnect();
   });
 }
@@ -8046,7 +8593,7 @@ if (window.electronAPI && window.electronAPI.onDiscordStatus) {
 // running yet, the retry loop keeps trying until it launches.
 if (settings.discord.enabled && DISCORD_CLIENT_ID) {
   tryDiscordConnect().then(ok => {
-    if (ok) { if (currentView === 'settings') renderDiscord(); }
+    if (ok) { if (isSettingsOpen()) renderDiscord(); }
     else scheduleDiscordReconnect();
   });
 }
@@ -8156,11 +8703,17 @@ function hideBootOverlay() {
     setTimeout(() => overlay.remove(), 600);
   }, Math.max(0, left));
 }
-// Version line in the overlay footer (single source: the Settings version tag).
+// Version shown in the boot-overlay footer and the sidebar brand block. Single
+// source: the Settings version tag — never hardcode the number again here.
 (() => {
   const tag = document.querySelector('.version-tag');
+  if (!tag) return;
+  const full = tag.textContent.trim();            // e.g. "Audex 1.1.7"
   const footer = document.getElementById('boot-footer');
-  if (tag && footer) footer.textContent = `${tag.textContent.trim()} · Audex Audio Engine`;
+  if (footer) footer.textContent = `${full} · Audex Audio Engine`;
+  const brand = document.getElementById('brand-version');
+  const num = full.match(/[\d][\d.]*/);
+  if (brand && num) brand.textContent = `v${num[0]}`;
 })();
 // Hard fallback: never leave the overlay up if something in the boot chain throws.
 setTimeout(hideBootOverlay, 30000);
