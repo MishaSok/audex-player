@@ -2006,6 +2006,42 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   font-weight: 600;
 }
 
+/* Loading skeleton for the chart — mirrors .tr-row so the list doesn't jump
+   when the real rows replace it. */
+.tr-skeleton .tr-skel-row {
+  display: grid;
+  grid-template-columns: 34px 64px minmax(0, 1fr) minmax(0, 220px) 70px 150px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tr-skeleton .tr-skel-row:last-child { border-bottom: none; }
+.tr-skel {
+  height: 11px;
+  border-radius: 5px;
+  background: var(--active-bg);
+  position: relative;
+  overflow: hidden;
+}
+.tr-skel-thumb { height: 40px; border-radius: 5px; }
+/* One sweep travels across the whole row, so the rows read as a single
+   surface loading rather than six independent bars. */
+.tr-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--hover-bg), transparent);
+  animation: tr-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes tr-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tr-skel::after { animation: none; }
+}
+
 /* Segmented choice control (background source / fit) */
 .seg {
   display: inline-flex;

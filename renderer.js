@@ -3678,6 +3678,22 @@ function trAlreadyHave(t) {
     (!artist || (x.artist || '').trim().toLowerCase() === artist));
 }
 
+// Placeholder rows drawn while a chart loads. Built once per load rather than
+// left in the markup so the count can match a full chart page.
+function renderTrendingSkeleton() {
+  const host = $('tr-loading');
+  if (!host || host.childElementCount) return;
+  host.innerHTML = Array.from({ length: 12 }, () => `
+    <div class="tr-skel-row">
+      <div class="tr-skel" style="width:14px"></div>
+      <div class="tr-skel tr-skel-thumb"></div>
+      <div class="tr-skel" style="width:${55 + Math.round(Math.random() * 35)}%"></div>
+      <div class="tr-skel" style="width:${40 + Math.round(Math.random() * 40)}%"></div>
+      <div class="tr-skel" style="width:34px"></div>
+      <div class="tr-skel" style="width:96px;height:26px;border-radius:6px"></div>
+    </div>`).join('');
+}
+
 function renderTrending() {
   document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.trRegion === trRegion);
@@ -3686,11 +3702,19 @@ function renderTrending() {
   const rows = $('tr-rows');
   const empty = $('tr-empty');
   const meta = $('tr-meta');
+  const loading = $('tr-loading');
   if (!wrap || !rows) return;
+
+  if (loading) {
+    if (trLoading) renderTrendingSkeleton();
+    loading.hidden = !trLoading;
+  }
 
   if (!trTracks.length) {
     wrap.hidden = true;
-    if (empty) empty.classList.add('show');
+    // While loading, the skeleton stands in for the list — showing the empty
+    // state too would read as "nothing found".
+    if (empty) empty.classList.toggle('show', !trLoading);
     if (meta) meta.textContent = '';
     return;
   }
@@ -3751,11 +3775,15 @@ async function loadTrending(force) {
     trCache.set(region, { tracks: res.tracks, fetchedAt: res.fetchedAt });
     trTracks = res.tracks;
     setTrStatus('');
-    renderTrending();
   } catch (err) {
     if (region === trRegion) setTrStatus(tr('trending.error', { e: String(err) }), 'error');
   } finally {
-    if (region === trRegion) trLoading = false;
+    // Clear the flag before repainting, or the skeleton would survive the
+    // render that is supposed to replace it.
+    if (region === trRegion) {
+      trLoading = false;
+      renderTrending();
+    }
   }
 }
 
