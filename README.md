@@ -8,7 +8,7 @@
 
 Built with Electron and vanilla JS — no frameworks, no bloat, just a clean charcoal-and-amber player that scans your files, downloads new tracks, and stays out of your way.
 
-[![Version](https://img.shields.io/badge/version-1.1.7-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.2.0-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-2b2b2b)](https://github.com/MishaSok/audex-player/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-42-47848f)](https://www.electronjs.org/)
@@ -120,9 +120,9 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 
 | Platform | File |
 | --- | --- |
-| **Linux** | `Audex-1.1.7.AppImage` (portable) or `audex-player_1.1.7_amd64.deb` |
-| **macOS** (Apple Silicon) | `Audex-1.1.7-arm64.dmg` |
-| **Windows** | `Audex.Setup.1.1.7.exe` |
+| **Linux** | `Audex-1.2.0.AppImage` (portable) or `audex-player_1.2.0_amd64.deb` |
+| **macOS** (Apple Silicon) | `Audex-1.2.0-arm64.dmg` |
+| **Windows** | `Audex.Setup.1.2.0.exe` |
 
 > **Note:** builds are unsigned.
 > - **macOS** — right-click the app → **Open**, or run `xattr -d com.apple.quarantine /Applications/Audex.app`.
