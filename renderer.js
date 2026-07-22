@@ -376,6 +376,13 @@ const I18N = {
     'trending.retry': 'Повторить',
     'trending.downloadOk': 'Скачано: {t}',
     'trending.downloadError': 'Ошибка загрузки: {e}',
+    'trending.tryingAlt': 'Трек недоступен напрямую — ищем другой источник для «{t}»…',
+    'trending.downloadOkAlt': 'Скачано из другого источника: {t}',
+    'trending.err.geo': 'Этот трек заблокирован для вашей страны, и найти замену не удалось.',
+    'trending.err.unavailable': 'Видео удалено или недоступно, замену найти не удалось.',
+    'trending.err.signin': 'YouTube требует вход в аккаунт для этого трека.',
+    'trending.err.members': 'Трек доступен только подписчикам канала.',
+    'trending.err.network': 'Нет связи с YouTube. Проверьте подключение.',
     'trending.empty.title': 'Что сейчас слушают',
     'trending.empty.text': 'Чарты YouTube Music по странам. Выберите регион — и скачивайте треки в один клик.',
     'trending.region.global': 'Мир',
@@ -852,6 +859,13 @@ const I18N = {
     'trending.retry': 'Retry',
     'trending.downloadOk': 'Downloaded: {t}',
     'trending.downloadError': 'Download failed: {e}',
+    'trending.tryingAlt': 'Not available directly — looking for another source for “{t}”…',
+    'trending.downloadOkAlt': 'Downloaded from an alternative source: {t}',
+    'trending.err.geo': 'This track is blocked in your country and no alternative was found.',
+    'trending.err.unavailable': 'The video was removed or is unavailable, and no alternative was found.',
+    'trending.err.signin': 'YouTube requires a signed-in account for this track.',
+    'trending.err.members': 'This track is limited to channel members.',
+    'trending.err.network': 'No connection to YouTube. Check your network.',
     'trending.empty.title': 'What people are listening to',
     'trending.empty.text': 'YouTube Music charts by country. Pick a region and download tracks in one click.',
     'trending.region.global': 'Global',
@@ -1328,6 +1342,13 @@ const I18N = {
     'trending.retry': 'Erneut',
     'trending.downloadOk': 'Geladen: {t}',
     'trending.downloadError': 'Download fehlgeschlagen: {e}',
+    'trending.tryingAlt': 'Nicht direkt verfügbar — suche eine andere Quelle für „{t}“…',
+    'trending.downloadOkAlt': 'Aus einer anderen Quelle geladen: {t}',
+    'trending.err.geo': 'Dieser Titel ist in Ihrem Land gesperrt, und es wurde keine Alternative gefunden.',
+    'trending.err.unavailable': 'Das Video wurde entfernt oder ist nicht verfügbar; keine Alternative gefunden.',
+    'trending.err.signin': 'YouTube verlangt für diesen Titel ein angemeldetes Konto.',
+    'trending.err.members': 'Dieser Titel ist nur für Kanalmitglieder verfügbar.',
+    'trending.err.network': 'Keine Verbindung zu YouTube. Prüfen Sie Ihr Netzwerk.',
     'trending.empty.title': 'Was gerade gehört wird',
     'trending.empty.text': 'YouTube-Music-Charts nach Ländern. Region wählen und Titel mit einem Klick laden.',
     'trending.region.global': 'Global',
@@ -1804,6 +1825,13 @@ const I18N = {
     'trending.retry': 'Réessayer',
     'trending.downloadOk': 'Téléchargé : {t}',
     'trending.downloadError': 'Échec du téléchargement : {e}',
+    'trending.tryingAlt': 'Indisponible directement — recherche d’une autre source pour « {t} »…',
+    'trending.downloadOkAlt': 'Téléchargé depuis une autre source : {t}',
+    'trending.err.geo': 'Ce titre est bloqué dans votre pays et aucune alternative n’a été trouvée.',
+    'trending.err.unavailable': 'La vidéo a été supprimée ou est indisponible ; aucune alternative trouvée.',
+    'trending.err.signin': 'YouTube exige un compte connecté pour ce titre.',
+    'trending.err.members': 'Ce titre est réservé aux membres de la chaîne.',
+    'trending.err.network': 'Pas de connexion à YouTube. Vérifiez votre réseau.',
     'trending.empty.title': "Ce que l'on écoute en ce moment",
     'trending.empty.text': 'Classements YouTube Music par pays. Choisissez une région et téléchargez en un clic.',
     'trending.region.global': 'Monde',
@@ -2280,6 +2308,13 @@ const I18N = {
     'trending.retry': 'Повторити',
     'trending.downloadOk': 'Завантажено: {t}',
     'trending.downloadError': 'Помилка завантаження: {e}',
+    'trending.tryingAlt': 'Недоступно напряму — шукаємо інше джерело для «{t}»…',
+    'trending.downloadOkAlt': 'Завантажено з іншого джерела: {t}',
+    'trending.err.geo': 'Цей трек заблоковано для вашої країни, і заміни не знайдено.',
+    'trending.err.unavailable': 'Відео видалено або недоступне, заміни не знайдено.',
+    'trending.err.signin': 'YouTube вимагає вхід в акаунт для цього треку.',
+    'trending.err.members': 'Трек доступний лише підписникам каналу.',
+    'trending.err.network': 'Немає зв’язку з YouTube. Перевірте підключення.',
     'trending.empty.title': 'Що зараз слухають',
     'trending.empty.text': 'Чарти YouTube Music за країнами. Оберіть регіон — і завантажуйте треки одним кліком.',
     'trending.region.global': 'Світ',
@@ -3748,17 +3783,41 @@ async function downloadTrendingTrack(idx, btn) {
     if (b && cls !== 'is-done') b.addEventListener('click', () => downloadTrendingTrack(idx, b));
   };
 
+  const name = t.artist ? `${t.artist} - ${t.title}` : t.title;
   try {
-    const res = await window.electronAPI.ytDownload({
+    let res = await window.electronAPI.ytDownload({
       videoId: t.id,
       url: t.url,
-      suggestedName: t.artist ? `${t.artist} - ${t.title}` : t.title,
+      suggestedName: name,
       targetDir: settings.defaultFolder || '',
     });
+
+    // Charts list the official video, which is often blocked in some countries
+    // or pulled entirely. Both are properties of that one upload, not of the
+    // song, so look for another source before giving up — usually a lyric video
+    // or a topic-channel upload of the same track exists and plays fine.
+    if (res && !res.success && (res.reason === 'geo' || res.reason === 'unavailable') && t.title) {
+      setTrStatus(tr('trending.tryingAlt', { t: t.title }));
+      const query = t.artist ? `${t.artist} ${t.title}` : t.title;
+      res = await window.electronAPI.ytDownloadByQuery({
+        query,
+        suggestedName: name,
+        requestId: 'tr-' + t.id,
+        targetDir: settings.defaultFolder || '',
+      });
+      if (res && res.success) {
+        trActiveDownloads.delete(t.id);
+        await importPaths([res.filePath]);
+        restore('trending.have', 'is-done');
+        setTrStatus(tr('trending.downloadOkAlt', { t: t.title }), 'ok');
+        return;
+      }
+    }
+
     trActiveDownloads.delete(t.id);
     if (!res || !res.success) {
       restore('trending.retry', 'is-error');
-      setTrStatus(tr('trending.downloadError', { e: (res && res.error) || 'unknown' }), 'error');
+      setTrStatus(trDownloadErrorText(res), 'error');
       return;
     }
     await importPaths([res.filePath]);
@@ -3769,6 +3828,18 @@ async function downloadTrendingTrack(idx, btn) {
     restore('trending.retry', 'is-error');
     setTrStatus(tr('trending.downloadError', { e: String(err) }), 'error');
   }
+}
+
+// Prefer a plain explanation over yt-dlp's raw English output, which for the
+// geo case ends by suggesting a --proxy flag the user cannot pass here.
+function trDownloadErrorText(res) {
+  const reason = res && res.reason;
+  if (reason === 'geo') return tr('trending.err.geo');
+  if (reason === 'unavailable') return tr('trending.err.unavailable');
+  if (reason === 'signin') return tr('trending.err.signin');
+  if (reason === 'members') return tr('trending.err.members');
+  if (reason === 'network') return tr('trending.err.network');
+  return tr('trending.downloadError', { e: (res && res.error) || 'unknown' });
 }
 
 if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {

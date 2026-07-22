@@ -1290,6 +1290,21 @@ function resolveDownloadsDir(requested) {
   return fallback;
 }
 
+// yt-dlp reports failures as free English prose aimed at a terminal user — the
+// geo-restriction one even ends with "use a VPN or a proxy server (with
+// --proxy)", advice that means nothing inside a GUI. Reduce the common cases to
+// a stable tag so the renderer can show a real message and decide whether a
+// different source is worth trying.
+function classifyYtDlpError(text) {
+  const s = String(text || '');
+  if (/not made this video available in your country|geo restriction|geo-restricted/i.test(s)) return 'geo';
+  if (/Video unavailable|This video is not available|has been removed|private video|Video has been removed/i.test(s)) return 'unavailable';
+  if (/Sign in to confirm|not a bot|cookies/i.test(s)) return 'signin';
+  if (/members-only|join this channel/i.test(s)) return 'members';
+  if (/Unable to download|Failed to resolve|Connection reset|timed out|Network is unreachable/i.test(s)) return 'network';
+  return '';
+}
+
 ipcMain.handle('downloads:ytDownload', async (event, payload) => {
   const { videoId, url, suggestedName, targetDir } = payload || {};
   if (!videoId && !url) return { success: false, error: 'No video id' };
@@ -1336,7 +1351,7 @@ ipcMain.handle('downloads:ytDownload', async (event, payload) => {
   }
   if (code !== 0) {
     const errLine = (stderr.trim().split('\n').pop() || stdout.trim().split('\n').pop() || 'yt-dlp failed').slice(0, 300);
-    return { success: false, error: errLine };
+    return { success: false, error: errLine, reason: classifyYtDlpError(stderr || stdout) };
   }
 
   let filePath = stdout.split('\n')
@@ -1420,7 +1435,7 @@ ipcMain.handle('downloads:ytDownloadByQuery', async (event, payload) => {
   }
   if (code !== 0) {
     const errLine = (stderr.trim().split('\n').pop() || stdout.trim().split('\n').pop() || 'yt-dlp failed').slice(0, 300);
-    return { success: false, error: errLine };
+    return { success: false, error: errLine, reason: classifyYtDlpError(stderr || stdout) };
   }
 
   let filePath = stdout.split('\n')
