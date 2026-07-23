@@ -36,6 +36,7 @@ let settings = Object.assign({
   editor: false,
   crossfade: false,
   downloads: true,
+  trending: true,
   showParserBrowser: true,
   uiScale: 1,
   settingsTab: 'appearance', // active tab in the Settings view
@@ -383,6 +384,7 @@ const I18N = {
     'trending.err.signin': 'YouTube требует вход в аккаунт для этого трека.',
     'trending.err.members': 'Трек доступен только подписчикам канала.',
     'trending.err.network': 'Нет связи с YouTube. Проверьте подключение.',
+    'trending.offline': 'Нет подключения к интернету. Проверьте соединение и повторите.',
     'trending.empty.title': 'Что сейчас слушают',
     'trending.empty.text': 'Чарты YouTube Music по странам. Выберите регион — и скачивайте треки в один клик.',
     'trending.region.global': 'Мир',
@@ -685,6 +687,8 @@ const I18N = {
     'setting.showDownloadsDesc': 'Откроет в боковом меню раздел для скачивания треков по ссылке.',
     'setting.showParserBrowser': 'Показывать окно браузера при парсинге',
     'setting.showParserBrowserDesc': 'Нужно, чтобы войти в Яндекс или Spotify при первом запуске, пройти капчу или увидеть, на чём парсер споткнулся. Если выключить — браузер запустится в фоне и окно не появится.',
+    'setting.showTrending': 'Показать вкладку «В тренде»',
+    'setting.showTrendingDesc': 'Раздел с чартами YouTube Music по странам и скачиванием в один клик. Требует интернета.',
     'section.system': 'Система',
     'section.hotkeys': 'Горячие клавиши',
     'hotkeys.intro': 'Нажмите на сочетание, затем — нужную клавишу или кнопку мыши. Esc — отмена, Backspace — очистить.',
@@ -866,6 +870,7 @@ const I18N = {
     'trending.err.signin': 'YouTube requires a signed-in account for this track.',
     'trending.err.members': 'This track is limited to channel members.',
     'trending.err.network': 'No connection to YouTube. Check your network.',
+    'trending.offline': 'No internet connection. Check your network and try again.',
     'trending.empty.title': 'What people are listening to',
     'trending.empty.text': 'YouTube Music charts by country. Pick a region and download tracks in one click.',
     'trending.region.global': 'Global',
@@ -1168,6 +1173,8 @@ const I18N = {
     'setting.showDownloadsDesc': 'Adds a section to the sidebar for downloading tracks by URL.',
     'setting.showParserBrowser': 'Show the browser window while parsing',
     'setting.showParserBrowserDesc': 'Useful for signing in to Yandex or Spotify on the first run, solving a captcha, or seeing where the parser got stuck. Turn off to run the browser silently in the background.',
+    'setting.showTrending': 'Show the “Trending” tab',
+    'setting.showTrendingDesc': 'A section with YouTube Music charts by country and one-click downloads. Requires the internet.',
     'section.system': 'System',
     'section.hotkeys': 'Hotkeys',
     'hotkeys.intro': 'Click a shortcut, then press a key or a mouse button. Esc cancels, Backspace clears it.',
@@ -1349,6 +1356,7 @@ const I18N = {
     'trending.err.signin': 'YouTube verlangt für diesen Titel ein angemeldetes Konto.',
     'trending.err.members': 'Dieser Titel ist nur für Kanalmitglieder verfügbar.',
     'trending.err.network': 'Keine Verbindung zu YouTube. Prüfen Sie Ihr Netzwerk.',
+    'trending.offline': 'Keine Internetverbindung. Prüfen Sie Ihr Netzwerk und versuchen Sie es erneut.',
     'trending.empty.title': 'Was gerade gehört wird',
     'trending.empty.text': 'YouTube-Music-Charts nach Ländern. Region wählen und Titel mit einem Klick laden.',
     'trending.region.global': 'Global',
@@ -1651,6 +1659,8 @@ const I18N = {
     'setting.showDownloadsDesc': 'Öffnet einen Bereich in der Seitenleiste zum Herunterladen von Titeln per URL.',
     'setting.showParserBrowser': 'Browserfenster beim Parsen anzeigen',
     'setting.showParserBrowserDesc': 'Nützlich, um sich beim ersten Start bei Yandex oder Spotify anzumelden, ein Captcha zu lösen oder zu sehen, wo der Parser hängengeblieben ist. Ausschalten, damit der Browser unsichtbar im Hintergrund läuft.',
+    'setting.showTrending': 'Registerkarte „Im Trend“ anzeigen',
+    'setting.showTrendingDesc': 'Ein Bereich mit YouTube-Music-Charts nach Ländern und Downloads mit einem Klick. Benötigt Internet.',
     'section.system': 'System',
     'section.hotkeys': 'Tastenkürzel',
     'hotkeys.intro': 'Auf ein Kürzel klicken, dann Taste oder Maustaste drücken. Esc bricht ab, Backspace löscht es.',
@@ -1832,6 +1842,7 @@ const I18N = {
     'trending.err.signin': 'YouTube exige un compte connecté pour ce titre.',
     'trending.err.members': 'Ce titre est réservé aux membres de la chaîne.',
     'trending.err.network': 'Pas de connexion à YouTube. Vérifiez votre réseau.',
+    'trending.offline': 'Pas de connexion Internet. Vérifiez votre réseau et réessayez.',
     'trending.empty.title': "Ce que l'on écoute en ce moment",
     'trending.empty.text': 'Classements YouTube Music par pays. Choisissez une région et téléchargez en un clic.',
     'trending.region.global': 'Monde',
@@ -2134,6 +2145,8 @@ const I18N = {
     'setting.showDownloadsDesc': 'Ajoute une section à la barre latérale pour télécharger des pistes par URL.',
     'setting.showParserBrowser': "Afficher la fenêtre du navigateur pendant l'analyse",
     'setting.showParserBrowserDesc': "Utile pour se connecter à Yandex ou Spotify au premier lancement, résoudre un captcha ou voir où l'analyseur s'est bloqué. Désactivez pour exécuter le navigateur silencieusement en arrière-plan.",
+    'setting.showTrending': 'Afficher l’onglet « Tendances »',
+    'setting.showTrendingDesc': 'Une section avec les classements YouTube Music par pays et des téléchargements en un clic. Nécessite Internet.',
     'section.system': 'Système',
     'section.hotkeys': 'Raccourcis clavier',
     'hotkeys.intro': "Cliquez sur un raccourci, puis appuyez sur une touche ou un bouton de souris. Échap annule, Retour arrière l'efface.",
@@ -2315,6 +2328,7 @@ const I18N = {
     'trending.err.signin': 'YouTube вимагає вхід в акаунт для цього треку.',
     'trending.err.members': 'Трек доступний лише підписникам каналу.',
     'trending.err.network': 'Немає зв’язку з YouTube. Перевірте підключення.',
+    'trending.offline': 'Немає підключення до інтернету. Перевірте з’єднання та повторіть.',
     'trending.empty.title': 'Що зараз слухають',
     'trending.empty.text': 'Чарти YouTube Music за країнами. Оберіть регіон — і завантажуйте треки одним кліком.',
     'trending.region.global': 'Світ',
@@ -2617,6 +2631,8 @@ const I18N = {
     'setting.showDownloadsDesc': 'Відкриє в боковому меню розділ для завантаження треків за посиланням.',
     'setting.showParserBrowser': 'Показувати вікно браузера під час парсингу',
     'setting.showParserBrowserDesc': 'Потрібно, щоб увійти в Яндекс або Spotify при першому запуску, пройти капчу або побачити, на чому парсер спіткнувся. Якщо вимкнути — браузер запуститься у фоні і вікно не з\'явиться.',
+    'setting.showTrending': 'Показати вкладку «У тренді»',
+    'setting.showTrendingDesc': 'Розділ із чартами YouTube Music за країнами та завантаженням у один клік. Потребує інтернету.',
     'section.system': 'Система',
     'section.hotkeys': 'Гарячі клавіші',
     'hotkeys.intro': 'Натисніть на сполучення, потім — клавішу або кнопку миші. Esc — скасувати, Backspace — очистити.',
@@ -3756,6 +3772,16 @@ async function loadTrending(force) {
     renderTrending();
     return;
   }
+  // Charts live entirely on the network — when the OS reports no connection,
+  // say so plainly instead of spinning into a generic fetch failure. The
+  // 'online' listener below re-runs this the moment connectivity returns.
+  if (!navigator.onLine) {
+    trTracks = [];
+    trLoading = false;
+    renderTrending();
+    setTrStatus(tr('trending.offline'), 'error');
+    return;
+  }
   if (!window.electronAPI || !window.electronAPI.trendingFetch) {
     setTrStatus(tr('trending.unavailable'), 'error');
     return;
@@ -3790,6 +3816,7 @@ async function loadTrending(force) {
 async function downloadTrendingTrack(idx, btn) {
   const t = trTracks[idx];
   if (!t || !btn || btn.disabled) return;
+  if (!navigator.onLine) { setTrStatus(tr('trending.offline'), 'error'); return; }
   const rowEl = btn.closest('.dl-row');
   const actionEl = rowEl && rowEl.querySelector('.action');
   if (!actionEl) return;
@@ -3902,6 +3929,12 @@ document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
 });
 const trRefreshBtn = $('tr-refresh');
 if (trRefreshBtn) trRefreshBtn.addEventListener('click', () => loadTrending(true));
+
+// When connectivity comes back while the user is looking at an empty Trending
+// tab (blocked earlier by the offline check), load the chart automatically.
+window.addEventListener('online', () => {
+  if (currentView === 'trending' && !trLoading && !trTracks.length) loadTrending(false);
+});
 
 function renderYtResults(results) {
   ytLastResults = results || [];
@@ -9028,6 +9061,7 @@ const TOGGLE_KEY_MAP = {
   'editor': 'editor',
   'crossfade': 'crossfade',
   'downloads': 'downloads',
+  'trending': 'trending',
   'show-parser-browser': 'showParserBrowser',
 };
 
@@ -9417,6 +9451,7 @@ document.querySelectorAll('.toggle').forEach(t => {
     saveSettings();
     t.classList.toggle('on', settings[key]);
     if (key === 'downloads') applyDownloadsVisibility();
+    if (key === 'trending') applyTrendingVisibility();
     if (key === 'healthCheck') applyHealthCheckVisibility();
     if (key === 'reports') applyReportsVisibility();
     if (key === 'editor') applyEditorVisibility();
@@ -9521,6 +9556,15 @@ function applyDownloadsVisibility() {
   if (!settings.downloads && currentView === 'downloads') setView('library');
 }
 applyDownloadsVisibility();
+
+// Toggle for the Trending (charts) tab: hides the nav item and redirects away
+// from the view when off. On by default.
+function applyTrendingVisibility() {
+  const navTrending = $('nav-trending');
+  if (navTrending) navTrending.hidden = !settings.trending;
+  if (!settings.trending && currentView === 'trending') setView('library');
+}
+applyTrendingVisibility();
 
 // Master switch for the Library Health-check feature: hides the Health nav item,
 // the Quality column across every track table, the quality note, and any active
