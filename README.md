@@ -1,103 +1,132 @@
 <div align="center">
 
-<img src="build/icon.png" width="128" alt="Audex icon" />
+<img src="build/icon.png" width="120" alt="Audex icon" />
 
 # Audex
 
-**A minimal desktop music player for your local audio library.**
+### Your music. Your machine. No account, no subscription, no cloud.
 
-Built with Electron and vanilla JS — no frameworks, no bloat, just a clean charcoal-and-amber player that scans your files, downloads new tracks, and stays out of your way.
+A fast, beautiful desktop player for the music you actually own — and a one-click way to get more of it.
 
-[![Version](https://img.shields.io/badge/version-1.2.0-e8a33d)](https://github.com/MishaSok/audex-player/releases/latest)
-[![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-2b2b2b)](https://github.com/MishaSok/audex-player/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Electron](https://img.shields.io/badge/Electron-42-47848f)](https://www.electronjs.org/)
+[![Version](https://img.shields.io/badge/version-1.2.0-e8a33d?style=for-the-badge)](https://github.com/MishaSok/audex-player/releases/latest)
+[![Platforms](https://img.shields.io/badge/Linux%20·%20macOS%20·%20Windows-2b2b2b?style=for-the-badge)](https://github.com/MishaSok/audex-player/releases/latest)
+[![License](https://img.shields.io/badge/MIT-blue?style=for-the-badge)](LICENSE)
 
-[Download](#-download) · [Features](#-features) · [Build from source](#%EF%B8%8F-building-from-source) · [Contact](#-contact)
+### [⬇️  Download the latest release](https://github.com/MishaSok/audex-player/releases/latest)
+
+*Free and open source. No telemetry, no ads, no sign-up.*
 
 </div>
+
+![Audex library](docs/screenshots/library-dark.png)
 
 ---
 
-## 📸 Screenshots
+## Why you'll like it
 
-<div align="center">
+- **It's yours.** Point it at a folder and it just works — offline, forever. Nothing is uploaded anywhere.
+- **It's quick.** Thousands of tracks scroll without a stutter — the list is virtualized and every cover is cached to disk after the first scan.
+- **It looks good.** Nine themes, any accent color you like, your own wallpaper behind the interface.
+- **It fills the gaps.** Missing a track? Search YouTube, paste a Spotify or Yandex playlist, or grab what's charting today — without leaving the app.
+- **It respects you.** Your listening stats are computed on your device and never leave it.
 
-<!-- Hero: the main Library view with the track table populated -->
-![Library](docs/screenshots/library.png)
+---
 
-</div>
+## See it in action
+
+### Charts by country *and* genre
+
+Browse what's trending worldwide or dive into a genre — Pop, Hip-hop, Phonk, Metal, K-pop and more. One click downloads the track, tags and cover art included.
+
+![Trending charts](docs/screenshots/trending.png)
+
+### Your year in music, computed locally
+
+Listening time, top artists and tracks, a streak counter, and a clock showing when you actually listen. Day, month, year or all-time — none of it ever leaves your machine.
+
+![Listening report](docs/screenshots/report.png)
+
+### Nine themes, one click
+
+Dark, Light, System, plus six hand-tuned palettes: Nocturne, Terracotta, Forest, Vapor, Crimson Noir and Arctic. Pick any accent color to go with them.
 
 <table>
   <tr>
-    <td width="50%"><!-- Fullscreen "now playing" view (desktop layout) -->
-      <img src="docs/screenshots/now-playing.png" alt="Now playing" /></td>
-    <td width="50%"><!-- Mobile / portrait "mobile player" mode -->
-      <img src="docs/screenshots/mobile.png" alt="Mobile mode" /></td>
+    <td width="50%"><img src="docs/screenshots/settings-themes.png" alt="Theme picker" /></td>
+    <td width="50%"><img src="docs/screenshots/library-light.png" alt="Light theme" /></td>
   </tr>
   <tr>
-    <td colspan="2"><!-- Downloads tab with a YouTube search or Yandex parse in progress -->
-      <img src="docs/screenshots/downloads.png" alt="Downloads" /></td>
+    <td colspan="2"><img src="docs/screenshots/artists-nocturne.png" alt="Artists view in the Nocturne theme" /></td>
   </tr>
 </table>
 
+### A player worth going fullscreen for
+
+Real waveform seeking, an upcoming-queue panel, and a portrait "mobile player" mode for when the window is narrow.
+
+<table>
+  <tr>
+    <td width="68%"><img src="docs/screenshots/now-playing.png" alt="Fullscreen now playing" /></td>
+    <td width="32%"><img src="docs/screenshots/mobile.png" alt="Portrait mobile player" /></td>
+  </tr>
+</table>
+
+### Search it, queue it, done
+
+<img src="docs/screenshots/downloads.png" alt="Downloads tab" />
+
 ---
 
-## ✨ Features
+## Features
 
-### 🎵 Library & playback
+<details open>
+<summary><b>🎵 Library &amp; playback</b></summary>
 
-- **Local library scanning** — recursive import of `.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac` files.
-- **Tag & cover art reading** via `music-metadata`; **MP3 tag editing** (title, artist, album, year, genre, track/disc number, comment, cover) written back with `node-id3`.
-- **Playlists, Favorites, Recents** — organize your music however you like.
-- **Artists view** — automatically grouped from your library.
-- **Search & command palette** (`Ctrl/⌘ + K`) — jump to any track or view instantly.
-- **Filters & sorting** — sort the library by title, artist, album, and more.
-- **Playback controls** — shuffle, repeat (off / all / one), seek, volume.
-- **Fullscreen "now playing"** view with cover art, full transport controls, volume slider, and an upcoming-queue panel.
-- **Real-waveform progress bar** — the seek bar renders the track's actual audio peaks, in both the bottom playbar and the fullscreen player.
-- **Resume on launch** — the last track is restored when you reopen the app.
-- **Library health-check** *(optional)* — a **Health** tab that scans your collection for quality problems such as suspected transcodes, alongside a per-track **quality badge** column showing real bitrate/sample-rate. Off by default; enable it in **Settings → Music** (it hides the badge column and tab completely when off).
+- Recursive import of `.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac`.
+- Tags and cover art read via `music-metadata`; **MP3 tag editing** written back with `node-id3`.
+- **Playlists, Favorites, Recents**, and an **Artists** view grouped automatically from your library.
+- **Command palette** (<kbd>Ctrl/⌘</kbd>+<kbd>K</kbd>) — jump to any track or view instantly.
+- Shuffle, repeat (off / all / one), sorting, filtering, and **resume on launch**.
+- **Real-waveform seek bar** — the actual audio peaks, in both the playbar and the fullscreen player.
+- **Crossfade** between tracks *(optional)*.
+- **Track trimmer** *(optional)* — cut a track with optional fades; lossless when no fade is applied.
+- **Library health-check** *(optional)* — finds suspected transcodes, low bitrates, missing covers, incomplete tags and duplicates.
 
-### 📊 Listening Report
+</details>
 
-- A dedicated **Report** tab that turns your listening history into stats — **computed entirely on your device**, nothing leaves your machine.
-- *(Optional)* Off by default — enable it in **Settings → Music**. Listening statistics are always recorded regardless, so your history is already there the moment you turn the tab on.
-- Switch between **Day / Month / Year / All-time** periods, each with **listening time** and a comparison against the previous period.
-- At-a-glance stats: **tracks played**, **artists**, **additions to your collection**, and your current **listening streak**.
-- A **"when you listen"** clock visualizing your activity across the 24 hours of the day.
-- **Top Artists** and **Top Tracks** cards with play counts and album art.
+<details open>
+<summary><b>⬇️ Get new music</b></summary>
 
-### ⬇️ Download from the internet
+- **YouTube** — search and download by query, with cover art and metadata embedded automatically.
+- **YouTube Music** — paste an album, single or artist link and parse the full track list.
+- **Spotify**, **Yandex Music** and **VK** — parse playlists and albums, then download them through the shared queue.
+- **Trending** — YouTube Music charts for 9 countries and 13 genres, downloadable in one click.
+- **Download queue** with live progress; queue state survives restarts.
+- Choose where new tracks land, or let them go to a dedicated `Audex Downloads` folder.
 
-- **YouTube** — search and download tracks by query straight from the app (`yt-dlp`), with automatic import into your library, embedded cover art and metadata. **ffmpeg is bundled**, so audio extraction and cover embedding work out of the box on every platform.
-- **YouTube Music** — paste an **album, single, or artist** link and parse its full track list (`yt-dlp`, no browser or login needed). Download any track individually or queue the whole release at once; cover art and tags are embedded automatically.
-- **Yandex Music** — parse playlists and albums via a bundled headless Chromium. Your login session persists between runs; the browser window can be shown for sign-in / captcha or hidden for silent background parsing.
-- **Download queue** with live progress, pause and resume. Queue state survives restarts.
-- **Configurable download folder** — choose where new tracks land, or fall back to a dedicated `Audex Downloads` folder.
+</details>
 
-### 📱 Mobile listening mode
+<details open>
+<summary><b>🎨 Interface</b></summary>
 
-- A dedicated **portrait "mobile player"** layout for the fullscreen view.
-- Fully **adaptive** — cover, titles and spacing scale smoothly from a phone-sized window up to a full screen.
-- **Fullscreen-aware** — if the OS window is already fullscreen, mobile mode reflows in place instead of shrinking the window.
+- **Five languages** — English, Russian, German, French, Ukrainian.
+- **Nine themes** and a **customizable accent color**.
+- **Custom background** — your own image or the current album art, with blur and dim controls.
+- **UI scale** and a **responsive layout** that adapts to narrow windows.
+- **Portrait "mobile player"** mode for the fullscreen view.
 
-### 🎨 Interface
+</details>
 
-- **Five UI languages** — Russian, English, German, French, Ukrainian.
-- **Themes** — dark / light / system, plus **6 hand-tuned designer color themes**, all selectable from a theme picker in Settings.
-- **Customizable accent color** — choose any accent from a set of presets or a custom color picker; it recolors now-playing highlights, progress bars and primary controls across the app.
-- **UI scale** setting — make the whole interface larger or smaller, applied instantly.
-- **Responsive layout** — adapts gracefully to narrow desktop windows.
-- Polished **animations** for now-playing transitions and UI controls (respecting `prefers-reduced-motion`).
+<details open>
+<summary><b>🖥️ System integration</b></summary>
 
-### 🖥️ System integration
+- **System tray** — transport controls; closing the window keeps music playing.
+- **MPRIS / Media Session** — now-playing info and controls in the GNOME top bar and other OS media widgets.
+- **Global hotkeys** — control playback even when the window isn't focused.
+- **Discord Rich Presence** — track, artist and album cover on your profile, with an optional timer and custom buttons.
+- **Update notifications** — a dismissible in-app banner when a new release is out.
 
-- **System tray** — controls playback (play / pause, previous / next) right from the tray menu, and closing the window keeps the app running in the background so music never stops.
-- **MPRIS / Media Session** — now-playing metadata and transport controls appear in the GNOME top bar (and other OS media widgets).
-- **Discord Rich Presence** — show what you're listening to on your Discord profile, with track, artist and **album cover** (resolved via the iTunes Search API, so even tracks without embedded art get a picture), an optional elapsed/remaining **timer**, and up to two custom **buttons**. Cover, timer and buttons are each toggleable in **Settings → Discord**.
-- **Update notifications** — on launch the app checks GitHub for a newer release and shows a dismissible in-app banner when one is available, with a one-click link to the download page.
-- **Mini-player navigation** — click the cover to open fullscreen, click the title/artist to jump to the library or artist page.
+</details>
 
 ---
 
@@ -105,18 +134,20 @@ Built with Electron and vanilla JS — no frameworks, no bloat, just a clean cha
 
 | Shortcut | Action |
 | --- | --- |
-| <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>K</kbd> | Open / close the search command palette |
-| <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + <kbd>E</kbd> | Edit tags of the current track |
+| <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd> | Open the search command palette |
+| <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>E</kbd> | Edit tags of the current track |
+| <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>,</kbd> | Open settings |
 | <kbd>Space</kbd> | Play / pause |
-| <kbd>Esc</kbd> | Close the fullscreen view or any open dialog |
-| <kbd>↑</kbd> / <kbd>↓</kbd> | Move between results in the command palette |
-| <kbd>Enter</kbd> | Run the highlighted command-palette result |
+| <kbd>Esc</kbd> | Close the fullscreen view or any dialog |
+| <kbd>↑</kbd> / <kbd>↓</kbd> · <kbd>Enter</kbd> | Navigate and run palette results |
+
+Every playback shortcut is rebindable in **Settings → Hotkeys**, and can be made system-wide.
 
 ---
 
 ## 📦 Download
 
-Grab the latest build for your platform from the [**Releases page**](https://github.com/MishaSok/audex-player/releases/latest):
+Grab the latest build from the [**Releases page**](https://github.com/MishaSok/audex-player/releases/latest):
 
 | Platform | File |
 | --- | --- |
@@ -124,23 +155,15 @@ Grab the latest build for your platform from the [**Releases page**](https://git
 | **macOS** (Apple Silicon) | `Audex-1.2.0-arm64.dmg` |
 | **Windows** | `Audex.Setup.1.2.0.exe` |
 
-> **Note:** builds are unsigned.
+**Nothing else to install.** `yt-dlp`, `ffmpeg` and Chromium all ship inside the app — downloading and parsing work out of the box.
+
+> **Builds are unsigned**, so the OS will ask once:
 > - **macOS** — right-click the app → **Open**, or run `xattr -d com.apple.quarantine /Applications/Audex.app`.
 > - **Windows** — SmartScreen may warn; click **More info → Run anyway**.
 
-### Runtime dependencies
-
-None — the release builds bundle everything they need:
-
-- The YouTube / YouTube Music downloader and parser ship a standalone [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) binary, so no `pip install` is required.
-- The Yandex Music parser uses a Chromium build bundled with the app.
-- `ffmpeg` ships with the app (via `ffmpeg-static`), so YouTube audio extraction works without a system install.
-
-If a bundled `yt-dlp` is somehow missing, the app falls back to a system-installed one (`pip install -U yt-dlp`).
-
 ---
 
-## 🛠️ Building from source
+## 🛠️ Build from source
 
 ```bash
 git clone https://github.com/MishaSok/audex-player.git
@@ -151,25 +174,17 @@ npm start
 
 `npm start` runs `electron . --no-sandbox` (the flag avoids sandbox permission issues on some Linux setups).
 
-To produce distributable packages:
-
 ```bash
-npm run dist
+npm run dist   # Linux AppImage + .deb into release/
 ```
 
-This builds a Linux AppImage and `.deb` into `release/`. macOS and Windows builds are produced by GitHub Actions on tag push.
+macOS and Windows builds are produced by GitHub Actions on tag push.
 
 ---
 
-## 🧰 Tech stack
+## 🧰 Built with
 
-- **[Electron 42](https://www.electronjs.org/)** — desktop shell (main + preload + renderer processes).
-- **Vanilla HTML / CSS / JS** — no UI framework, no bundler.
-- **[music-metadata](https://github.com/borewit/music-metadata)** — read tags and embedded artwork.
-- **[node-id3](https://github.com/Zazama/node-id3)** — write ID3v2 tags back to MP3 files.
-- **[Puppeteer](https://pptr.dev/)** — drives the bundled Chromium for the Yandex Music parser.
-- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** — YouTube / YouTube Music search, parsing and download backend.
-- **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** — bundled ffmpeg binary for audio extraction and cover embedding.
+**[Electron 42](https://www.electronjs.org/)** · vanilla HTML/CSS/JS — no framework, no bundler · **[music-metadata](https://github.com/borewit/music-metadata)** · **[node-id3](https://github.com/Zazama/node-id3)** · **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** · **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** · **[Puppeteer](https://pptr.dev/)**
 
 ---
 
@@ -177,12 +192,14 @@ This builds a Linux AppImage and `.deb` into `release/`. macOS and Windows build
 
 Made by **Mikhail Sokov**.
 
-- 💬 **Telegram:** [@JuicexNet](https://t.me/JuicexNet) — *found a bug or have a suggestion? Message me here.*
+- 💬 **Telegram:** [@JuicexNet](https://t.me/JuicexNet) — *found a bug or have an idea? Message me.*
 - 🐙 **GitHub:** [MishaSok/audex-player](https://github.com/MishaSok/audex-player)
 - ✉️ **Email:** mikhail.sokov2006@gmail.com
 
 ---
 
-## 📄 License
+<div align="center">
 
-Released under the [MIT License](LICENSE).
+**[⬇️  Download Audex](https://github.com/MishaSok/audex-player/releases/latest)** · Released under the [MIT License](LICENSE).
+
+</div>
