@@ -2450,6 +2450,20 @@ html.is-playing .equalizer > span { animation-play-state: running; }
 }
 .select-opt:hover { background: var(--hover-bg); color: var(--text-strong); }
 .select-opt.active { background: var(--active-bg); color: var(--text-strong); }
+/* Group heading inside a grouped ComboBox (Trending chart picker). */
+.select-group {
+  padding: 8px 12px 4px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+.select-group:not(:first-child) { margin-top: 2px; border-top: 1px solid var(--border); }
+/* The chart picker holds ~20 options — let its menu scroll instead of overflowing the view. */
+.tr-select { min-width: 200px; }
+.tr-select-menu { max-height: 340px; overflow-y: auto; }
 
 /* ─── Playbar ─── */
 .playbar {

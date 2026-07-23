@@ -879,16 +879,37 @@
         </header>
 
         <div class="tr-head">
-          <div class="seg" id="tr-region-seg">
-            <button class="seg-btn" data-tr-region="global" data-i18n="trending.region.global">Мир</button>
-            <button class="seg-btn" data-tr-region="russia" data-i18n="trending.region.russia">Россия</button>
-            <button class="seg-btn" data-tr-region="ukraine" data-i18n="trending.region.ukraine">Украина</button>
-            <button class="seg-btn" data-tr-region="usa" data-i18n="trending.region.usa">США</button>
-            <button class="seg-btn" data-tr-region="uk" data-i18n="trending.region.uk">Британия</button>
-            <button class="seg-btn" data-tr-region="germany" data-i18n="trending.region.germany">Германия</button>
-            <button class="seg-btn" data-tr-region="france" data-i18n="trending.region.france">Франция</button>
-            <button class="seg-btn" data-tr-region="turkey" data-i18n="trending.region.turkey">Турция</button>
-            <button class="seg-btn" data-tr-region="poland" data-i18n="trending.region.poland">Польша</button>
+          <div class="select tr-select" id="tr-chart-select">
+            <button class="select-btn" type="button">
+              <span id="tr-chart-current">Мир</span>
+              <svg class="i" width="13" height="13"><use href="#i-chevron-down"/></svg>
+            </button>
+            <div class="select-menu tr-select-menu">
+              <div class="select-group" data-i18n="trending.group.countries">Страны</div>
+              <div class="select-opt" data-tr-chart="global" data-i18n="trending.region.global">Мир</div>
+              <div class="select-opt" data-tr-chart="russia" data-i18n="trending.region.russia">Россия</div>
+              <div class="select-opt" data-tr-chart="ukraine" data-i18n="trending.region.ukraine">Украина</div>
+              <div class="select-opt" data-tr-chart="usa" data-i18n="trending.region.usa">США</div>
+              <div class="select-opt" data-tr-chart="uk" data-i18n="trending.region.uk">Британия</div>
+              <div class="select-opt" data-tr-chart="germany" data-i18n="trending.region.germany">Германия</div>
+              <div class="select-opt" data-tr-chart="france" data-i18n="trending.region.france">Франция</div>
+              <div class="select-opt" data-tr-chart="turkey" data-i18n="trending.region.turkey">Турция</div>
+              <div class="select-opt" data-tr-chart="poland" data-i18n="trending.region.poland">Польша</div>
+              <div class="select-group" data-i18n="trending.group.genres">Жанры</div>
+              <div class="select-opt" data-tr-chart="g_pop" data-i18n="trending.genre.pop">Поп</div>
+              <div class="select-opt" data-tr-chart="g_hiphop" data-i18n="trending.genre.hiphop">Хип-хоп</div>
+              <div class="select-opt" data-tr-chart="g_rock" data-i18n="trending.genre.rock">Рок</div>
+              <div class="select-opt" data-tr-chart="g_electronic" data-i18n="trending.genre.electronic">Электроника</div>
+              <div class="select-opt" data-tr-chart="g_phonk" data-i18n="trending.genre.phonk">Фонк</div>
+              <div class="select-opt" data-tr-chart="g_rnb" data-i18n="trending.genre.rnb">R&B</div>
+              <div class="select-opt" data-tr-chart="g_chill" data-i18n="trending.genre.chill">Chill</div>
+              <div class="select-opt" data-tr-chart="g_metal" data-i18n="trending.genre.metal">Метал</div>
+              <div class="select-opt" data-tr-chart="g_latin" data-i18n="trending.genre.latin">Латина</div>
+              <div class="select-opt" data-tr-chart="g_kpop" data-i18n="trending.genre.kpop">K-pop</div>
+              <div class="select-opt" data-tr-chart="g_jazz" data-i18n="trending.genre.jazz">Джаз</div>
+              <div class="select-opt" data-tr-chart="g_classical" data-i18n="trending.genre.classical">Классика</div>
+              <div class="select-opt" data-tr-chart="g_country" data-i18n="trending.genre.country">Кантри</div>
+            </div>
           </div>
           <div class="tr-meta" id="tr-meta"></div>
         </div>

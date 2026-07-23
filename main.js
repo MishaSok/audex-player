@@ -424,6 +424,7 @@ ipcMain.handle('window:setPortrait', async (event, payload) => {
 // this table rather than being interpolated into a URL, so a bad value can't
 // point yt-dlp at an arbitrary page.
 const TRENDING_CHARTS = {
+  // Per-country "Top 100 Songs" — YouTube Music's official charts channel.
   global:  'PL4fGSI1pDJn6puJdseH2Rt9sMvt9E2M4i',
   russia:  'PL4fGSI1pDJn5C8dBiYt0BTREyCHbZ47qc',
   ukraine: 'PL4fGSI1pDJn4E_HoW5HB-w5vFPkYfo3dB',
@@ -433,6 +434,23 @@ const TRENDING_CHARTS = {
   france:  'PL4fGSI1pDJn7bK3y1Hx-qpHBqfr6cesNs',
   turkey:  'PL4fGSI1pDJn5tdVDtIAZArERm_vv4uFCR',
   poland:  'PL4fGSI1pDJn68fmsRw9f6g-NzU5UA45v1',
+  // Per-genre — YouTube Music's official curated "<Genre> Hits" playlists
+  // (RDCLAK5uy_ prefix). Like the country charts these flat-list into individual
+  // songs in one request. Keys are prefixed `g_` so they never collide with a
+  // country code.
+  g_pop:        'RDCLAK5uy_l6kmbwVnzKyu31exvtuxnFkjswnNgI6Uw',
+  g_hiphop:     'RDCLAK5uy_lX24L_CGP46xH6pM4FgXpX4yNr3jX9xpU',
+  g_rock:       'RDCLAK5uy_k54Zr5UY8lb-LJx1XLj0q4rH355y9dJV8',
+  g_electronic: 'RDCLAK5uy_khFJzdpmtk0_MaUuWNgqYbNamuGV623kk',
+  g_phonk:      'RDCLAK5uy_lbdY2I_FKUrzQOGiOQxV0Ux_b3HH2dfc8',
+  g_rnb:        'RDCLAK5uy_kYUaBqUZxA0VpgN2xsHNUnVoLu8-JGXk8',
+  g_chill:      'RDCLAK5uy_kycx4KP0Kj3BcUEZN4RDhGEjUce2UPqEc',
+  g_metal:      'RDCLAK5uy_k0Gg0qAR50hC6S3gxvO4KPQ6avEgAu6ho',
+  g_latin:      'RDCLAK5uy_lw21MuKaqFsDBIPZSbRmZcoDrHmV_c6uY',
+  g_kpop:       'RDCLAK5uy_k27uu-EtQ_b5U2r26DNDZOmNqGdccUIGQ',
+  g_jazz:       'RDCLAK5uy_kL57PLcOmExjhzqGfGhvA82ZWe4fPH2c4',
+  g_classical:  'RDCLAK5uy_kVXmNQjiBEKjCGifBWc3eTMg8Fwjc6K8M',
+  g_country:    'RDCLAK5uy_kpxnNxJpPZjLKbL9WgvrPuErWkUxMP6x4',
 };
 
 // "Artist - Title (Official Video)" is the chart's naming convention; split it

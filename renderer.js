@@ -386,7 +386,7 @@ const I18N = {
     'trending.err.network': 'Нет связи с YouTube. Проверьте подключение.',
     'trending.offline': 'Нет подключения к интернету. Проверьте соединение и повторите.',
     'trending.empty.title': 'Что сейчас слушают',
-    'trending.empty.text': 'Чарты YouTube Music по странам. Выберите регион — и скачивайте треки в один клик.',
+    'trending.empty.text': 'Чарты YouTube Music по странам и жанрам. Выберите чарт — и скачивайте треки в один клик.',
     'trending.region.global': 'Мир',
     'trending.region.russia': 'Россия',
     'trending.region.ukraine': 'Украина',
@@ -396,6 +396,21 @@ const I18N = {
     'trending.region.france': 'Франция',
     'trending.region.turkey': 'Турция',
     'trending.region.poland': 'Польша',
+    'trending.group.countries': 'Страны',
+    'trending.group.genres': 'Жанры',
+    'trending.genre.pop': 'Поп',
+    'trending.genre.hiphop': 'Хип-хоп',
+    'trending.genre.rock': 'Рок',
+    'trending.genre.electronic': 'Электроника',
+    'trending.genre.phonk': 'Фонк',
+    'trending.genre.rnb': 'R&B',
+    'trending.genre.chill': 'Chill',
+    'trending.genre.metal': 'Метал',
+    'trending.genre.latin': 'Латина',
+    'trending.genre.kpop': 'K-pop',
+    'trending.genre.jazz': 'Джаз',
+    'trending.genre.classical': 'Классика',
+    'trending.genre.country': 'Кантри',
     'nav.report': 'Отчёт',
     'report.onDevice': 'Считается на устройстве',
     'report.eyebrow': 'Отчёт о прослушивании',
@@ -872,7 +887,7 @@ const I18N = {
     'trending.err.network': 'No connection to YouTube. Check your network.',
     'trending.offline': 'No internet connection. Check your network and try again.',
     'trending.empty.title': 'What people are listening to',
-    'trending.empty.text': 'YouTube Music charts by country. Pick a region and download tracks in one click.',
+    'trending.empty.text': 'YouTube Music charts by country and genre. Pick a chart and download tracks in one click.',
     'trending.region.global': 'Global',
     'trending.region.russia': 'Russia',
     'trending.region.ukraine': 'Ukraine',
@@ -882,6 +897,21 @@ const I18N = {
     'trending.region.france': 'France',
     'trending.region.turkey': 'Turkey',
     'trending.region.poland': 'Poland',
+    'trending.group.countries': 'Countries',
+    'trending.group.genres': 'Genres',
+    'trending.genre.pop': 'Pop',
+    'trending.genre.hiphop': 'Hip-hop',
+    'trending.genre.rock': 'Rock',
+    'trending.genre.electronic': 'Electronic',
+    'trending.genre.phonk': 'Phonk',
+    'trending.genre.rnb': 'R&B',
+    'trending.genre.chill': 'Chill',
+    'trending.genre.metal': 'Metal',
+    'trending.genre.latin': 'Latin',
+    'trending.genre.kpop': 'K-pop',
+    'trending.genre.jazz': 'Jazz',
+    'trending.genre.classical': 'Classical',
+    'trending.genre.country': 'Country',
     'nav.report': 'Report',
     'report.onDevice': 'Computed on this device',
     'report.eyebrow': 'Listening report',
@@ -1358,7 +1388,7 @@ const I18N = {
     'trending.err.network': 'Keine Verbindung zu YouTube. Prüfen Sie Ihr Netzwerk.',
     'trending.offline': 'Keine Internetverbindung. Prüfen Sie Ihr Netzwerk und versuchen Sie es erneut.',
     'trending.empty.title': 'Was gerade gehört wird',
-    'trending.empty.text': 'YouTube-Music-Charts nach Ländern. Region wählen und Titel mit einem Klick laden.',
+    'trending.empty.text': 'YouTube-Music-Charts nach Ländern und Genres. Chart wählen und Titel mit einem Klick laden.',
     'trending.region.global': 'Global',
     'trending.region.russia': 'Russland',
     'trending.region.ukraine': 'Ukraine',
@@ -1368,6 +1398,21 @@ const I18N = {
     'trending.region.france': 'Frankreich',
     'trending.region.turkey': 'Türkei',
     'trending.region.poland': 'Polen',
+    'trending.group.countries': 'Länder',
+    'trending.group.genres': 'Genres',
+    'trending.genre.pop': 'Pop',
+    'trending.genre.hiphop': 'Hip-Hop',
+    'trending.genre.rock': 'Rock',
+    'trending.genre.electronic': 'Electronic',
+    'trending.genre.phonk': 'Phonk',
+    'trending.genre.rnb': 'R&B',
+    'trending.genre.chill': 'Chill',
+    'trending.genre.metal': 'Metal',
+    'trending.genre.latin': 'Latin',
+    'trending.genre.kpop': 'K-Pop',
+    'trending.genre.jazz': 'Jazz',
+    'trending.genre.classical': 'Klassik',
+    'trending.genre.country': 'Country',
     'nav.report': 'Bericht',
     'report.onDevice': 'Auf diesem Gerät berechnet',
     'report.eyebrow': 'Hörbericht',
@@ -1844,7 +1889,7 @@ const I18N = {
     'trending.err.network': 'Pas de connexion à YouTube. Vérifiez votre réseau.',
     'trending.offline': 'Pas de connexion Internet. Vérifiez votre réseau et réessayez.',
     'trending.empty.title': "Ce que l'on écoute en ce moment",
-    'trending.empty.text': 'Classements YouTube Music par pays. Choisissez une région et téléchargez en un clic.',
+    'trending.empty.text': 'Classements YouTube Music par pays et par genre. Choisissez un classement et téléchargez en un clic.',
     'trending.region.global': 'Monde',
     'trending.region.russia': 'Russie',
     'trending.region.ukraine': 'Ukraine',
@@ -1854,6 +1899,21 @@ const I18N = {
     'trending.region.france': 'France',
     'trending.region.turkey': 'Turquie',
     'trending.region.poland': 'Pologne',
+    'trending.group.countries': 'Pays',
+    'trending.group.genres': 'Genres',
+    'trending.genre.pop': 'Pop',
+    'trending.genre.hiphop': 'Hip-hop',
+    'trending.genre.rock': 'Rock',
+    'trending.genre.electronic': 'Électronique',
+    'trending.genre.phonk': 'Phonk',
+    'trending.genre.rnb': 'R&B',
+    'trending.genre.chill': 'Chill',
+    'trending.genre.metal': 'Métal',
+    'trending.genre.latin': 'Latino',
+    'trending.genre.kpop': 'K-pop',
+    'trending.genre.jazz': 'Jazz',
+    'trending.genre.classical': 'Classique',
+    'trending.genre.country': 'Country',
     'nav.report': 'Rapport',
     'report.onDevice': 'Calculé sur cet appareil',
     'report.eyebrow': "Rapport d'écoute",
@@ -2330,7 +2390,7 @@ const I18N = {
     'trending.err.network': 'Немає зв’язку з YouTube. Перевірте підключення.',
     'trending.offline': 'Немає підключення до інтернету. Перевірте з’єднання та повторіть.',
     'trending.empty.title': 'Що зараз слухають',
-    'trending.empty.text': 'Чарти YouTube Music за країнами. Оберіть регіон — і завантажуйте треки одним кліком.',
+    'trending.empty.text': 'Чарти YouTube Music за країнами та жанрами. Оберіть чарт — і завантажуйте треки одним кліком.',
     'trending.region.global': 'Світ',
     'trending.region.russia': 'Росія',
     'trending.region.ukraine': 'Україна',
@@ -2340,6 +2400,21 @@ const I18N = {
     'trending.region.france': 'Франція',
     'trending.region.turkey': 'Туреччина',
     'trending.region.poland': 'Польща',
+    'trending.group.countries': 'Країни',
+    'trending.group.genres': 'Жанри',
+    'trending.genre.pop': 'Поп',
+    'trending.genre.hiphop': 'Хіп-хоп',
+    'trending.genre.rock': 'Рок',
+    'trending.genre.electronic': 'Електроніка',
+    'trending.genre.phonk': 'Фонк',
+    'trending.genre.rnb': 'R&B',
+    'trending.genre.chill': 'Chill',
+    'trending.genre.metal': 'Метал',
+    'trending.genre.latin': 'Латина',
+    'trending.genre.kpop': 'K-pop',
+    'trending.genre.jazz': 'Джаз',
+    'trending.genre.classical': 'Класика',
+    'trending.genre.country': 'Кантрі',
     'nav.report': 'Звіт',
     'report.onDevice': 'Обчислюється на пристрої',
     'report.eyebrow': 'Звіт про прослуховування',
@@ -3656,15 +3731,34 @@ function saveYtState() {
 }
 
 // ── Trending ──
-// Reads a YouTube Music country chart through the main process and lets each row
-// be downloaded with one click, reusing the same yt-dlp download path (and the
-// same progress events) as the Downloads tab. Charts are cached per region for
-// the session so switching back and forth doesn't re-hit the network.
-let trRegion = 'global';
+// Reads a YouTube Music chart through the main process and lets each row be
+// downloaded with one click, reusing the same yt-dlp download path (and the same
+// progress events) as the Downloads tab. A chart is either a per-country "Top
+// 100" or a per-genre "<Genre> Hits" playlist — both resolve to a playlist id in
+// TRENDING_CHARTS (main.js). Charts are cached per key for the session so
+// switching back and forth doesn't re-hit the network.
+let trChart = 'global';                  // selected chart key (country code or g_<genre>)
 let trTracks = [];
-const trCache = new Map();               // region -> { tracks, fetchedAt }
+const trCache = new Map();               // chart key -> { tracks, fetchedAt }
 const trActiveDownloads = new Map();     // videoId -> row element
 let trLoading = false;
+
+// chart key -> i18n key for the label shown in the ComboBox button. Kept in sync
+// with the option list in index.html (#tr-chart-select).
+const TR_CHART_LABEL = {
+  global: 'trending.region.global', russia: 'trending.region.russia',
+  ukraine: 'trending.region.ukraine', usa: 'trending.region.usa',
+  uk: 'trending.region.uk', germany: 'trending.region.germany',
+  france: 'trending.region.france', turkey: 'trending.region.turkey',
+  poland: 'trending.region.poland',
+  g_pop: 'trending.genre.pop', g_hiphop: 'trending.genre.hiphop',
+  g_rock: 'trending.genre.rock', g_electronic: 'trending.genre.electronic',
+  g_phonk: 'trending.genre.phonk',
+  g_rnb: 'trending.genre.rnb', g_chill: 'trending.genre.chill',
+  g_metal: 'trending.genre.metal', g_latin: 'trending.genre.latin',
+  g_kpop: 'trending.genre.kpop', g_jazz: 'trending.genre.jazz',
+  g_classical: 'trending.genre.classical', g_country: 'trending.genre.country',
+};
 
 function setTrStatus(text, kind) {
   const el = $('tr-status');
@@ -3711,8 +3805,10 @@ function renderTrendingSkeleton() {
 }
 
 function renderTrending() {
-  document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.trRegion === trRegion);
+  const cur = $('tr-chart-current');
+  if (cur) cur.textContent = tr(TR_CHART_LABEL[trChart] || 'trending.region.global');
+  document.querySelectorAll('#tr-chart-select .select-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.trChart === trChart);
   });
   const wrap = $('tr-results');
   const rows = $('tr-rows');
@@ -3766,8 +3862,8 @@ function renderTrending() {
 
 async function loadTrending(force) {
   if (trLoading) return;
-  if (!force && trCache.has(trRegion)) {
-    trTracks = trCache.get(trRegion).tracks;
+  if (!force && trCache.has(trChart)) {
+    trTracks = trCache.get(trChart).tracks;
     setTrStatus('');
     renderTrending();
     return;
@@ -3790,23 +3886,25 @@ async function loadTrending(force) {
   trTracks = [];
   renderTrending();
   setTrStatus(tr('trending.loading'));
-  const region = trRegion;
+  const chart = trChart;
   try {
-    const res = await window.electronAPI.trendingFetch(region);
-    if (region !== trRegion) return; // user switched region mid-fetch
+    // The IPC parameter is still named `region` for backward compatibility; the
+    // main process matches any key (country or genre) against TRENDING_CHARTS.
+    const res = await window.electronAPI.trendingFetch(chart);
+    if (chart !== trChart) return; // user switched chart mid-fetch
     if (!res || !res.success) {
       setTrStatus(tr('trending.error', { e: (res && res.error) || 'unknown' }), 'error');
       return;
     }
-    trCache.set(region, { tracks: res.tracks, fetchedAt: res.fetchedAt });
+    trCache.set(chart, { tracks: res.tracks, fetchedAt: res.fetchedAt });
     trTracks = res.tracks;
     setTrStatus('');
   } catch (err) {
-    if (region === trRegion) setTrStatus(tr('trending.error', { e: String(err) }), 'error');
+    if (chart === trChart) setTrStatus(tr('trending.error', { e: String(err) }), 'error');
   } finally {
     // Clear the flag before repainting, or the skeleton would survive the
     // render that is supposed to replace it.
-    if (region === trRegion) {
+    if (chart === trChart) {
       trLoading = false;
       renderTrending();
     }
@@ -3920,13 +4018,28 @@ if (window.electronAPI && window.electronAPI.onYtDownloadProgress) {
   });
 }
 
-document.querySelectorAll('#tr-region-seg .seg-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    if (trRegion === b.dataset.trRegion) return;
-    trRegion = b.dataset.trRegion;
-    loadTrending(false);
+// Chart ComboBox — country/genre picker. Same open/close idiom as the Settings
+// theme/language selects: toggle .open on the wrapper, close on outside click.
+const trChartSelect = $('tr-chart-select');
+if (trChartSelect) {
+  trChartSelect.querySelector('.select-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    trChartSelect.classList.toggle('open');
   });
-});
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#tr-chart-select')) trChartSelect.classList.remove('open');
+  });
+  trChartSelect.querySelectorAll('.select-opt').forEach(o => {
+    o.addEventListener('click', () => {
+      trChartSelect.classList.remove('open');
+      const key = o.dataset.trChart;
+      if (!key || key === trChart) return;
+      trChart = key;
+      renderTrending();       // update the button label immediately
+      loadTrending(false);
+    });
+  });
+}
 const trRefreshBtn = $('tr-refresh');
 if (trRefreshBtn) trRefreshBtn.addEventListener('click', () => loadTrending(true));
 
@@ -9539,6 +9652,7 @@ document.querySelectorAll('#lang-select .select-opt').forEach(o => {
     // Re-render dynamic surfaces so plurals, counts, and rendered strings update.
     refreshCurrentViewRows();
     if (currentView === 'playlists') renderPlaylists();
+    if (currentView === 'trending') renderTrending(); // refresh ComboBox label + count
     renderCounts();
     renderRecents();
     if (currentTrackIndex >= 0) updateNowPlayingUI(library[currentTrackIndex]);
