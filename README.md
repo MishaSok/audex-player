@@ -8,7 +8,7 @@
 
 A fast, beautiful desktop player for the music you actually own — and a one-click way to get more of it.
 
-[![Version](https://img.shields.io/badge/version-1.2.0-e8a33d?style=for-the-badge)](https://github.com/MishaSok/audex-player/releases/latest)
+[![Version](https://img.shields.io/badge/version-1.2.1-e8a33d?style=for-the-badge)](https://github.com/MishaSok/audex-player/releases/latest)
 [![Platforms](https://img.shields.io/badge/Linux%20·%20macOS%20·%20Windows-2b2b2b?style=for-the-badge)](https://github.com/MishaSok/audex-player/releases/latest)
 [![License](https://img.shields.io/badge/MIT-blue?style=for-the-badge)](LICENSE)
 
@@ -151,9 +151,9 @@ Grab the latest build from the [**Releases page**](https://github.com/MishaSok/a
 
 | Platform | File |
 | --- | --- |
-| **Linux** | `Audex-1.2.0.AppImage` (portable) or `audex-player_1.2.0_amd64.deb` |
-| **macOS** (Apple Silicon) | `Audex-1.2.0-arm64.dmg` |
-| **Windows** | `Audex.Setup.1.2.0.exe` |
+| **Linux** | `Audex-1.2.1.AppImage` (portable) or `audex-player_1.2.1_amd64.deb` |
+| **macOS** (Apple Silicon) | `Audex-1.2.1-arm64.dmg` |
+| **Windows** | `Audex.Setup.1.2.1.exe` |
 
 **Nothing else to install.** `yt-dlp`, `ffmpeg` and Chromium all ship inside the app — downloading and parsing work out of the box.
 

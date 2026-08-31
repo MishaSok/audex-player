@@ -1052,6 +1052,24 @@ function ytDlpPath() {
   return candidates[0];
 }
 
+// YouTube now hands out media URLs only to clients that solve a JS "player
+// challenge"; without a JavaScript runtime yt-dlp falls back to clients whose
+// URLs get rejected with HTTP 403. Electron *is* a Node runtime — running our
+// own executable with ELECTRON_RUN_AS_NODE=1 makes it behave exactly like node,
+// so we hand that path to yt-dlp instead of shipping deno/node separately.
+// Only passed to the bundled yt-dlp: a system install may predate the option.
+function jsRuntimeArgs() {
+  if (!resolveBundledYtDlp()) return [];
+  // deno stays enabled (higher priority) if the user happens to have it.
+  return ['--js-runtimes', `node:${process.execPath}`];
+}
+
+// Env for every yt-dlp spawn: see jsRuntimeArgs() — the child runtime inherits
+// this, which is what turns our own binary into a plain node interpreter.
+function ytDlpEnv() {
+  return { ...process.env, ELECTRON_RUN_AS_NODE: '1' };
+}
+
 // ffmpeg is required by yt-dlp for audio extraction (mp3) and thumbnail embedding.
 // We ship the static binary via the ffmpeg-static npm package (asarUnpack'd in
 // package.json). require() resolves the path inside the asar; rewrite it to the
@@ -1081,7 +1099,7 @@ function runYtDlp(args, { timeoutMs } = {}) {
     let stdout = '';
     let stderr = '';
     let killed = false;
-    const proc = spawn(ytDlpPath(), args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const proc = spawn(ytDlpPath(), args, { stdio: ['ignore', 'pipe', 'pipe'], env: ytDlpEnv() });
     let timer = null;
     if (timeoutMs) {
       timer = setTimeout(() => { killed = true; try { proc.kill('SIGKILL'); } catch (_) {} }, timeoutMs);
@@ -1252,7 +1270,7 @@ function streamYtDlp(args, { onProgress, onPhase, timeoutMs } = {}) {
     let stdout = '';
     let stderr = '';
     let stdoutBuf = '';
-    const proc = spawn(ytDlpPath(), args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const proc = spawn(ytDlpPath(), args, { stdio: ['ignore', 'pipe', 'pipe'], env: ytDlpEnv() });
     let timer = null;
     if (timeoutMs) {
       timer = setTimeout(() => { try { proc.kill('SIGKILL'); } catch (_) {} }, timeoutMs);
@@ -1349,6 +1367,7 @@ ipcMain.handle('downloads:ytDownload', async (event, payload) => {
   ];
   const ffmpeg = resolveBundledFfmpeg();
   if (ffmpeg) args.push('--ffmpeg-location', ffmpeg);
+  args.push(...jsRuntimeArgs());
 
   const sendProgress = (data) => {
     try {
@@ -1433,6 +1452,7 @@ ipcMain.handle('downloads:ytDownloadByQuery', async (event, payload) => {
   ];
   const ffmpeg = resolveBundledFfmpeg();
   if (ffmpeg) args.push('--ffmpeg-location', ffmpeg);
+  args.push(...jsRuntimeArgs());
 
   const sendProgress = (data) => {
     try {

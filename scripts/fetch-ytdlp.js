@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const YTDLP_VERSION = '2026.03.17';
+const YTDLP_VERSION = '2026.08.19';
 
 const ASSET = {
   linux: 'yt-dlp_linux',
@@ -27,9 +27,17 @@ const bundleDir = path.join(__dirname, '..', 'yt-dlp-bundle');
 const dest = path.join(bundleDir, ASSET);
 const url = `https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP_VERSION}/${ASSET}`;
 
-if (fs.existsSync(dest) && fs.statSync(dest).size > 1_000_000) {
-  console.log(`[fetch-ytdlp] ${ASSET} already present — skipping`);
+// A version marker next to the binary, so bumping YTDLP_VERSION actually
+// re-downloads instead of silently keeping a stale (and by now 403-prone) build.
+const stamp = path.join(bundleDir, 'VERSION');
+const haveVersion = fs.existsSync(stamp) ? fs.readFileSync(stamp, 'utf8').trim() : '';
+
+if (fs.existsSync(dest) && fs.statSync(dest).size > 1_000_000 && haveVersion === YTDLP_VERSION) {
+  console.log(`[fetch-ytdlp] ${ASSET} ${YTDLP_VERSION} already present — skipping`);
   process.exit(0);
+}
+if (fs.existsSync(dest) && haveVersion !== YTDLP_VERSION) {
+  console.log(`[fetch-ytdlp] have ${haveVersion || 'unknown'}, want ${YTDLP_VERSION} — refreshing`);
 }
 
 fs.mkdirSync(bundleDir, { recursive: true });
@@ -63,5 +71,6 @@ download(url, 5, (err) => {
     console.error(`[fetch-ytdlp] FAILED: ${err.message}`);
     process.exit(1);
   }
+  fs.writeFileSync(stamp, YTDLP_VERSION + '\n');
   console.log(`[fetch-ytdlp] saved ${dest}`);
 });
