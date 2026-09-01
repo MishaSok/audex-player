@@ -2,7 +2,7 @@
   "name": "audex-player",
   "productName": "Audex",
   "version": "1.2.1",
-  "description": "Audex — minimal desktop music player",
+  "description": "Audex \u2014 minimal desktop music player",
   "main": "main.js",
   "scripts": {
     "start": "electron . --no-sandbox",
@@ -13,7 +13,7 @@
   "build": {
     "appId": "com.audex.player",
     "productName": "Audex",
-    "copyright": "Copyright © 2026 Mikhail Sokov and Sergei",
+    "copyright": "Copyright \u00a9 2026 Mikhail Sokov and Sergei",
     "directories": {
       "output": "release"
     },
@@ -37,7 +37,10 @@
       "node_modules/ffmpeg-static/**"
     ],
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "build/icons",
       "category": "AudioVideo;Audio;Player",
       "synopsis": "Minimal desktop music player",
@@ -51,8 +54,18 @@
     },
     "mac": {
       "target": [
-        { "target": "dmg", "arch": ["arm64"] },
-        { "target": "zip", "arch": ["arm64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
       ],
       "icon": "build/icon.png",
       "category": "public.app-category.music",
@@ -60,8 +73,18 @@
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "zip", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico"
     },
@@ -88,5 +111,8 @@
   "devDependencies": {
     "electron": "^42.1.0",
     "electron-builder": "^26.8.1"
+  },
+  "overrides": {
+    "js-yaml": "4.3.1"
   }
 }
