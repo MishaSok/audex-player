@@ -47,6 +47,17 @@ if (isGpuDisabled()) {
   app.commandLine.appendSwitch('disable-gpu');
 }
 
+// ── Background throttling ──
+// webPreferences.backgroundThrottling covers the renderer's own timers, but
+// Chromium also backgrounds/deprioritizes the whole renderer process when the
+// window is occluded or minimized, which is enough to stall playback
+// transitions. These switches keep the audio pipeline running at full speed no
+// matter what the window manager does with the window. Must be set before the
+// app is ready.
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;
@@ -166,6 +177,14 @@ function createWindow() {
       webSecurity: false,
       contextIsolation: true,
       nodeIntegration: false,
+      // A music player must keep working while its window is hidden, minimized
+      // or covered by another window. Chromium otherwise treats the page as
+      // background: rAF stops entirely and timers are throttled (down to one
+      // tick per minute after a few minutes), which stalls the track-change
+      // path — the volume ramp of a crossfade never advances, so the incoming
+      // track sits at volume 0 and the app appears to stop playing until the
+      // window is focused again. See also the command-line switches above.
+      backgroundThrottling: false,
     }
   });
 

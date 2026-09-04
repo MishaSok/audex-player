@@ -6965,18 +6965,33 @@ let crossfadeArmed = false;    // per-track guard for the end-of-track trigger
 // slider, the mute icon, and the fade ceiling all read this instead.
 let targetVolume = 1;
 
+// Driven by rAF for smoothness, but *also* by a plain timer: rAF stops firing
+// completely while the window is hidden/occluded, and a fade-in that never
+// advances leaves the incoming track stuck at volume 0 — the app sounds like it
+// simply stopped playing until the window is focused again. The timer keeps the
+// ramp moving (and, worst case under timer throttling, still snaps it to the
+// target) so a track change is always audible.
 function rampVolume(el, to, ms, onDone) {
   const from = el.volume;
   const start = performance.now();
-  let id = 0;
-  const step = (now) => {
+  let rafId = 0, timerId = 0, done = false;
+  const stop = () => {
+    done = true;
+    cancelAnimationFrame(rafId);
+    clearInterval(timerId);
+  };
+  const apply = (now) => {
+    if (done) return;
     const k = Math.min(1, (now - start) / ms);
     try { el.volume = Math.max(0, Math.min(1, from + (to - from) * k)); } catch (_) {}
-    if (k < 1) id = requestAnimationFrame(step);
-    else if (onDone) onDone();
+    if (k < 1) return;
+    stop();
+    if (onDone) onDone();
   };
-  id = requestAnimationFrame(step);
-  return () => cancelAnimationFrame(id);
+  const step = (now) => { apply(now); if (!done) rafId = requestAnimationFrame(step); };
+  rafId = requestAnimationFrame(step);
+  timerId = setInterval(() => apply(performance.now()), 50);
+  return () => { if (!done) stop(); };
 }
 
 function stopCrossfadeTail() {
