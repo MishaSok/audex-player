@@ -167,8 +167,11 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 1024,
-    minHeight: 700,
+    // Low on purpose: the layout has a responsive ladder down to a phone-width
+    // column (icon-only sidebar rail below 940px — see the media queries at the
+    // end of style.css), so the window may be squeezed to a bare track list.
+    minWidth: 420,
+    minHeight: 520,
     show: false,
     backgroundColor: '#0a0a0b',
     icon: path.join(__dirname, 'build', 'icon.png'),

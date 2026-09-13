@@ -2916,6 +2916,21 @@ function applyLanguage(lang) {
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     el.title = tr(el.getAttribute('data-i18n-title'));
   });
+  refreshRailTips();
+}
+
+// Below 940px the sidebar (and the Settings tab rail) collapses to icons and
+// every label is hidden — see the media queries at the end of style.css. The
+// hover tooltip that replaces the label reads `data-tip`, mirrored here from
+// the just-translated label text so it follows the language without needing a
+// second string table. Recents set their own `data-tip` in renderRecents.
+function refreshRailTips() {
+  const sel = '.sidebar .nav-item, #btn-add-files, .settings-tab';
+  document.querySelectorAll(sel).forEach(el => {
+    const label = el.querySelector('span:not(.nav-search-icon):not(.nav-meta):not(.nav-shortcut)');
+    const text = label ? label.textContent.trim() : '';
+    if (text) el.setAttribute('data-tip', text);
+  });
 }
 
 // ── Utils ──
@@ -5858,6 +5873,8 @@ function renderRecents() {
     const el = document.createElement('div');
     el.className = 'recent-item';
     const cover = t.cover ? `background-image:url('${t.cover}')` : '';
+    // `data-tip` feeds the icon-rail tooltip when the sidebar is collapsed.
+    el.dataset.tip = t.artist ? `${t.title} — ${t.artist}` : t.title;
     el.innerHTML = `
       <div class="recent-swatch" style="${cover}"></div>
       <div class="recent-body">
@@ -6417,7 +6434,11 @@ function renderTrackRow(track, displayIndex, queue) {
     <div class="trow-num">${numCell}</div>
     <div class="trow-title-cell">
       <div class="trow-cover" style="${coverStyle}"></div>
-      <span class="trow-title">${escapeHtml(track.title)}</span>
+      <div class="trow-title-text">
+        <span class="trow-title">${escapeHtml(track.title)}</span>
+        <!-- Shown only below 940px, where the Artist column is dropped. -->
+        <span class="trow-sub">${escapeHtml(track.artist)}</span>
+      </div>
     </div>
     <div class="trow-muted">${escapeHtml(track.artist)}</div>
     <div class="trow-muted">${escapeHtml(track.album)}</div>
@@ -7267,7 +7288,7 @@ function updateNowPlayingUI(track) {
   }
   lastNowPlayingPath = track.path;
 
-  buildWaveforms(track);
+  buildFsWaveform(track);
 
   updateFavoriteUI();
   updatePlayButtonUI();
@@ -7527,13 +7548,15 @@ $('fs-btn-repeat').addEventListener('click', () => {
   updateRepeatUI();
 });
 
-// ── Inline waveform progress bar ──
-// The progress bar is rendered as the track's amplitude envelope (like Amberol):
-// played bars use --accent, the rest are dim, and hovering shows a seek preview.
-// Bar heights are the *real* per-bucket peaks decoded from the audio via the Web
-// Audio API (computeRealPeaks), cached per track in wavePeaksCache. While decoding
-// — or if decode fails — we fall back to a deterministic seeded envelope keyed off
-// the track so the bar always shows something stable instantly.
+// ── Inline waveform progress bar (fullscreen player only) ──
+// The fullscreen player's progress bar is rendered as the track's amplitude
+// envelope (like Amberol): played bars use --accent, the rest are dim, and
+// hovering shows a seek preview. Bar heights are the *real* per-bucket peaks
+// decoded from the audio via the Web Audio API (computeRealPeaks), cached per
+// track in wavePeaksCache. While decoding — or if decode fails — we fall back to
+// a deterministic seeded envelope keyed off the track so the bar always shows
+// something stable instantly.
+// The playbar deliberately does NOT use this: see makeThinBar below.
 const WAVE_BARS = 130;
 
 function waveSeededRand(seed) {
@@ -7632,10 +7655,7 @@ async function computeRealPeaks(track) {
     const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
     const peaks = await decodePeaks(ab);
     cacheWavePeaks(p, peaks);
-    if (lastNowPlayingPath === p) {
-      playbarWave.setPeaks(peaks, p + ':real');
-      fsWave.setPeaks(peaks, p + ':real');
-    }
+    if (lastNowPlayingPath === p) fsWave.setPeaks(peaks, p + ':real');
   } catch (e) {
     console.warn('Waveform decode failed for', p, e);
   } finally {
@@ -7700,21 +7720,55 @@ function makeWave(containerEl) {
   return { setPeaks, setProgress, setHover };
 }
 
-const playbarWave = makeWave($('progress-track'));
 const fsWave = makeWave($('fs-progress-track'));
 
-function buildWaveforms(track) {
+// ── Playbar progress bar ──
+// Same surface contract as makeWave (setProgress / setHover) so the timeupdate
+// handler and wireSeek don't care which of the two they're driving — only the
+// painting differs: a thin rail with a fill, a hover-preview segment and a thumb.
+function makeThinBar(containerEl) {
+  const fill = containerEl.querySelector('.progress-fill');
+  const preview = containerEl.querySelector('.progress-preview');
+  const thumb = containerEl.querySelector('.progress-thumb');
+  let progress = 0;   // 0..100
+  let hover = null;   // 0..100 seek-preview position, or null
+
+  function paint() {
+    fill.style.width = `${progress}%`;
+    thumb.style.left = `${progress}%`;
+    // The preview only reads as a preview when the cursor is ahead of the
+    // playhead; behind it, the fill already covers the same pixels.
+    preview.style.width = hover != null && hover > progress ? `${hover}%` : '0';
+  }
+
+  function setProgress(p) { if (p !== progress) { progress = p; paint(); } }
+  function setHover(h) { if (h !== hover) { hover = h; paint(); } }
+
+  containerEl.addEventListener('mousemove', (e) => {
+    const rect = containerEl.getBoundingClientRect();
+    setHover(Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100)));
+  });
+  containerEl.addEventListener('mouseleave', () => setHover(null));
+
+  paint();
+  return { setProgress, setHover };
+}
+
+const playbarBar = makeThinBar($('progress-track'));
+
+// Builds the fullscreen player's waveform for a track. The real-peak decode
+// reads and decodes the whole file, so it is skipped while the overlay is
+// closed — nothing would show it. openFullscreen() calls this again, which
+// starts the decode at the moment the waveform actually becomes visible.
+function buildFsWaveform(track) {
   const p = track.path;
   const real = wavePeaksCache[p];
   if (real) {
-    playbarWave.setPeaks(real, p + ':real');
     fsWave.setPeaks(real, p + ':real');
   } else {
     // show the synthetic shape immediately, then decode real peaks in the background
-    const syn = waveBuildPeaks(waveHashStr((track.title || '') + (track.artist || '')));
-    playbarWave.setPeaks(syn, p + ':syn');
-    fsWave.setPeaks(syn, p + ':syn');
-    computeRealPeaks(track);
+    fsWave.setPeaks(waveBuildPeaks(waveHashStr((track.title || '') + (track.artist || ''))), p + ':syn');
+    if (isFullscreenOpen()) computeRealPeaks(track);
   }
 }
 
@@ -8022,7 +8076,7 @@ audio.addEventListener('timeupdate', () => {
     $('time-total').textContent = formatTime(dur);
     $('fs-time-total').textContent = formatTime(dur);
     const pct = (cur / dur) * 100;
-    playbarWave.setProgress(pct);
+    playbarBar.setProgress(pct);
     fsWave.setProgress(pct);
   }
   // Crossfade into the next track *before* this one ends. Repeat-one is left to
@@ -8062,10 +8116,17 @@ function wireSeek(trackEl) {
   }
   trackEl.addEventListener('mousedown', e => {
     dragging = true;
+    // Keeps the playbar's rail thick and its thumb visible while the pointer
+    // wanders off the (3px tall) bar mid-drag. Inert for the fullscreen wave.
+    trackEl.classList.add('is-seeking');
     seekTo(e.clientX);
   });
   window.addEventListener('mousemove', e => { if (dragging) seekTo(e.clientX); });
-  window.addEventListener('mouseup', () => { dragging = false; });
+  window.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    trackEl.classList.remove('is-seeking');
+  });
 }
 wireSeek($('progress-track'));
 wireSeek($('fs-progress-track'));
@@ -8145,13 +8206,20 @@ function cancelCoverAnim() {
   fsCoverAnim = null;
 }
 
+function isFullscreenOpen() {
+  return $('fullscreen-overlay').classList.contains('active');
+}
+
 function openFullscreen() {
   if (currentTrackIndex < 0 || fsAnimating) return;
   const overlay = $('fullscreen-overlay');
-  if (overlay.classList.contains('active')) return;
+  if (isFullscreenOpen()) return;
   fsAnimating = true;
   cancelCoverAnim();
   overlay.classList.add('active');
+  // The waveform is only decoded while it's on screen, so kick that off now
+  // that it is — buildFsWaveform is a no-op if the peaks are already cached.
+  if (library[currentTrackIndex]) buildFsWaveform(library[currentTrackIndex]);
   updateFullscreenQueue();
   // Force layout so getBoundingClientRect returns measurable values for FLIP.
   void overlay.offsetHeight;

@@ -755,7 +755,24 @@ input { font-family: inherit; color: inherit; }
   background-position: center;
   flex-shrink: 0;
 }
+.trow-title-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 .trow-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Second line inside the title cell, carrying the artist. Hidden by default —
+   it only appears below 940px, where the Artist column leaves the grid. */
+.trow-sub {
+  display: none;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2581,14 +2598,69 @@ html.is-playing .equalizer > span { animation-play-state: running; }
   font-variant-numeric: tabular-nums;
   min-width: 30px;
 }
+/* ── Playbar progress bar ──
+   A thin rail rather than the inline waveform: the mini-player is a glance
+   surface a few pixels tall, where 130 amplitude bars read as noise. The
+   waveform is kept for the fullscreen player (.fs-wave), which has the height
+   to make it mean something. The tall .progress-track stays as the hit area —
+   the visible rail is only 3px, which would be a miserable click target. */
 .progress-track {
   flex: 1;
   height: 28px;
   position: relative;
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
+.progress-rail {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-strong) 16%, transparent);
+  overflow: hidden;
+  transition: height 0.12s ease;
+}
+.progress-track:hover .progress-rail,
+.progress-track.is-seeking .progress-rail { height: 5px; }
+/* Seek preview: reaches from the playhead to the cursor. Painted under the
+   fill, so only the part ahead of the playhead ever shows. */
+.progress-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: color-mix(in srgb, var(--text-strong) 30%, transparent);
+}
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+}
+/* Sits outside .progress-rail — the rail clips its overflow to keep the fill's
+   rounded end, which would cut the thumb in half. */
+.progress-thumb {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+.progress-track:hover .progress-thumb,
+.progress-track.is-seeking .progress-thumb { opacity: 1; }
 
-/* ── Inline waveform progress bar ── */
+/* ── Inline waveform progress bar (fullscreen player only) ── */
 .wave {
   display: flex;
   align-items: center;
@@ -4325,6 +4397,320 @@ html:has(.palette-overlay.active) .dl-progress-fill {
 
   /* Health-check — stack the score/inspector column above the issue list. */
   .health-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Narrow windows, step 2: the sidebar becomes an icon rail (≤ 940px) ───
+   Everything above still applies (media queries stack), so this block only
+   adds what the 1100px step doesn't cover. The goal at this width is "just the
+   tracks": labels collapse to icons, secondary table columns disappear, and the
+   artist moves under the title inside the title cell. Labels are replaced by a
+   CSS tooltip fed from `data-tip`, which renderer.js mirrors from the
+   translated label text (`refreshRailTips`) so it follows the language. */
+@media (max-width: 940px) {
+  /* ── Sidebar rail ── */
+  .sidebar {
+    width: 62px;
+    padding: 14px 8px 12px;
+    align-items: center;
+  }
+  .brand {
+    padding: 2px 0 16px;
+    gap: 0;
+    justify-content: center;
+  }
+  .brand-titles { display: none; }
+  .brand-mark { width: 34px; height: 34px; }
+
+  .nav-menu {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  /* Every direct span child is a label, a count or the ⌘K hint — all of them
+     go. The search item's icon is also a span, hence the exception. */
+  .nav-item {
+    position: relative;
+    justify-content: center;
+    gap: 0;
+    padding: 9px 0;
+  }
+  .nav-item > span:not(.nav-search-icon) { display: none; }
+  /* The sheen sweep needs overflow:hidden, but that would clip the tooltip. */
+  .nav-search { overflow: visible; }
+  .nav-search::before { display: none; }
+
+  /* Recents keeps only its cover swatches — the tooltip carries the title. */
+  .nav-section.recents { width: 100%; margin-bottom: 16px; }
+  .nav-label { display: none; }
+  .recents .recent-item {
+    position: relative;
+    justify-content: center;
+    gap: 0;
+    padding: 4px 0;
+  }
+  .recent-body { display: none; }
+  .recent-swatch { width: 26px; height: 26px; border-radius: 5px; }
+
+  .sidebar-actions { width: 100%; align-items: center; }
+  #btn-add-files {
+    position: relative;
+    width: 38px;
+    height: 34px;
+    padding: 0;
+  }
+  #btn-add-files > span { display: none; }
+
+  /* Rail tooltip — the replacement for the hidden labels. */
+  .sidebar [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: var(--panel-elev);
+    border: 1px solid var(--border-strong);
+    color: var(--text-strong);
+    font-size: 11.5px;
+    font-weight: 400;
+    line-height: 1.3;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 60;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  .sidebar [data-tip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* ── Main content ── */
+  .main-content { padding: 16px 16px 12px; }
+  .topbar { margin-bottom: 16px; gap: 10px; }
+  .searchbox { max-width: 210px; min-width: 110px; }
+  .searchbox .kbd { display: none; }
+  .filters { flex-wrap: wrap; gap: 5px; }
+  .sort-right { margin-left: auto; }
+  .sort-right > span { display: none; }
+
+  /* Track table — down to #, title (+ artist under it), time, more. The
+     quality-off variant is overridden too: its selector is more specific, so
+     it would otherwise keep its own five-column template. */
+  .thead, .trow,
+  :root.quality-off .thead, :root.quality-off .trow {
+    grid-template-columns: 26px minmax(0, 1fr) 52px 26px;
+    gap: 10px;
+  }
+  .thead > div:nth-child(3),
+  .trow > div:nth-child(3),
+  .thead > div:nth-child(5),
+  .trow-quality { display: none; }
+  .trow-sub { display: block; }
+  .trow-title-cell { gap: 9px; }
+  .trow-cover { width: 30px; height: 30px; }
+
+  /* ── Downloads / trending tables ── */
+  /* Action buttons go icon-only, which buys back ~150px per row, and the
+     duration column drops. Titles and artists stay — they're the payload. */
+  .dl-download-btn > span,
+  .dl-queue-btn > span { display: none; }
+  .dl-download-btn { padding: 6px 9px; }
+  .dl-results-head .dl-col-duration,
+  .dl-row .duration,
+  .dl-row-ym .duration { display: none; }
+  .dl-results-head,
+  .dl-row {
+    grid-template-columns: 48px minmax(0, 1fr) minmax(0, 130px) 86px;
+    gap: 10px;
+    padding: 9px 10px;
+  }
+  .dl-results-head-ym,
+  .dl-row-ym {
+    grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1.2fr) 86px;
+  }
+  .dl-results-head-ytm,
+  .dl-row-ytm {
+    grid-template-columns: 32px 32px minmax(0, 1fr) minmax(0, 1.2fr) 86px;
+  }
+  .dl-row.tr-row,
+  .tr-skeleton .tr-skel-row {
+    grid-template-columns: 26px 44px minmax(0, 1fr) minmax(0, 120px) 86px;
+  }
+  .tr-skeleton .tr-skel-row > :nth-child(5) { display: none; }
+  .dl-tabs { display: flex; flex-wrap: wrap; }
+  .dl-queue-row { grid-template-columns: minmax(0, 1fr) auto; }
+
+  /* ── Fullscreen overlay — drop the queue column, one centred stack. ── */
+  .fs-body {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 18px 40px;
+  }
+  .fs-queue { display: none; }
+  .fs-cover { width: min(46vh, 240px); height: min(46vh, 240px); }
+  .fs-cover-letter { font-size: 64px; }
+  .fs-title { font-size: 34px; }
+
+  /* ── Playbar ── */
+  /* Height is load-bearing: the centre column stacks the transport row on top
+     of the progress row, so it can't drop below their combined height or the
+     waveform gets clipped by the window edge. */
+  .playbar {
+    height: 70px;
+    padding: 0 12px;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) auto;
+  }
+  .mini-cover { width: 38px; height: 38px; padding: 4px; }
+  .ctrls { gap: 12px; }
+  .playbar-right { gap: 6px; }
+  .vol-track { width: 44px; }
+
+  /* ── Modals — fixed pixel widths become viewport-bounded. ── */
+  .modal-card { width: min(380px, calc(100vw - 28px)); padding: 20px; }
+  .modal-card-md { width: min(440px, calc(100vw - 28px)); }
+  .editor-card { width: min(720px, calc(100vw - 24px)); }
+  .editor-body { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+  .editor-cover { width: 128px; height: 128px; }
+  .editor-cover-letter { font-size: 40px; }
+
+  /* Settings — the tab rail collapses to icons, same idea as the sidebar.
+     `overflow: visible` is what lets the tooltip escape the scroll column;
+     seven tabs fit without scrolling at every allowed window height. */
+  .settings-tabs {
+    width: 56px;
+    padding: 12px 8px;
+    overflow: visible;
+  }
+  .settings-tab {
+    position: relative;
+    justify-content: center;
+    padding: 9px 0;
+    gap: 0;
+  }
+  .settings-tab > span { display: none; }
+  .settings-tab[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: var(--panel-elev);
+    border: 1px solid var(--border-strong);
+    color: var(--text-strong);
+    font-size: 11.5px;
+    font-weight: 400;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 60;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  .settings-tab[data-tip]:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  .settings-content { padding: 18px 16px; }
+  .settings-card-head { padding: 18px 16px 14px; }
+  .settings-title { font-size: 22px; }
+  .setting-row { flex-wrap: wrap; gap: 10px; }
+  .field-row { grid-template-columns: 1fr; }
+}
+
+/* ─── Narrow windows, step 3: phone-width column (≤ 720px) ───
+   The last step before the 420px window minimum. Only the now-playing strip,
+   the track list and the rail survive; everything decorative is dropped. */
+@media (max-width: 720px) {
+  .main-content { padding: 12px 10px 10px; }
+
+  /* Breadcrumb keeps the leaf, its count, and — on detail views — the single
+     clickable step back, which is the only in-page way out of them. */
+  .crumb-item:not(.active):not(.link),
+  .crumb-item.link:has(~ .crumb-item.link),
+  .crumb-sep { display: none; }
+  .crumb-item.link { color: var(--text-muted); }
+  .crumb-item.link::before { content: '‹ '; }
+  .crumb-count { margin-left: 0; }
+  .searchbox { max-width: none; min-width: 0; flex: 1 1 90px; padding: 6px 9px; }
+
+  .thead, .trow,
+  :root.quality-off .thead, :root.quality-off .trow {
+    grid-template-columns: 22px minmax(0, 1fr) 44px 22px;
+    gap: 8px;
+  }
+  .thead, .trow { padding-left: 4px; padding-right: 4px; }
+  .trow-cover { width: 28px; height: 28px; }
+
+  /* Playbar — the volume slider goes; the mute toggle stays, and volume is
+     still reachable from the fullscreen player and the hotkeys. */
+  .playbar {
+    height: 64px;
+    padding: 0 8px;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  }
+  .vol-track { display: none; }
+  .playbar-center { gap: 4px; }
+  .ctrls { gap: 10px; }
+  .btn-play { width: 28px; height: 28px; }
+  .progress-row { gap: 6px; }
+  .progress-track { height: 22px; }
+  .time { min-width: 26px; }
+  .mini-cover { width: 34px; height: 34px; }
+  .heart { display: none; }
+
+  /* Downloads — artist column folds away, the title carries the row. */
+  .dl-results-head .dl-col-channel,
+  .dl-row .channel,
+  .dl-results-head-ym .dl-col-artist,
+  .dl-row-ym .artist { display: none; }
+  .dl-results-head,
+  .dl-row {
+    grid-template-columns: 44px minmax(0, 1fr) 78px;
+  }
+  .dl-results-head-ym,
+  .dl-row-ym {
+    grid-template-columns: 28px minmax(0, 1fr) 78px;
+  }
+  .dl-results-head-ytm,
+  .dl-row-ytm {
+    grid-template-columns: 28px 28px minmax(0, 1fr) 78px;
+  }
+  .dl-row.tr-row,
+  .tr-skeleton .tr-skel-row {
+    grid-template-columns: 22px 38px minmax(0, 1fr) 78px;
+  }
+  .tr-skeleton .tr-skel-row > :nth-child(4) { display: none; }
+  .dl-search-row { flex-wrap: wrap; }
+
+  /* The fullscreen player stacks cover over info — the same shape the portrait
+     mode uses, reached here by width alone. Portrait's own rules are more
+     specific, so an actual portrait window is unaffected. */
+  .fs-main {
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+  }
+  .fs-info {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .fs-eyebrow.eq-line,
+  .fs-secondary,
+  .fs-ctrls,
+  .fs-volume { justify-content: center; }
+  .fs-title { font-size: 26px; }
+  .fs-cover { width: min(38vh, 200px); height: min(38vh, 200px); }
+  .fs-body { padding: 16px 14px 32px; }
 }
 
 /* ─── Boot overlay (in-window loader, replaces the old splash window) ─── */
