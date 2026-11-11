@@ -83,7 +83,7 @@ Real waveform seeking, an upcoming-queue panel, and a portrait "mobile player" m
 <summary><b>🎵 Library &amp; playback</b></summary>
 
 - Recursive import of `.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`, `.aac`.
-- Tags and cover art read via `music-metadata`; **MP3 tag editing** written back with `node-id3`.
+- Tags and cover art read via `music-metadata`; **MP3 tag editing** written back with `music-metadata`. Existing ID3v2.2/v2.3 tags are converted to ID3v2.4 when saved, carrying over supported metadata and artwork. Unmapped legacy frames may be lost or normalized. ID3v2.4 files use preserving updates.
 - **Playlists, Favorites, Recents**, and an **Artists** view grouped automatically from your library.
 - **Command palette** (<kbd>Ctrl/⌘</kbd>+<kbd>K</kbd>) — jump to any track or view instantly.
 - Shuffle, repeat (off / all / one), sorting, filtering, and **resume on launch**.
@@ -184,7 +184,7 @@ macOS and Windows builds are produced by GitHub Actions on tag push.
 
 ## 🧰 Built with
 
-**[Electron 42](https://www.electronjs.org/)** · vanilla HTML/CSS/JS — no framework, no bundler · **[music-metadata](https://github.com/borewit/music-metadata)** · **[node-id3](https://github.com/Zazama/node-id3)** · **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** · **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** · **[Puppeteer](https://pptr.dev/)**
+**[Electron 42](https://www.electronjs.org/)** · vanilla HTML/CSS/JS — no framework, no bundler · **[music-metadata](https://github.com/borewit/music-metadata)** · **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** · **[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static)** · **[Puppeteer](https://pptr.dev/)**
 
 ---
 
