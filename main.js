@@ -7,7 +7,6 @@ const https = require('https');
 const crypto = require('crypto');
 const { pathToFileURL } = require('url');
 const musicMetadata = require('music-metadata');
-const NodeID3 = require('node-id3');
 
 app.setName('Audex');
 
@@ -794,20 +793,54 @@ ipcMain.handle('music:writeMetadata', async (event, { filePath, tags }) => {
     return { success: false, error: 'Запись тегов поддерживается только для MP3' };
   }
   try {
+    const { parseFile, updateFile } = await import('music-metadata');
     const id3Tags = {
       title: tags.title,
       artist: tags.artist,
       album: tags.album,
-      performerInfo: tags.albumArtist || undefined,
+      albumartist: tags.albumArtist || undefined,
       year: tags.year ? String(tags.year) : undefined,
       genre: tags.genre || undefined,
-      trackNumber: tags.trackNo || undefined,
-      partOfSet: tags.discNo || undefined,
-      comment: tags.comment ? { language: 'eng', text: tags.comment } : undefined,
+      native: {
+        ...(tags.trackNo ? { TRCK: String(tags.trackNo) } : {}),
+        ...(tags.discNo ? { TPOS: String(tags.discNo) } : {})
+      },
+      comment: tags.comment ? [{ language: 'eng', text: tags.comment }] : undefined,
     };
     Object.keys(id3Tags).forEach(k => id3Tags[k] === undefined && delete id3Tags[k]);
-    const ok = NodeID3.update(id3Tags, filePath);
-    return { success: !!ok };
+    const metadata = await parseFile(filePath);
+    const legacy = metadata.format.tagTypes?.some(type => type === 'ID3v2.2' || type === 'ID3v2.3');
+    if (legacy) {
+      const common = { ...metadata.common };
+      // Avoid read-side aliases overriding the user's edits during conversion.
+      if (id3Tags.artist !== undefined) delete common.artists;
+      if (id3Tags.albumartist !== undefined) delete common.albumartists;
+      if (id3Tags.native.TRCK !== undefined) delete common.track;
+      if (id3Tags.native.TPOS !== undefined) delete common.disk;
+      const native = {};
+      for (const [group, frames] of Object.entries(metadata.native)) {
+        if (!group.startsWith('ID3v2')) continue;
+        for (const frame of frames) {
+          const legacyText = frame.id === 'TXX' && typeof frame.value === 'string' ? frame.value.split('\0') : undefined;
+          const id = frame.id === 'TXX' ? `TXXX:${legacyText ? legacyText[0] : frame.value.description || ''}`
+            : frame.id.replace(/^TXX:/, 'TXXX:');
+          const value = frame.id === 'TXX' ? (legacyText ? legacyText.slice(1) : frame.value.text) : frame.value;
+          const key = ({ SLT: 'SYLT', POP: 'POPM' })[id] || id;
+          if (!key.startsWith('TXXX:') && key !== 'SYLT' && key !== 'POPM') continue;
+          const previous = native[key];
+          native[key] = previous === undefined ? value
+            : [...(Array.isArray(previous) ? previous : [previous]), ...(Array.isArray(value) ? value : [value])];
+        }
+      }
+      await updateFile(filePath, {
+        ...common,
+        ...id3Tags,
+        native: { ...native, ...id3Tags.native }
+      }, { replaceId3: true });
+    } else {
+      await updateFile(filePath, id3Tags);
+    }
+    return { success: true };
   } catch (err) {
     return { success: false, error: String(err) };
   }
